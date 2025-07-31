@@ -1,0 +1,92 @@
+# Frontend Setup - Next.js + Tailwind + PostgreSQL
+
+## 🚀 Instalação Rápida
+
+```bash
+# 1. Criar projeto
+npx create-next-app@latest frontend --typescript --tailwind --eslint --app --src-dir --import-alias "@/*"
+cd frontend
+
+# 2. Instalar dependências
+npm install -D tailwindcss@3.4.0 postcss autoprefixer
+npm install @headlessui/react @heroicons/react clsx tailwind-merge
+npm install axios swr react-hook-form @hookform/resolvers zod
+npm install bcryptjs jsonwebtoken @types/bcryptjs @types/jsonwebtoken
+
+# 3. Inicializar
+npm run dev
+```
+
+## 📦 Versões Instaladas
+
+- **Next.js**: 14.x (latest)
+- **Tailwind CSS**: 3.4.0
+- **TypeScript**: 5.x
+- **React**: 18.x
+- **Node.js**: 20.15.1
+
+## 🎨 Tailwind - Breakpoints Responsivos
+
+```css
+xs: 320px   /* Mobile pequeno */
+sm: 375px   /* Mobile médio */
+md: 425px   /* Mobile grande */
+lg: 768px   /* Tablet */
+xl: 1024px  /* Laptop */
+2xl: 1280px /* Desktop */
+3xl: 1440px /* Desktop grande */
+4xl: 1920px /* Monitor FHD */
+5xl: 2560px /* Monitor 2K */
+6xl: 3840px /* Monitor 4K */
+```
+
+## 🗂️ Arquivos Configurados
+
+- ✅ `tailwind.config.js` - Breakpoints responsivos
+- ✅ `postcss.config.mjs` - PostCSS + Autoprefixer  
+- ✅ `next.config.js` - Suporte Tailscale + localhost
+- ✅ `tsconfig.json` - TypeScript + paths
+- ✅ `.env.local` - Variáveis ambiente + DB
+- ✅ `src/app/globals.css` - CSS global Tailwind
+- ✅ `src/lib/utils.ts` - Função cn() utilitária
+
+## 🌐 URLs de Acesso
+
+- **Local**: http://localhost:3000
+- **Tailscale**: http://100.77.52.45:3000
+
+## 🗄️ Database PostgreSQL
+
+```env
+DATABASE_NAME=mydb
+DATABASE_USERNAME=danilo
+DATABASE_PASSWORD=Danilo@34333528
+DATABASE_HOST=localhost:5432
+```
+
+## 🛠️ Classes Utilitárias Customizadas
+
+```css
+.container-fluid  /* Container responsivo com padding fluido */
+.text-fluid      /* Texto responsivo xs até 5xl */
+.gap-fluid       /* Gaps responsivos 2 até 16 */
+.p-fluid         /* Padding responsivo 2 até 16 */
+.grid-fluid      /* Grid 1 até 6 colunas */
+```
+
+## ⚡ Comandos Úteis
+
+```bash
+npm run dev      # Desenvolver
+npm run build    # Build produção
+npm run start    # Iniciar produção
+npm run lint     # ESLint
+```
+
+## 🔧 Próximos Passos
+
+1. ✅ Setup completo
+2. 🔄 Criar componentes UI
+3. 🔄 Sistema de autenticação
+4. 🔄 Dashboard responsivo
+5. 🔄 Backend Strapi + PostgreSQL

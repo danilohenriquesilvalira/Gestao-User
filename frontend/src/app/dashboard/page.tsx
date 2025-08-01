@@ -1,240 +1,204 @@
 'use client';
+
 import { useState, useEffect } from 'react';
-import { 
-  UserCircleIcon, 
-  ArrowRightOnRectangleIcon,
-  ServerIcon,
-  DocumentDuplicateIcon,
-  ClockIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
-  ChartBarIcon
-} from '@heroicons/react/24/outline';
+import ModernSidebar from '@/components/layout/ModernSidebar';
+import ModernHeader from '@/components/layout/ModernHeader';
+import StatusCard from '@/components/ui/StatusCard';
 
-type User = {
-  id: number;
-  username: string;
-  email: string;
-  role: {
-    name: string;
-    description: string;
+// Debug Component para responsividade
+function ScreenDebug() {
+  const [screenInfo, setScreenInfo] = useState({ width: 0, height: 0 });
+  
+  useEffect(() => {
+    const updateSize = () => {
+      setScreenInfo({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+    
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+  
+  const getBreakpoint = (width: number) => {
+    if (width >= 3840) return '6xl (3840px+)';
+    if (width >= 2560) return '5xl (2560px+)';
+    if (width >= 1920) return '4xl (1920px+)';
+    if (width >= 1440) return '3xl (1440px+)';
+    if (width >= 1280) return '2xl (1280px+)';
+    if (width >= 1024) return 'xl (1024px+)';
+    if (width >= 768) return 'lg (768px+)';
+    if (width >= 425) return 'md (425px+)';
+    if (width >= 375) return 'sm (375px+)';
+    if (width >= 320) return 'xs (320px+)';
+    return 'Menor que xs';
   };
-};
-
-type BackupStats = {
-  total: number;
-  sucesso: number;
-  falha: number;
-  pendente: number;
-};
+  
+  return (
+    <div className="fixed top-20 right-4 bg-black text-white p-3 rounded-lg text-xs font-mono-tech z-50 border border-gray-800">
+      <div className="text-tech-600">Resolução: {screenInfo.width} x {screenInfo.height}</div>
+      <div className="text-gray-300">Breakpoint: {getBreakpoint(screenInfo.width)}</div>
+    </div>
+  );
+}
 
 export default function Dashboard() {
-  const [user, setUser] = useState<User | null>(null);
-  const [stats, setStats] = useState<BackupStats>({
-    total: 156,
-    sucesso: 142,
-    falha: 8,
-    pendente: 6
-  });
-
-  useEffect(() => {
-    // Simular carregamento do usuário
-    setUser({
-      id: 1,
-      username: 'admin',
-      email: 'admin@sistema.com',
-      role: {
-        name: 'Super Admin',
-        description: 'Acesso total ao sistema'
-      }
-    });
-  }, []);
+  const [activeItem, setActiveItem] = useState('dashboard');
 
   const handleLogout = () => {
-    if (confirm('Deseja realmente sair?')) {
-      window.location.href = '/login';
-    }
+    window.location.replace('/');
   };
 
-  const getStatusColor = (tipo: string) => {
-    switch (tipo) {
-      case 'sucesso': return 'text-green-400 bg-green-400/10';
-      case 'falha': return 'text-red-400 bg-red-400/10';
-      case 'pendente': return 'text-yellow-400 bg-yellow-400/10';
-      default: return 'text-blue-400 bg-blue-400/10';
-    }
+  const handleNavClick = (itemId: string) => {
+    setActiveItem(itemId);
+    console.log(`Navegando para: ${itemId}`);
   };
 
-  const recentBackups = [
-    { id: 1, servidor: 'Server-01', status: 'sucesso', data: '2024-01-31 14:30', tamanho: '2.4 GB' },
-    { id: 2, servidor: 'Server-02', status: 'sucesso', data: '2024-01-31 14:25', tamanho: '1.8 GB' },
-    { id: 3, servidor: 'Server-03', status: 'falha', data: '2024-01-31 14:20', tamanho: '0 B' },
-    { id: 4, servidor: 'Server-04', status: 'pendente', data: '2024-01-31 14:15', tamanho: 'Processando...' }
-  ];
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
+  const getIconColor = (itemId: string) => {
+    return activeItem === itemId ? '#3CFF01' : 'white';
+  };
 
   return (
-    <div className="min-h-screen bg-slate-900">
-      {/* Header */}
-      <header className="bg-slate-800 border-b border-slate-700">
-        <div className="container-fluid py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <ServerIcon className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-white">Sistema de Backup</h1>
-                <p className="text-sm text-slate-400">Painel de Controle</p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-3">
-                <UserCircleIcon className="w-8 h-8 text-slate-400" />
-                <div className="text-right">
-                  <p className="text-sm font-medium text-white">{user.username}</p>
-                  <p className="text-xs text-slate-400">{user.role.name}</p>
-                </div>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
-                title="Sair"
-              >
-                <ArrowRightOnRectangleIcon className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="container-fluid py-8">
-        {/* Bem-vindo */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-white mb-2">
-            Bem-vindo, {user.username}!
-          </h2>
-          <p className="text-slate-400">
-            Aqui está o resumo dos seus backups e atividades do sistema.
-          </p>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-400">Total de Backups</p>
-                <p className="text-2xl font-bold text-white">{stats.total}</p>
-              </div>
-              <ChartBarIcon className="w-8 h-8 text-blue-400" />
-            </div>
-          </div>
-
-          <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-400">Sucessos</p>
-                <p className="text-2xl font-bold text-green-400">{stats.sucesso}</p>
-              </div>
-              <CheckCircleIcon className="w-8 h-8 text-green-400" />
-            </div>
-          </div>
-
-          <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-400">Falhas</p>
-                <p className="text-2xl font-bold text-red-400">{stats.falha}</p>
-              </div>
-              <ExclamationTriangleIcon className="w-8 h-8 text-red-400" />
-            </div>
-          </div>
-
-          <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-400">Pendentes</p>
-                <p className="text-2xl font-bold text-yellow-400">{stats.pendente}</p>
-              </div>
-              <ClockIcon className="w-8 h-8 text-yellow-400" />
-            </div>
-          </div>
-        </div>
-
-        {/* Recent Backups */}
-        <div className="bg-slate-800 rounded-xl border border-slate-700">
-          <div className="p-6 border-b border-slate-700">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">Backups Recentes</h3>
-              <button className="text-blue-400 hover:text-blue-300 text-sm transition-colors">
-                Ver todos
-              </button>
-            </div>
-          </div>
-
-          <div className="divide-y divide-slate-700">
-            {recentBackups.map((backup) => (
-              <div key={backup.id} className="p-6 hover:bg-slate-700/50 transition-colors">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center">
-                      <DocumentDuplicateIcon className="w-5 h-5 text-slate-400" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-white">{backup.servidor}</p>
-                      <p className="text-sm text-slate-400">{backup.data}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-4">
-                    <span className="text-sm text-slate-400">{backup.tamanho}</span>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(backup.status)}`}>
-                      {backup.status.charAt(0).toUpperCase() + backup.status.slice(1)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <button className="bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-xl p-6 text-left transition-colors group">
-            <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-500/30">
-              <ServerIcon className="w-6 h-6 text-blue-400" />
-            </div>
-            <h4 className="text-white font-medium mb-2">Novo Backup</h4>
-            <p className="text-slate-400 text-sm">Iniciar processo de backup manual</p>
+    <div className="h-screen w-screen overflow-hidden bg-white">
+      {/* Modern Header */}
+      <ModernHeader 
+        title="Dashboard Principal" 
+        user="João Silva"
+        onLogout={handleLogout}
+      />
+      
+      <ScreenDebug />
+      
+      {/* Modern Sidebar - Desktop only */}
+      <ModernSidebar />
+      
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#131827] border-t border-slate-700 px-4 py-2 z-50">
+        <div className="flex justify-around items-center">
+          
+          {/* Eclusa */}
+          <button 
+            onClick={() => handleNavClick('eclusa')}
+            className="flex flex-col items-center p-2 rounded-lg transition-all duration-200"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill={getIconColor('eclusa')} xmlns="http://www.w3.org/2000/svg">
+              <path d="M7.46932 6.09748V3.65757H5.5561L5.00673 6.13799C5.00371 6.15824 4.99968 6.1773 4.99363 6.19517L1.78011 20.7215C2.28612 21.1492 2.87784 21.3731 3.47458 21.391C4.1681 21.4125 4.86865 21.1527 5.44525 20.613C6.02788 20.0031 6.73953 19.6552 7.46935 19.5742V6.09645L7.46932 6.09748Z" />
+            </svg>
+            <span className="text-xs mt-1" style={{ color: getIconColor('eclusa') }}>Eclusa</span>
           </button>
 
-          <button className="bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 rounded-xl p-6 text-left transition-colors group">
-            <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:bg-green-500/30">
-              <ChartBarIcon className="w-6 h-6 text-green-400" />
-            </div>
-            <h4 className="text-white font-medium mb-2">Relatórios</h4>
-            <p className="text-slate-400 text-sm">Visualizar relatórios detalhados</p>
+          {/* Dashboard */}
+          <button 
+            onClick={() => handleNavClick('dashboard')}
+            className="flex flex-col items-center p-2 rounded-lg transition-all duration-200"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={getIconColor('dashboard')} strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <span className="text-xs mt-1" style={{ color: getIconColor('dashboard') }}>Home</span>
           </button>
 
-          <button className="bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 rounded-xl p-6 text-left transition-colors group">
-            <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:bg-purple-500/30">
-              <UserCircleIcon className="w-6 h-6 text-purple-400" />
-            </div>
-            <h4 className="text-white font-medium mb-2">Configurações</h4>
-            <p className="text-slate-400 text-sm">Gerenciar usuários e permissões</p>
+          {/* Configurações */}
+          <button 
+            onClick={() => handleNavClick('configuracoes')}
+            className="flex flex-col items-center p-2 rounded-lg transition-all duration-200"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={getIconColor('configuracoes')} strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span className="text-xs mt-1" style={{ color: getIconColor('configuracoes') }}>Config</span>
+          </button>
+
+          {/* Relatórios */}
+          <button 
+            onClick={() => handleNavClick('relatorios')}
+            className="flex flex-col items-center p-2 rounded-lg transition-all duration-200"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={getIconColor('relatorios')} strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span className="text-xs mt-1" style={{ color: getIconColor('relatorios') }}>Reports</span>
+          </button>
+
+          {/* Usuários */}
+          <button 
+            onClick={() => handleNavClick('usuarios')}
+            className="flex flex-col items-center p-2 rounded-lg transition-all duration-200"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path fillRule="evenodd" clipRule="evenodd" d="M9.592 15.2031C13.281 15.2031 16.434 15.7621 16.434 17.9951C16.434 20.2281 13.302 20.8031 9.592 20.8031C5.902 20.8031 2.75 20.2491 2.75 18.0151C2.75 15.7811 5.881 15.2031 9.592 15.2031Z" stroke={getIconColor('usuarios')} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path fillRule="evenodd" clipRule="evenodd" d="M9.59303 12.02C7.17103 12.02 5.20703 10.057 5.20703 7.635C5.20703 5.213 7.17103 3.25 9.59303 3.25C12.014 3.25 13.978 5.213 13.978 7.635C13.987 10.048 12.037 12.011 9.62403 12.02H9.59303Z" stroke={getIconColor('usuarios')} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span className="text-xs mt-1" style={{ color: getIconColor('usuarios') }}>Users</span>
           </button>
         </div>
-      </main>
+      </nav>
+      
+      {/* Container principal */}
+      <div className="h-[calc(100vh-64px)] overflow-auto pb-20 md:pb-0">
+        <div className="pt-6 px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24 3xl:px-28">
+          
+          {/* Grid de Status Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <StatusCard 
+              title="Eclusa Crestuma" 
+              eclusa="crestuma"
+              status="online" 
+              value="12.5m"
+              subtitle="Nível da água"
+              lastUpdate="14:30:25"
+            />
+            
+            <StatusCard 
+              title="Eclusa Carrapatelo" 
+              eclusa="carrapatelo"
+              status="maintenance"
+              value="8.2m"
+              subtitle="Nível da água"
+              lastUpdate="14:28:15"
+            />
+            
+            <StatusCard 
+              title="Eclusa Régua" 
+              eclusa="regua"
+              status="online"
+              value="15.7m"
+              subtitle="Nível da água"
+              lastUpdate="14:31:02"
+            />
+            
+            <StatusCard 
+              title="Eclusa Valeira"
+              eclusa="valeira" 
+              status="alert"
+              value="95%"
+              subtitle="Capacidade"
+              lastUpdate="14:29:40"
+            />
+            
+            <StatusCard 
+              title="Eclusa Pocinho" 
+              eclusa="pocinho"
+              status="online"
+              value="11.3m"
+              subtitle="Nível da água"
+              lastUpdate="14:30:55"
+            />
+            
+            <StatusCard 
+              title="Sistema Geral" 
+              eclusa="pocinho"
+              status="online"
+              value="85%"
+              subtitle="Performance"
+              lastUpdate="14:31:10"
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

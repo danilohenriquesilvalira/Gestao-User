@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de WebSocket</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; }
+        #status { font-weight: bold; margin-bottom: 15px; }
+        #messages { border: 1px solid #ddd; padding: 10px; height: 300px; overflow-y: scroll; background-color: #fafafa; border-radius: 4px; }
+        .message { margin: 5px 0; padding: 5px; border-bottom: 1px solid #eee; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Teste de Conexão WebSocket</h1>
+    <div id="status">Status: Desconectado</div>
+    <div id="messages"></div>
+</div>
+
+<script>
+    const statusDiv = document.getElementById('status');
+    const messagesDiv = document.getElementById('messages');
+
+    // Mude esta URL se o seu servidor Go estiver em outro lugar
+    const socket = new WebSocket('ws://localhost:8080/ws');
+
+    socket.onopen = function(event) {
+        statusDiv.textContent = 'Status: Conectado!';
+        statusDiv.style.color = 'green';
+        console.log('Conexão WebSocket estabelecida.');
+    };
+
+    socket.onmessage = function(event) {
+        const message = document.createElement('div');
+        message.className = 'message';
+        message.textContent = event.data;
+        messagesDiv.appendChild(message);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight; // Scroll para o final
+        console.log('Mensagem recebida:', event.data);
+    };
+
+    socket.onclose = function(event) {
+        statusDiv.textContent = 'Status: Desconectado';
+        statusDiv.style.color = 'red';
+        console.log('Conexão WebSocket fechada:', event);
+    };
+
+    socket.onerror = function(error) {
+        console.error('Erro no WebSocket:', error);
+        statusDiv.textContent = 'Status: Erro na Conexão';
+        statusDiv.style.color = 'orange';
+    };
+</script>
+
+</body>
+</html>

@@ -3,11 +3,14 @@
 import { useState, useEffect } from 'react';
 import ModernSidebar from '@/components/layout/ModernSidebar';
 import ModernHeader from '@/components/layout/ModernHeader';
-import ResponsiveWrapper from '@/components/ResponsiveWrapper';
-import SmartSidebarPanel from '@/components/SmartSidebarPanel';
-import Nivel from '@/components/Nivel';
-import Motor from '@/components/Eclusa/Motor'; // 🚀 NOVO IMPORT
+import ResponsiveWrapper from '@/components/core/ResponsiveWrapper';
+import FloatingEditorDialog from '@/components/dashboard/FloatingEditorDialog';
+import Nivel from '@/components/industrial/Nivel';
+import Motor from '@/components/industrial/Motor';
 import { useWebSocket } from '@/hooks/useWebSocket';
+import { LayoutLoadingProvider, useLayoutLoading } from '@/contexts/LayoutLoadingContext';
+import { NotificationProvider } from '@/contexts/NotificationContext';
+import NotificationContainer from '@/components/ui/NotificationContainer';
 
 // Debug Component para responsividade
 function ScreenDebug() {
@@ -49,98 +52,135 @@ function ScreenDebug() {
 }
 
 export default function Dashboard() {
-  const [activeItem, setActiveItem] = useState('dashboard');
-  const [editMode, setEditMode] = useState(false);
+  return (
+    <NotificationProvider>
+      <LayoutLoadingProvider>
+        <DashboardContent />
+        <NotificationContainer />
+      </LayoutLoadingProvider>
+    </NotificationProvider>
+  );
+}
 
-  // 🔥 Hook do WebSocket ATUALIZADO para múltiplas variáveis
+function DashboardContent() {
+  const [editMode, setEditMode] = useState(false);
+  const { isAllLoaded } = useLayoutLoading();
   const { nivelValue, motorValue, isConnected, error, lastMessage } = useWebSocket('ws://localhost:8080/ws');
 
   const handleLogout = () => {
     window.location.replace('/');
   };
 
-  const handleNavClick = (itemId: string) => {
-    setActiveItem(itemId);
-    console.log(`Navegando para: ${itemId}`);
-  };
-
-  const getIconColor = (itemId: string) => {
-    return activeItem === itemId ? '#3CFF01' : 'white';
-  };
-
   return (
     <div className="h-screen w-screen overflow-hidden bg-white">
-      {/* Modern Header */}
-      <ModernHeader
-        title="Dashboard Principal"
-        user="danilohenriquesilvalira" // 👤 Usuário atualizado
-        onLogout={handleLogout}
-      />
-
-      <ScreenDebug />
-
-      {/* 📊 STATUS DO WEBSOCKET DETALHADO */}
-      <div className="fixed top-20 left-4 bg-black text-white p-3 rounded text-xs z-40 max-w-[350px]">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-            <span>PLC: {isConnected ? 'Conectado' : 'Desconectado'}</span>
+      {/* TELA DE LOADING GLOBAL - Moderna e Rápida */}
+      {!isAllLoaded && (
+        <div className="fixed inset-0 bg-gradient-to-br from-gray-50 to-gray-100 z-[9999] flex items-center justify-center">
+          <div className="text-center">
+            {/* Spinner SVG Moderno */}
+            <div className="relative mb-8">
+              <svg 
+                className="animate-spin h-16 w-16 mx-auto" 
+                viewBox="0 0 24 24" 
+                fill="none"
+              >
+                <circle 
+                  cx="12" 
+                  cy="12" 
+                  r="10" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  className="text-gray-300"
+                />
+                <path 
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" 
+                  fill="currentColor" 
+                  className="text-blue-600"
+                />
+              </svg>
+              
+              {/* Pulse interno */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-3 h-3 bg-blue-600 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+            
+            {/* Texto simples */}
+            <div className="space-y-3">
+              <h2 className="text-2xl font-bold text-gray-800">Carregando</h2>
+              <div className="flex items-center justify-center space-x-1">
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+              </div>
+            </div>
           </div>
-          
-          {nivelValue !== null && (
-            <div className="text-blue-400">📊 Nível: {nivelValue}%</div>
-          )}
-          
-          {motorValue !== null && (
-            <div className="text-green-400">
-              ⚙️ Motor: {motorValue === 0 ? 'INATIVO' : motorValue === 1 ? 'OPERANDO' : 'FALHA'}
-            </div>
-          )}
-          
-          {error && (
-            <div className="text-red-400">❌ Erro: {error}</div>
-          )}
-
-          {lastMessage && (
-            <div className="text-gray-400 text-xs">
-              📡 Última msg: {lastMessage.substring(0, 25)}...
-            </div>
-          )}
         </div>
-      </div>
+      )}
 
-      {/* BARRA LATERAL INTELIGENTE */}
-      <SmartSidebarPanel
-        editMode={editMode}
-        onToggleEdit={() => setEditMode(!editMode)}
-      />
+      {/* CONTEÚDO DO DASHBOARD - Só mostra quando TUDO estiver carregado */}
+      {isAllLoaded && (
+        <>
+          <ModernHeader
+            title="Dashboard Principal"
+            user="danilohenriquesilvalira"
+            onLogout={handleLogout}
+          />
 
-      {/* Modern Sidebar - Desktop only */}
-      <ModernSidebar />
+          <ScreenDebug />
 
-      {/* Container principal */}
-      <div className="h-[calc(100vh-64px)] overflow-auto pb-20 md:pb-0">
-        {/* Área vazia para conteúdo futuro */}
-      </div>
+          <div className="fixed top-20 left-4 bg-black text-white p-3 rounded text-xs z-40 max-w-[350px]">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <span>PLC: {isConnected ? 'Conectado' : 'Desconectado'}</span>
+              </div>
+              
+              {nivelValue !== null && (
+                <div className="text-blue-400">📊 Nível: {nivelValue}%</div>
+              )}
+              
+              {motorValue !== null && (
+                <div className="text-green-400">
+                  ⚙️ Motor: {motorValue === 0 ? 'INATIVO' : motorValue === 1 ? 'OPERANDO' : 'FALHA'}
+                </div>
+              )}
+              
+              {error && (
+                <div className="text-red-400">❌ Erro: {error}</div>
+              )}
 
-      {/* COMPONENTE NIVEL COM CONTROLE WEBSOCKET */}
-      <Nivel
-        nivel={75}
-        showControls={true}
-        editMode={editMode}
-        websocketValue={nivelValue} // 📊 Valor do nível via WebSocket
-      />
+              {lastMessage && (
+                <div className="text-gray-400 text-xs">
+                  📡 Última msg: {lastMessage.substring(0, 25)}...
+                </div>
+              )}
+            </div>
+          </div>
 
-      {/* 🚀 NOVO COMPONENTE MOTOR COM CONTROLE WEBSOCKET */}
-      <Motor
-        status={1} // Status padrão
-        showControls={true}
-        editMode={editMode}
-        websocketValue={motorValue} // ⚙️ Valor do motor via WebSocket
-      />
+          <FloatingEditorDialog
+            editMode={editMode}
+            onToggleEdit={() => setEditMode(!editMode)}
+          />
 
-      {/* ECLUSA BASE RESPONSIVA */}
-      <ResponsiveWrapper
+          <ModernSidebar />
+
+          <div className="h-[calc(100vh-64px)] overflow-auto pb-20 md:pb-0">
+          </div>
+
+          <Nivel
+            nivel={75}
+            editMode={editMode}
+            websocketValue={nivelValue}
+          />
+
+          <Motor
+            status={1}
+            editMode={editMode}
+            websocketValue={motorValue}
+          />
+
+          <ResponsiveWrapper
         componentId="eclusa-caldeira"
         editMode={editMode}
         defaultConfig={{
@@ -209,6 +249,8 @@ export default function Dashboard() {
           </div>
         </div>
       </ResponsiveWrapper>
+        </>
+      )}
     </div>
   );
 }

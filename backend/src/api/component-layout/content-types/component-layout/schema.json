@@ -1,0 +1,55 @@
+{
+  "kind": "collectionType",
+  "collectionName": "component_layout",
+  "info": {
+    "singularName": "component-layout",
+    "pluralName": "component-layouts",
+    "displayName": "Component Layout"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "componentId": {
+      "type": "string",
+      "required": true
+    },
+    "breakpoint": {
+      "type": "enumeration",
+      "enum": ["xs", "sm", "md", "lg", "xl", "xxl", "xxxl", "xxxxl"],
+      "required": true
+    },
+    "x": {
+      "type": "integer",
+      "required": true
+    },
+    "y": {
+      "type": "integer",
+      "required": true
+    },
+    "width": {
+      "type": "integer",
+      "required": true
+    },
+    "height": {
+      "type": "integer",
+      "required": true
+    },
+    "scale": {
+      "type": "decimal",
+      "default": 1.0
+    },
+    "zIndex": {
+      "type": "integer",
+      "default": 1
+    },
+    "opacity": {
+      "type": "decimal",
+      "default": 1.0
+    },
+    "rotation": {
+      "type": "integer",
+      "default": 0
+    }
+  }
+}

@@ -2,28 +2,12 @@
 
 import { useState } from 'react';
 
-interface ModernSidebarProps {
-  activeItem?: string;
-  onItemClick?: (itemId: string) => void;
-}
-
-export default function ModernSidebar({ 
-  activeItem = 'eclusa',
-  onItemClick 
-}: ModernSidebarProps) {
+export default function ModernSidebar() {
   const [isHovered, setIsHovered] = useState(false);
+  const [activeItem, setActiveItem] = useState('eclusa'); // Item ativo padrão
 
   const handleItemClick = (itemId: string) => {
-    // Navegação para páginas
-    if (itemId === 'eclusa') {
-      window.location.href = '/dashboard';
-    } else if (itemId === 'dashboard') {
-      window.location.href = '/plc';
-    }
-    
-    // Chama callback se fornecido
-    onItemClick?.(itemId);
-    
+    setActiveItem(itemId);
     console.log(`Navegando para: ${itemId}`);
   };
 
@@ -73,13 +57,13 @@ export default function ModernSidebar({
               </svg>
             </button>
 
-            {/* Dashboard - PLCs */}
+            {/* Dashboard */}
             <button 
               className="p-2 hover:scale-110 transition-all duration-200"
               onClick={() => handleItemClick('dashboard')}
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={getIconColor('dashboard')} strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 8h.01" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
             </button>
 

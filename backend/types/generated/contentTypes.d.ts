@@ -410,99 +410,44 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
-export interface ApiPlcPlc extends Struct.CollectionTypeSchema {
-  collectionName: 'plcs';
-  info: {
-    displayName: 'plc';
-    pluralName: 'plcs';
-    singularName: 'plc';
-  };
-  options: {
-    draftAndPublish: true;
-  };
-  attributes: {
-    active: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    ip_address: Schema.Attribute.String & Schema.Attribute.Required;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<'oneToMany', 'api::plc.plc'> &
-      Schema.Attribute.Private;
-    name: Schema.Attribute.String & Schema.Attribute.Required;
-    needs_reload: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    publishedAt: Schema.Attribute.DateTime;
-    rack: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
-    slot: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
-    tags: Schema.Attribute.Relation<'oneToMany', 'api::tag.tag'>;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    users_permissions_user: Schema.Attribute.Relation<
-      'manyToOne',
-      'plugin::users-permissions.user'
-    >;
-  };
-}
-
-export interface ApiSystemControlSystemControl
+export interface ApiComponentLayoutComponentLayout
   extends Struct.CollectionTypeSchema {
-  collectionName: 'system_controls';
+  collectionName: 'component_layout';
   info: {
-    displayName: 'system-control';
-    pluralName: 'system-controls';
-    singularName: 'system-control';
+    displayName: 'Component Layout';
+    pluralName: 'component-layouts';
+    singularName: 'component-layout';
   };
   options: {
-    draftAndPublish: true;
+    draftAndPublish: false;
   };
   attributes: {
+    breakpoint: Schema.Attribute.Enumeration<
+      ['xs', 'sm', 'md', 'lg', 'xl', 'xxl', 'xxxl', 'xxxxl']
+    > &
+      Schema.Attribute.Required;
+    componentId: Schema.Attribute.String & Schema.Attribute.Required;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    key: Schema.Attribute.String & Schema.Attribute.Required;
+    height: Schema.Attribute.Integer & Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
-      'api::system-control.system-control'
+      'api::component-layout.component-layout'
     > &
       Schema.Attribute.Private;
+    opacity: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<1>;
     publishedAt: Schema.Attribute.DateTime;
+    rotation: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    scale: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<1>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    value: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-  };
-}
-
-export interface ApiTagTag extends Struct.CollectionTypeSchema {
-  collectionName: 'tags';
-  info: {
-    displayName: 'tag';
-    pluralName: 'tags';
-    singularName: 'tag';
-  };
-  options: {
-    draftAndPublish: true;
-  };
-  attributes: {
-    address: Schema.Attribute.String & Schema.Attribute.Required;
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    current_value: Schema.Attribute.JSON;
-    data_type: Schema.Attribute.Enumeration<
-      ['INT', 'REAL', 'BOOL', 'DINT', 'STRING', 'ARRAY']
-    >;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<'oneToMany', 'api::tag.tag'> &
-      Schema.Attribute.Private;
-    name: Schema.Attribute.String & Schema.Attribute.Required;
-    plc_device: Schema.Attribute.Relation<'manyToOne', 'api::plc.plc'>;
-    publishedAt: Schema.Attribute.DateTime;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
+    width: Schema.Attribute.Integer & Schema.Attribute.Required;
+    x: Schema.Attribute.Integer & Schema.Attribute.Required;
+    y: Schema.Attribute.Integer & Schema.Attribute.Required;
+    zIndex: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<1>;
   };
 }
 
@@ -985,7 +930,6 @@ export interface PluginUsersPermissionsUser
       Schema.Attribute.SetMinMaxLength<{
         minLength: 6;
       }>;
-    plcs: Schema.Attribute.Relation<'oneToMany', 'api::plc.plc'>;
     provider: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     resetPasswordToken: Schema.Attribute.String & Schema.Attribute.Private;
@@ -1016,9 +960,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
-      'api::plc.plc': ApiPlcPlc;
-      'api::system-control.system-control': ApiSystemControlSystemControl;
-      'api::tag.tag': ApiTagTag;
+      'api::component-layout.component-layout': ApiComponentLayoutComponentLayout;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;

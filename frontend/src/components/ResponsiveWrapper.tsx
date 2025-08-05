@@ -1,4 +1,4 @@
-// components/ResponsiveWrapper.tsx - VERSÃO BARRA LATERAL
+// components/ResponsiveWrapper.tsx - CORRIGIDO
 'use client';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
@@ -22,12 +22,11 @@ interface ResponsiveWrapperProps {
   onConfigChange?: (config: Record<string, ResponsiveConfig>) => void;
 }
 
-// Defina uma interface para as props que você está injetando
 interface InjectedProps {
-  width: number;
-  height: number;
-  componentWidth: number;
-  componentHeight: number;
+  width?: number;
+  height?: number;
+  componentWidth?: number;
+  componentHeight?: number;
 }
 
 export default function ResponsiveWrapper({
@@ -57,7 +56,6 @@ export default function ResponsiveWrapper({
   const [configs, setConfigs] = useState<Record<string, ResponsiveConfig>>(defaultConfigs);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Carrega do localStorage após hidratação
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(`component-${componentId}`);
@@ -92,7 +90,6 @@ export default function ResponsiveWrapper({
     onConfigChange?.(updated);
   }, [configs, breakpoint, componentId, onConfigChange]);
 
-  // Escuta mudanças da barra lateral
   useEffect(() => {
     const handleConfigChange = (e: CustomEvent) => {
       if (e.detail.componentId === componentId) {
@@ -105,7 +102,6 @@ export default function ResponsiveWrapper({
     return () => window.removeEventListener('component-config-changed', handleConfigChange as EventListener);
   }, [componentId, configs, breakpoint]);
 
-  // Atalhos de teclado
   useEffect(() => {
     if (!editMode) return;
 
@@ -116,7 +112,6 @@ export default function ResponsiveWrapper({
       const resizeStep = e.shiftKey ? 20 : 5;
       let newConfig = { ...currentConfig };
 
-      // MOVIMENTO
       if (!e.ctrlKey && !e.altKey) {
         switch(e.key) {
           case 'ArrowLeft':
@@ -138,7 +133,6 @@ export default function ResponsiveWrapper({
         }
       }
 
-      // REDIMENSIONAR COM CTRL + SETAS
       if (e.ctrlKey) {
         switch(e.key) {
           case 'ArrowLeft':
@@ -160,7 +154,6 @@ export default function ResponsiveWrapper({
         }
       }
 
-      // OUTRAS AÇÕES
       switch(e.key) {
         case 'r':
           e.preventDefault();
@@ -190,7 +183,6 @@ export default function ResponsiveWrapper({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [editMode, currentConfig, saveConfig]);
 
-  // Drag handlers
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!editMode) return;
     setIsDragging(true);
@@ -214,7 +206,6 @@ export default function ResponsiveWrapper({
     setIsDragging(false);
   };
 
-  // Resize handlers
   const handleResize = (direction: string, e: React.MouseEvent) => {
     if (!editMode) return;
     e.stopPropagation();
@@ -269,7 +260,6 @@ export default function ResponsiveWrapper({
     document.addEventListener('mouseup', handleMouseUp);
   };
 
-  // Event listeners
   useEffect(() => {
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
@@ -282,9 +272,32 @@ export default function ResponsiveWrapper({
     };
   }, [isDragging, handleMouseMove]);
 
+  // 🔥 FIX: Função para clonar children sem props DOM inválidos
+  const renderChildren = () => {
+    if (!React.isValidElement(children)) {
+      return children;
+    }
+
+    // Se é um elemento DOM (string), NÃO injeta props customizados
+    if (typeof children.type === 'string') {
+      return children;
+    }
+
+    // Se é um componente React (função/class), PODE injetar props
+    if (typeof children.type === 'function') {
+      return React.cloneElement(children, {
+        width: currentConfig.width,
+        height: currentConfig.height,
+        componentWidth: currentConfig.width,
+        componentHeight: currentConfig.height
+      } as InjectedProps);
+    }
+
+    return children;
+  };
+
   return (
     <>
-      {/* Grid de fundo no modo edição */}
       {editMode && (
         <div
           className="fixed inset-0 pointer-events-none z-0"
@@ -314,7 +327,6 @@ export default function ResponsiveWrapper({
           transformOrigin: 'top left',
           zIndex: currentConfig.zIndex,
           opacity: currentConfig.opacity,
-          // Border só visual, não afeta layout
           ...(editMode && {
             boxShadow: '0 0 0 2px #3b82f6',
             outline: '2px solid #3b82f6',
@@ -323,39 +335,26 @@ export default function ResponsiveWrapper({
         }}
         onMouseDown={handleMouseDown}
       >
-        {/* Passa dimensões reais para o children */}
-        {React.isValidElement<InjectedProps>(children)
-          ? React.cloneElement(children, {
-              width: currentConfig.width,
-              height: currentConfig.height,
-              componentWidth: currentConfig.width,
-              componentHeight: currentConfig.height
-            })
-          : children
-        }
+        {/* 🔥 RENDERIZAÇÃO CORRIGIDA */}
+        {renderChildren()}
 
-        {/* Handles de redimensionamento - FUNCIONAIS */}
         {editMode && (
           <>
-            {/* Handle direita */}
             <div
               className="absolute right-[-4px] top-0 w-2 h-full bg-blue-500 cursor-e-resize opacity-50 hover:opacity-100"
               onMouseDown={(e) => handleResize('right', e)}
             />
 
-            {/* Handle baixo */}
             <div
               className="absolute bottom-[-4px] left-0 w-full h-2 bg-blue-500 cursor-s-resize opacity-50 hover:opacity-100"
               onMouseDown={(e) => handleResize('bottom', e)}
             />
 
-            {/* Handle canto inferior direito */}
             <div
               className="absolute bottom-[-4px] right-[-4px] w-4 h-4 bg-blue-600 cursor-se-resize opacity-70 hover:opacity-100"
               onMouseDown={(e) => handleResize('right bottom', e)}
             />
 
-            {/* Info compacta */}
             <div className="absolute -top-6 left-0 bg-blue-500 text-white px-2 py-1 rounded text-xs font-mono">
               {componentId} | {Math.round(currentConfig.width)}×{Math.round(currentConfig.height)} | Z:{currentConfig.zIndex}
             </div>

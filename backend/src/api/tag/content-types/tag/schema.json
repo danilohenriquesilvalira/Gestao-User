@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "tags",
+  "info": {
+    "singularName": "tag",
+    "pluralName": "tags",
+    "displayName": "tag"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "address": {
+      "type": "string",
+      "required": true
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "data_type": {
+      "type": "enumeration",
+      "enum": [
+        "INT",
+        "REAL",
+        "BOOL",
+        "DINT",
+        "STRING",
+        "ARRAY"
+      ]
+    },
+    "current_value": {
+      "type": "json"
+    },
+    "plc_device": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::plc.plc",
+      "inversedBy": "tags"
+    }
+  }
+}

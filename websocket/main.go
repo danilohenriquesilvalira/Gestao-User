@@ -2,14 +2,51 @@ package main
 
 import (
 	"encoding/binary"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"math"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/robinson/gos7"
 )
+
+type PLCConfig struct {
+	IP       string `json:"ip"`
+	Rack     int    `json:"rack"`
+	Slot     int    `json:"slot"`
+	DBNumber int    `json:"db_number"`
+}
+
+type Tag struct {
+	Type        string  `json:"type"`
+	Offset      float64 `json:"offset"`
+	Description string  `json:"description"`
+}
+
+type Config struct {
+	PLCConfig PLCConfig      `json:"plc_config"`
+	Tags      map[string]Tag `json:"tags"`
+}
+
+type Client struct {
+	conn     *websocket.Conn
+	send     chan []byte
+	hub      *Hub
+	lastPing time.Time
+}
+
+type Hub struct {
+	clients    map[*Client]bool
+	broadcast  chan []byte
+	register   chan *Client
+	unregister chan *Client
+	mutex      sync.RWMutex
+}
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
@@ -17,173 +54,458 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
+	HandshakeTimeout: 10 * time.Second,
 }
 
-var broadcast = make(chan string)
-var clients = make(map[*websocket.Conn]bool)
+var config Config
+var hub *Hub
+
+// ✅ VARIÁVEIS GLOBAIS PARA CACHE DOS VALORES ATUAIS DO PLC
+var currentPLCValues = make(map[string]interface{})
+var currentPLCMutex sync.RWMutex
+var plcReadAtLeastOnce = false
 
 func main() {
-	handler := gos7.NewTCPClientHandler("192.168.0.33", 0, 1)
-	handler.Timeout = 10 * time.Second
-	handler.IdleTimeout = 10 * time.Second
+	// Carrega a configuração dos tags
+	err := loadConfig("tags.json")
+	if err != nil {
+		log.Fatalf("Erro ao carregar configuração: %v", err)
+	}
 
-	defer handler.Close()
+	log.Printf("Configuração carregada: PLC %s, DB%d, %d tags",
+		config.PLCConfig.IP, config.PLCConfig.DBNumber, len(config.Tags))
+
+	// Inicializa o hub
+	hub = &Hub{
+		clients:    make(map[*Client]bool),
+		broadcast:  make(chan []byte),
+		register:   make(chan *Client),
+		unregister: make(chan *Client),
+	}
+
+	// Inicia o hub em goroutine separada
+	go hub.run()
+
+	// Configura conexão PLC
+	handler := gos7.NewTCPClientHandler(config.PLCConfig.IP, config.PLCConfig.Rack, config.PLCConfig.Slot)
+	handler.Timeout = 5 * time.Second
+	handler.IdleTimeout = 5 * time.Second
 
 	client := gos7.NewClient(handler)
 
-	err := handler.Connect()
+	// Tenta conectar ao PLC
+	err = handler.Connect()
 	if err != nil {
-		log.Fatalf("Erro fatal ao conectar com o PLC: %v", err)
+		log.Printf("⚠️ Não foi possível conectar ao PLC: %v. Continuando sem PLC...", err)
+	} else {
+		log.Println("✅ Conexão com o PLC estabelecida!")
+		defer handler.Close()
 	}
-	log.Println("Conexão com o PLC estabelecida com sucesso!")
 
+	// Inicia leitura PLC (com ou sem conexão)
 	go readPLCData(client)
-	go handleMessages()
 
-	http.HandleFunc("/ws", handleConnections)
+	// Configura rotas HTTP
+	http.HandleFunc("/ws", handleWebSocket)
 
-	log.Println("Servidor WebSocket iniciado em http://localhost:8080/ws")
+	log.Println("🚀 Servidor WebSocket iniciado em http://localhost:8080/ws")
 	err = http.ListenAndServe(":8080", nil)
 	if err != nil {
-		log.Fatal("ListenAndServe:", err)
+		log.Fatal("❌ Erro no servidor:", err)
 	}
 }
 
-// Mapeia o valor do PLC para um nível visual mais interessante
-func mapPLCValueToLevel(rawValue int16) int {
-	if rawValue == 0 {
-		return 0
-	} else if rawValue == 1 {
-		return 75
-	}
+func (h *Hub) run() {
+	ticker := time.NewTicker(120 * time.Second)
+	defer ticker.Stop()
 
-	if rawValue < 0 {
-		return 0
-	} else if rawValue > 100 {
-		return 100
-	}
-
-	return int(rawValue)
-}
-
-// Mapeia o valor do motor (Teste_1)
-func mapPLCValueToMotor(rawValue int16) int {
-	// 0 = inativo, 1 = operando, 2 = falha
-	if rawValue == 0 {
-		return 0
-	} else if rawValue == 1 {
-		return 1
-	} else if rawValue == 2 {
-		return 2
-	}
-
-	// Para outros valores, considera operando
-	if rawValue > 0 {
-		return 1
-	}
-	return 0
-}
-
-func readPLCData(client gos7.Client) {
 	for {
-		dbNumber := 19
+		select {
+		case client := <-h.register:
+			h.mutex.Lock()
+			h.clients[client] = true
+			clientCount := len(h.clients)
+			h.mutex.Unlock()
 
-		// Lê a primeira variável (nível) - DB19.DBW0
-		byteOffset := 0
-		size := 2
-		buffer1 := make([]byte, size)
+			if clientCount == 1 {
+				log.Printf("🟢 Cliente conectado. Total: %d", clientCount)
+			}
 
-		err := client.AGReadDB(dbNumber, byteOffset, size, buffer1)
-		if err != nil {
-			log.Printf("Erro ao ler do PLC (DB%d.DBW%d): %v", dbNumber, byteOffset, err)
-			time.Sleep(2 * time.Second)
-			continue
+			// ✅ CORREÇÃO PRINCIPAL: Envia valores ATUAIS do PLC
+			go h.sendCurrentPLCValues(client)
+
+		case client := <-h.unregister:
+			h.mutex.Lock()
+			if _, ok := h.clients[client]; ok {
+				delete(h.clients, client)
+				close(client.send)
+				clientCount := len(h.clients)
+				h.mutex.Unlock()
+
+				if clientCount == 0 {
+					log.Printf("🔴 Cliente desconectado. Total: %d", clientCount)
+				}
+			} else {
+				h.mutex.Unlock()
+			}
+
+		case message := <-h.broadcast:
+			h.mutex.RLock()
+			clientCount := len(h.clients)
+			if clientCount > 0 {
+				for client := range h.clients {
+					go func(c *Client) {
+						select {
+						case c.send <- message:
+						default:
+							h.closeClient(c)
+						}
+					}(client)
+				}
+			}
+			h.mutex.RUnlock()
+
+		case <-ticker.C:
+			h.mutex.RLock()
+			if len(h.clients) > 0 {
+				for client := range h.clients {
+					select {
+					case client.send <- []byte(`{"ping":true}`):
+					default:
+						go h.closeClient(client)
+					}
+				}
+			}
+			h.mutex.RUnlock()
 		}
-
-		// Lê a segunda variável (motor Teste_1) - DB19.DBW2
-		byteOffset2 := 2
-		buffer2 := make([]byte, size)
-
-		err = client.AGReadDB(dbNumber, byteOffset2, size, buffer2)
-		if err != nil {
-			log.Printf("Erro ao ler motor do PLC (DB%d.DBW%d): %v", dbNumber, byteOffset2, err)
-			time.Sleep(2 * time.Second)
-			continue
-		}
-
-		// Processa os valores
-		rawValue1 := int16(binary.BigEndian.Uint16(buffer1))
-		rawValue2 := int16(binary.BigEndian.Uint16(buffer2))
-
-		levelValue := mapPLCValueToLevel(rawValue1)
-		motorValue := mapPLCValueToMotor(rawValue2)
-
-		log.Printf("PLC - Nível: %d->%d%% | Motor: %d->%d | Clientes: %d",
-			rawValue1, levelValue, rawValue2, motorValue, len(clients))
-
-		// Envia mensagem com os dois valores
-		message := fmt.Sprintf("Nivel:%d,Motor:%d", levelValue, motorValue)
-
-		// Só envia se houver clientes conectados
-		if len(clients) > 0 {
-			broadcast <- message
-		}
-
-		time.Sleep(1 * time.Second)
 	}
 }
 
-func handleConnections(w http.ResponseWriter, r *http.Request) {
-	ws, err := upgrader.Upgrade(w, r, nil)
+// ✅ NOVA FUNÇÃO: Envia valores atuais para novo cliente
+func (h *Hub) sendCurrentPLCValues(client *Client) {
+	currentPLCMutex.RLock()
+
+	// Copia valores atuais
+	currentValues := make(map[string]interface{})
+	for k, v := range currentPLCValues {
+		currentValues[k] = v
+	}
+	hasValues := len(currentValues) > 0 && plcReadAtLeastOnce
+	currentPLCMutex.RUnlock()
+
+	var message map[string]interface{}
+
+	if hasValues {
+		// ✅ USA VALORES REAIS DO PLC
+		log.Printf("📡 Enviando valores ATUAIS do PLC para novo cliente")
+		message = buildMessage(currentValues)
+	} else {
+		// ✅ VALORES PADRÃO só se PLC nunca foi lido
+		log.Printf("📡 PLC ainda não foi lido - enviando valores padrão")
+		defaultValues := map[string]interface{}{
+			"nivel":               float32(0.0),
+			"porta_jusante":       int16(0),
+			"semaforo_verde_0":    false,
+			"semaforo_vermelho_0": false,
+			"semaforo_verde_1":    false,
+			"semaforo_vermelho_1": false,
+			"semaforo_verde_2":    false,
+			"semaforo_vermelho_2": false,
+			"semaforo_verde_3":    false,
+			"semaforo_vermelho_3": false,
+		}
+		message = buildMessage(defaultValues)
+	}
+
+	if data, err := json.Marshal(message); err == nil {
+		select {
+		case client.send <- data:
+			log.Printf("✅ Dados iniciais enviados para novo cliente")
+		default:
+			log.Printf("❌ Falha ao enviar dados iniciais")
+			h.closeClient(client)
+		}
+	}
+}
+
+func (h *Hub) closeClient(client *Client) {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
+	if _, ok := h.clients[client]; ok {
+		delete(h.clients, client)
+		close(client.send)
+		client.conn.Close()
+	}
+}
+
+func loadConfig(filename string) error {
+	data, err := ioutil.ReadFile(filename)
 	if err != nil {
-		log.Printf("Erro no upgrade para WebSocket: %v", err)
+		return err
+	}
+
+	return json.Unmarshal(data, &config)
+}
+
+// ✅ FUNÇÃO CORRIGIDA: Atualiza cache de valores atuais
+func readPLCData(client gos7.Client) {
+	lastValues := make(map[string]interface{})
+
+	for {
+		values := make(map[string]interface{})
+		hasChanges := false
+
+		// Lê cada tag configurado
+		for tagName, tag := range config.Tags {
+			value, err := readTag(client, tag)
+			if err != nil {
+				if time.Now().Unix()%60 == 0 {
+					log.Printf("⚠️ Erro ao ler tag %s: %v", tagName, err)
+				}
+				continue
+			}
+
+			// ✅ ATUALIZA CACHE DE VALORES ATUAIS
+			currentPLCMutex.Lock()
+			currentPLCValues[tagName] = value
+			if !plcReadAtLeastOnce {
+				plcReadAtLeastOnce = true
+				log.Printf("✅ Primeira leitura do PLC concluída")
+			}
+			currentPLCMutex.Unlock()
+
+			// Verifica mudanças
+			if lastVal, exists := lastValues[tagName]; !exists || lastVal != value {
+				hasChanges = true
+				lastValues[tagName] = value
+
+				if tag.Type == "bool" {
+					log.Printf("🚦 Semáforo %s mudou: %v -> %v", tagName, lastVal, value)
+				}
+			}
+			values[tagName] = value
+		}
+
+		// Envia mudanças
+		if hasChanges {
+			message := buildMessage(values)
+
+			hub.mutex.RLock()
+			clientCount := len(hub.clients)
+			hub.mutex.RUnlock()
+
+			if clientCount > 0 {
+				if data, err := json.Marshal(message); err == nil {
+					select {
+					case hub.broadcast <- data:
+					default:
+						go func() {
+							hub.broadcast <- data
+						}()
+					}
+				}
+			}
+		}
+
+		time.Sleep(25 * time.Millisecond)
+	}
+}
+
+func readTag(client gos7.Client, tag Tag) (interface{}, error) {
+	switch tag.Type {
+	case "real":
+		return readReal(client, int(tag.Offset))
+	case "int":
+		return readInt(client, int(tag.Offset))
+	case "bool":
+		return readBool(client, tag.Offset)
+	default:
+		return nil, fmt.Errorf("tipo de tag não suportado: %s", tag.Type)
+	}
+}
+
+func readReal(client gos7.Client, offset int) (float32, error) {
+	buffer := make([]byte, 4)
+	err := client.AGReadDB(config.PLCConfig.DBNumber, offset, 4, buffer)
+	if err != nil {
+		return 0, err
+	}
+
+	bits := binary.BigEndian.Uint32(buffer)
+	return math.Float32frombits(bits), nil
+}
+
+func readInt(client gos7.Client, offset int) (int16, error) {
+	buffer := make([]byte, 2)
+	err := client.AGReadDB(config.PLCConfig.DBNumber, offset, 2, buffer)
+	if err != nil {
+		return 0, err
+	}
+
+	return int16(binary.BigEndian.Uint16(buffer)), nil
+}
+
+func readBool(client gos7.Client, offset float64) (bool, error) {
+	byteOffset := int(offset)
+	bitOffset := int(math.Round((offset - float64(byteOffset)) * 10))
+
+	if bitOffset < 0 || bitOffset > 7 {
+		return false, fmt.Errorf("bit offset inválido: %d (deve ser 0-7)", bitOffset)
+	}
+
+	buffer := make([]byte, 1)
+	err := client.AGReadDB(config.PLCConfig.DBNumber, byteOffset, 1, buffer)
+	if err != nil {
+		return false, err
+	}
+
+	result := (buffer[0] & (1 << bitOffset)) != 0
+	return result, nil
+}
+
+func buildMessage(values map[string]interface{}) map[string]interface{} {
+	data := make(map[string]interface{})
+
+	if nivel, ok := values["nivel"]; ok {
+		data["nivelValue"] = nivel
+	}
+
+	if porta, ok := values["porta_jusante"]; ok {
+		data["motorValue"] = porta
+	}
+
+	semaforos := make(map[string]bool)
+
+	for i := 0; i <= 3; i++ {
+		tagNameVerde := fmt.Sprintf("semaforo_verde_%d", i)
+		if value, ok := values[tagNameVerde]; ok {
+			if boolVal, isBool := value.(bool); isBool {
+				semaforos[tagNameVerde] = boolVal
+			} else {
+				semaforos[tagNameVerde] = false
+			}
+		} else {
+			semaforos[tagNameVerde] = false
+		}
+
+		tagNameVermelho := fmt.Sprintf("semaforo_vermelho_%d", i)
+		if value, ok := values[tagNameVermelho]; ok {
+			if boolVal, isBool := value.(bool); isBool {
+				semaforos[tagNameVermelho] = boolVal
+			} else {
+				semaforos[tagNameVermelho] = false
+			}
+		} else {
+			semaforos[tagNameVermelho] = false
+		}
+	}
+
+	data["semaforos"] = semaforos
+	data["timestamp"] = time.Now().Unix()
+	data["connected"] = true
+
+	return data
+}
+
+func handleWebSocket(w http.ResponseWriter, r *http.Request) {
+	clientIP := r.RemoteAddr
+	hub.mutex.RLock()
+	sameIPCount := 0
+	for client := range hub.clients {
+		if client.conn.RemoteAddr().String() == clientIP {
+			sameIPCount++
+		}
+	}
+	hub.mutex.RUnlock()
+
+	if sameIPCount >= 2 {
+		log.Printf("⚠️ Muitas conexões do IP %s (%d), rejeitando", clientIP, sameIPCount)
+		http.Error(w, "Muitas conexões", http.StatusTooManyRequests)
 		return
 	}
+
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Printf("❌ Erro no upgrade WebSocket: %v", err)
+		return
+	}
+
+	client := &Client{
+		conn:     conn,
+		send:     make(chan []byte, 256),
+		hub:      hub,
+		lastPing: time.Now(),
+	}
+
+	client.hub.register <- client
+
+	go client.writePump()
+	go client.readPump()
+}
+
+func (c *Client) readPump() {
 	defer func() {
-		ws.Close()
-		delete(clients, ws)
-		log.Printf("Cliente desconectado. Clientes restantes: %d", len(clients))
+		c.hub.unregister <- c
+		c.conn.Close()
 	}()
 
-	clients[ws] = true
-	log.Printf("Novo cliente WebSocket conectado. Total: %d", len(clients))
+	c.conn.SetReadDeadline(time.Now().Add(120 * time.Second))
+	c.conn.SetPongHandler(func(string) error {
+		c.conn.SetReadDeadline(time.Now().Add(120 * time.Second))
+		c.lastPing = time.Now()
+		return nil
+	})
 
-	// Envia valor inicial com as duas variáveis
-	initialMessage := "Nivel:75,Motor:1"
-	err = ws.WriteMessage(websocket.TextMessage, []byte(initialMessage))
-	if err != nil {
-		log.Printf("Erro ao enviar mensagem inicial: %v", err)
-		return
-	}
-
-	// Mantém a conexão aberta e trata pings/pongs
 	for {
-		messageType, _, err := ws.ReadMessage()
+		_, _, err := c.conn.ReadMessage()
 		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("Erro no WebSocket: %v", err)
+			if websocket.IsUnexpectedCloseError(err,
+				websocket.CloseGoingAway,
+				websocket.CloseAbnormalClosure,
+				websocket.CloseNoStatusReceived) {
+				log.Printf("⚠️ Erro inesperado no WebSocket: %v", err)
 			}
 			break
 		}
-
-		// Responde a pings
-		if messageType == websocket.PingMessage {
-			ws.WriteMessage(websocket.PongMessage, nil)
-		}
 	}
 }
 
-func handleMessages() {
-	for {
-		msg := <-broadcast
-		log.Printf("Enviando para %d clientes: %s", len(clients), msg)
+func (c *Client) writePump() {
+	ticker := time.NewTicker(90 * time.Second)
+	defer func() {
+		ticker.Stop()
+		c.conn.Close()
+	}()
 
-		for client := range clients {
-			err := client.WriteMessage(websocket.TextMessage, []byte(msg))
+	for {
+		select {
+		case message, ok := <-c.send:
+			c.conn.SetWriteDeadline(time.Now().Add(15 * time.Second))
+			if !ok {
+				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				return
+			}
+
+			w, err := c.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
-				log.Printf("Erro ao enviar mensagem: %v", err)
-				client.Close()
-				delete(clients, client)
+				return
+			}
+			w.Write(message)
+
+			n := len(c.send)
+			for i := 0; i < n; i++ {
+				w.Write([]byte{'\n'})
+				w.Write(<-c.send)
+			}
+
+			if err := w.Close(); err != nil {
+				return
+			}
+
+		case <-ticker.C:
+			c.conn.SetWriteDeadline(time.Now().Add(15 * time.Second))
+			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				return
 			}
 		}
 	}

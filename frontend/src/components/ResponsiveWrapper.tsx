@@ -1,6 +1,6 @@
-// components/ResponsiveWrapper.tsx - VERSÃO COM SALVAMENTO MANUAL
+// components/ResponsiveWrapper.tsx - VERSÃO FUNCIONAL RESTAURADA
 'use client';
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { useLayoutLoading } from '@/contexts/LayoutLoadingContext';
 
@@ -42,147 +42,105 @@ export default function ResponsiveWrapper({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
   
   const { registerComponent, setComponentLoaded } = useLayoutLoading();
 
+  // Configurações padrão simples
   const defaultConfigs = {
     xs: { x: 10, y: 70, width: 200, height: 100, scale: 0.7, zIndex: 1, opacity: 1, rotation: 0 },
     sm: { x: 20, y: 70, width: 250, height: 120, scale: 0.8, zIndex: 1, opacity: 1, rotation: 0 },
-    md: { x: 74, y: 70, width: 300, height: 150, scale: 0.9, zIndex: 1, opacity: 1, rotation: 0 },
-    lg: { x: 74, y: 70, width: 400, height: 200, scale: 1, zIndex: 1, opacity: 1, rotation: 0 },
-    xl: { x: 74, y: 70, width: 500, height: 250, scale: 1, zIndex: 1, opacity: 1, rotation: 0 },
-    '2xl': { x: 74, y: 70, width: 600, height: 300, scale: 1, zIndex: 1, opacity: 1, rotation: 0 },
-    '3xl': { x: 74, y: 70, width: 700, height: 350, scale: 1, zIndex: 1, opacity: 1, rotation: 0 },
-    '4xl': { x: 74, y: 70, width: 800, height: 400, scale: 1, zIndex: 1, opacity: 1, rotation: 0 },
+    md: { x: 30, y: 70, width: 300, height: 150, scale: 0.9, zIndex: 1, opacity: 1, rotation: 0 },
+    lg: { x: 50, y: 70, width: 350, height: 175, scale: 1, zIndex: 1, opacity: 1, rotation: 0 },
+    xl: { x: 74, y: 70, width: 400, height: 200, scale: 1, zIndex: 1, opacity: 1, rotation: 0 },
+    '2xl': { x: 100, y: 70, width: 450, height: 225, scale: 1, zIndex: 1, opacity: 1, rotation: 0 },
+    '3xl': { x: 120, y: 70, width: 500, height: 250, scale: 1, zIndex: 1, opacity: 1, rotation: 0 },
+    '4xl': { x: 150, y: 70, width: 550, height: 275, scale: 1, zIndex: 1, opacity: 1, rotation: 0 },
     ...defaultConfig
   };
 
   const [configs, setConfigs] = useState<Record<string, ResponsiveConfig>>(defaultConfigs);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isLoadingFromStrapi, setIsLoadingFromStrapi] = useState(true);
 
-  // Carrega TODAS as configurações do PostgreSQL via Strapi (PRIORIDADE ABSOLUTA)
+  // Configuração atual
+  const currentConfig = useMemo((): ResponsiveConfig => 
+    configs[breakpoint] || configs.lg || {
+      x: 74,
+      y: 70,
+      width: 400,
+      height: 200,
+      scale: 1,
+      zIndex: 1,
+      opacity: 1,
+      rotation: 0
+    }, [configs, breakpoint]
+  );
+
+  // Inicialização
   useEffect(() => {
-    // Registra o componente no contexto global
     registerComponent(componentId);
     
-    async function loadAllConfigs() {
-      if (typeof window !== 'undefined') {
-        setIsLoadingFromStrapi(true);
-        
-        try {
-          const baseURL = (typeof window !== 'undefined' && window.location.origin.includes('localhost')) 
-            ? 'http://localhost:1337' 
-            : process?.env?.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
-          console.log(`🔍 Carregando TODAS as configurações para ${componentId} do PostgreSQL...`);
-          
-          // Busca TODAS as configurações do componente de todos os breakpoints
-          const response = await fetch(
-            `${baseURL}/api/component-layouts?filters[componentId][$eq]=${componentId}`,
-            { cache: 'no-store' }
-          );
-          
-          if (!response.ok) {
-            throw new Error(`Erro HTTP: ${response.status}`);
-          }
-          
-          const data = await response.json();
-          console.log('📄 TODOS os dados do PostgreSQL:', data);
-          
-          // Converte dados do Strapi para formato interno
-          const loadedConfigs: Record<string, ResponsiveConfig> = { ...defaultConfigs };
-          
-          if (data && data.data && data.data.length > 0) {
-            data.data.forEach((strapiConfig: any) => {
-              // Converte breakpoints do Strapi de volta para formato interno
-              const internalBreakpoint = strapiConfig.breakpoint === 'xxl' ? '2xl' : 
-                                       strapiConfig.breakpoint === 'xxxl' ? '3xl' : 
-                                       strapiConfig.breakpoint === 'xxxxl' ? '4xl' : 
-                                       strapiConfig.breakpoint;
-              
-              loadedConfigs[internalBreakpoint] = {
-                x: strapiConfig.x || 74,
-                y: strapiConfig.y || 70,
-                width: strapiConfig.width || 400,
-                height: strapiConfig.height || 200,
-                scale: strapiConfig.scale || 1,
-                zIndex: strapiConfig.zIndex || 1,
-                opacity: strapiConfig.opacity || 1,
-                rotation: strapiConfig.rotation || 0
-              };
-              
-              console.log(`⚙️ Configuração ${internalBreakpoint}:`, loadedConfigs[internalBreakpoint]);
-            });
-            
-            console.log('✅ TODAS as configurações carregadas do PostgreSQL:', loadedConfigs);
-          } else {
-            console.log('ℹ️ Nenhuma configuração encontrada no PostgreSQL - usando padrões');
-          }
-          
-          setConfigs(loadedConfigs);
-          
-          // Atualiza localStorage APENAS como cache (FloatingEditor ainda precisa)
-          localStorage.setItem(`component-${componentId}`, JSON.stringify(loadedConfigs));
-          console.log('💾 Cache localStorage atualizado com dados do PostgreSQL');
-          
-          console.log(`🔍 DEBUG: Estado de configs após carregamento inicial:`, loadedConfigs);
-          console.log(`🔍 DEBUG: Configuração atual para breakpoint ${breakpoint}:`, loadedConfigs[breakpoint]);
-          
-        } catch (error) {
-          console.error('❌ Erro ao carregar do PostgreSQL:', error);
-          
-          // ÚLTIMO RECURSO: localStorage (não deveria acontecer em produção)
-          const saved = localStorage.getItem(`component-${componentId}`);
-          if (saved) {
-            try {
-              setConfigs(JSON.parse(saved));
-              console.log('⚠️ Usando cache localStorage como último recurso');
-            } catch (e) {
-              console.error('Erro ao carregar cache:', e);
-              setConfigs(defaultConfigs);
-            }
-          } else {
-            setConfigs(defaultConfigs);
-            console.log('⚠️ Usando configurações padrão');
-          }
-        } finally {
-          setIsLoadingFromStrapi(false);
-          setIsLoaded(true);
-          console.log(`✅ Componente ${componentId} totalmente carregado!`);
-          setComponentLoaded(componentId);
+    // Tenta carregar do localStorage
+    const saved = localStorage.getItem(`component-${componentId}`);
+    if (saved) {
+      try {
+        const loadedConfigs = JSON.parse(saved);
+        setConfigs(loadedConfigs);
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`✅ Configurações carregadas para ${componentId}:`, loadedConfigs);
         }
+      } catch (e) {
+        console.error('Erro ao carregar cache:', e);
+        setConfigs(defaultConfigs);
       }
     }
     
-    loadAllConfigs();
-  }, [componentId]); // Remove breakpoint da dependência - carrega tudo de uma vez
+    setIsLoaded(true);
+    setComponentLoaded(componentId);
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`🎯 ResponsiveWrapper ${componentId} inicializado`);
+    }
+  }, [componentId, registerComponent, setComponentLoaded]);
 
-  const currentConfig: ResponsiveConfig = configs[breakpoint] || configs.lg || {
-    x: 74,
-    y: 70,
-    width: 400,
-    height: 200,
-    scale: 1,
-    zIndex: 1,
-    opacity: 1,
-    rotation: 0
-  };
-
-  // DEBUG: Log sempre que currentConfig mudar
+  // Sistema de seleção de componentes
   useEffect(() => {
-    console.log(`🎯 DEBUG ${componentId}: currentConfig para ${breakpoint}:`, currentConfig);
-    console.log(`🎯 DEBUG ${componentId}: configs completos:`, configs);
-  }, [componentId, breakpoint, currentConfig, configs]);
+    const handleComponentSelect = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      setSelectedComponent(customEvent.detail.componentId);
+    };
 
+    const handleDeselectAll = () => {
+      setSelectedComponent(null);
+    };
+
+    window.addEventListener('select-component', handleComponentSelect);
+    window.addEventListener('deselect-all-components', handleDeselectAll);
+    
+    return () => {
+      window.removeEventListener('select-component', handleComponentSelect);
+      window.removeEventListener('deselect-all-components', handleDeselectAll);
+    };
+  }, []);
+
+  // Verifica se este componente está selecionado
+  const isSelected = selectedComponent === componentId;
+  const shouldShowControls = editMode && isSelected;
+
+  // Função para salvar configuração
   const saveConfig = useCallback((newConfig: ResponsiveConfig) => {
     const updated = { ...configs, [breakpoint]: newConfig };
     setConfigs(updated);
     
-    // SEMPRE atualiza localStorage com TODAS as configurações para o FloatingEditor
+    // Salva no localStorage
     if (typeof window !== 'undefined') {
       localStorage.setItem(`component-${componentId}`, JSON.stringify(updated));
-      console.log(`💾 Configurações atualizadas no cache para ${componentId}:`, updated);
     }
+    
+    // Dispara evento para GlobalAdvancedControls
+    window.dispatchEvent(new CustomEvent('component-config-changed', { 
+      detail: { componentId, config: newConfig } 
+    }));
     
     onConfigChange?.(updated);
   }, [configs, breakpoint, componentId, onConfigChange]);
@@ -203,8 +161,11 @@ export default function ResponsiveWrapper({
       const baseURL = (typeof window !== 'undefined' && window.location.origin.includes('localhost')) 
         ? 'http://localhost:1337' 
         : process?.env?.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
-      console.log(`💾 Salvando layout de ${componentId} no breakpoint ${strapiBreakpoint}...`);
-      console.log('📋 Configuração atual a ser salva:', currentConfig);
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`💾 Salvando layout de ${componentId} no breakpoint ${strapiBreakpoint}...`);
+        console.log('📋 Configuração atual a ser salva:', currentConfig);
+      }
       
       // Busca se já existe
       const checkResponse = await fetch(
@@ -216,11 +177,13 @@ export default function ResponsiveWrapper({
       }
       
       const checkData = await checkResponse.json();
-      console.log('📋 Verificando se já existe:', checkData);
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('📋 Verificando se já existe:', checkData);
+      }
       
       // Extrai o documentId e id com segurança para Strapi v5
       const existingEntry = checkData?.data && checkData.data.length > 0 ? checkData.data[0] : null;
-      const existingId = existingEntry?.id;
       const existingDocumentId = existingEntry?.documentId;
 
       const configData = {
@@ -236,13 +199,17 @@ export default function ResponsiveWrapper({
         rotation: Number(currentConfig.rotation) || 0
       };
       
-      console.log('📤 Enviando configuração:', configData);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('📤 Enviando configuração:', configData);
+      }
 
       let saveResponse;
       
       if (existingDocumentId) {
         // Atualiza usando documentId (Strapi v5)
-        console.log(`🔄 Atualizando configuração existente documentId ${existingDocumentId}`);
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`🔄 Atualizando configuração existente documentId ${existingDocumentId}`);
+        }
         saveResponse = await fetch(`${baseURL}/api/component-layouts/${existingDocumentId}`, {
           method: 'PUT',
           headers: { 
@@ -287,21 +254,25 @@ export default function ResponsiveWrapper({
     }
   }, [componentId, breakpoint, currentConfig, configs]);
 
+  // Sistema de seleção individual de componentes
   useEffect(() => {
-    const handleConfigChange = (e: Event) => {
+    const handleComponentSelect = (e: Event) => {
       const customEvent = e as CustomEvent;
-      if (customEvent.detail.componentId === componentId) {
-        const updated = { ...configs, [breakpoint]: customEvent.detail.config };
-        setConfigs(updated);
-      }
+      setSelectedComponent(customEvent.detail.componentId);
     };
 
-    window.addEventListener('component-config-changed', handleConfigChange);
+    const handleDeselectAll = () => {
+      setSelectedComponent(null);
+    };
+
+    window.addEventListener('select-component', handleComponentSelect);
+    window.addEventListener('deselect-all-components', handleDeselectAll);
     
     return () => {
-      window.removeEventListener('component-config-changed', handleConfigChange);
+      window.removeEventListener('select-component', handleComponentSelect);
+      window.removeEventListener('deselect-all-components', handleDeselectAll);
     };
-  }, [componentId, breakpoint, configs]);
+  }, []);
 
   useEffect(() => {
     if (!editMode) return;
@@ -311,7 +282,7 @@ export default function ResponsiveWrapper({
 
       const step = e.shiftKey ? 10 : 1;
       const resizeStep = e.shiftKey ? 20 : 5;
-      let newConfig = { ...currentConfig };
+      const newConfig = { ...currentConfig };
 
       if (!e.ctrlKey && !e.altKey) {
         switch(e.key) {
@@ -386,6 +357,12 @@ export default function ResponsiveWrapper({
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!editMode) return;
+    
+    // Seleciona este componente
+    window.dispatchEvent(new CustomEvent('select-component', {
+      detail: { componentId }
+    }));
+    
     setIsDragging(true);
     setDragStart({
       x: e.clientX - currentConfig.x,
@@ -395,20 +372,29 @@ export default function ResponsiveWrapper({
   };
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isDragging || !editMode) return;
+    if (!isDragging || !editMode || !isSelected) return;
 
     const newX = e.clientX - dragStart.x;
     const newY = e.clientY - dragStart.y;
 
-    saveConfig({ ...currentConfig, x: newX, y: newY });
-  }, [isDragging, dragStart, currentConfig, saveConfig, editMode]);
+    // Obter dimensões da viewport para limitação inteligente
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const margin = 20; // Margem mínima das bordas
+
+    // Limitar movimento para não sair da tela
+    const limitedX = Math.max(margin, Math.min(newX, viewportWidth - currentConfig.width - margin));
+    const limitedY = Math.max(margin, Math.min(newY, viewportHeight - currentConfig.height - margin));
+
+    saveConfig({ ...currentConfig, x: limitedX, y: limitedY });
+  }, [isDragging, dragStart, currentConfig, saveConfig, editMode, isSelected]);
 
   const handleMouseUp = () => {
     setIsDragging(false);
   };
 
   const handleResize = (direction: string, e: React.MouseEvent) => {
-    if (!editMode) return;
+    if (!editMode || !isSelected) return;
     e.stopPropagation();
     e.preventDefault();
 
@@ -428,19 +414,46 @@ export default function ResponsiveWrapper({
       let newX = startPosX;
       let newY = startPosY;
 
+      // Obter dimensões da viewport para limitação inteligente
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const margin = 20; // Margem mínima das bordas
+
       if (direction.includes('right')) {
-        newWidth = Math.max(50, startWidth + deltaX);
+        const calculatedWidth = Math.max(50, startWidth + deltaX);
+        // Limitar para não sair da tela pela direita
+        const maxWidth = viewportWidth - startPosX - margin;
+        newWidth = Math.min(calculatedWidth, maxWidth);
       }
       if (direction.includes('bottom')) {
-        newHeight = Math.max(30, startHeight + deltaY);
+        const calculatedHeight = Math.max(30, startHeight + deltaY);
+        // Limitar para não sair da tela por baixo
+        const maxHeight = viewportHeight - startPosY - margin;
+        newHeight = Math.min(calculatedHeight, maxHeight);
       }
       if (direction.includes('left')) {
-        newWidth = Math.max(50, startWidth - deltaX);
-        newX = startPosX + (startWidth - newWidth);
+        const calculatedWidth = Math.max(50, startWidth - deltaX);
+        const proposedX = startPosX + (startWidth - calculatedWidth);
+        // Não permitir que saia pela esquerda
+        if (proposedX >= margin) {
+          newWidth = calculatedWidth;
+          newX = proposedX;
+        } else {
+          newX = margin;
+          newWidth = startPosX + startWidth - margin;
+        }
       }
       if (direction.includes('top')) {
-        newHeight = Math.max(30, startHeight - deltaY);
-        newY = startPosY + (startHeight - newHeight);
+        const calculatedHeight = Math.max(30, startHeight - deltaY);
+        const proposedY = startPosY + (startHeight - calculatedHeight);
+        // Não permitir que saia por cima
+        if (proposedY >= margin) {
+          newHeight = calculatedHeight;
+          newY = proposedY;
+        } else {
+          newY = margin;
+          newHeight = startPosY + startHeight - margin;
+        }
       }
 
       saveConfig({
@@ -519,8 +532,8 @@ export default function ResponsiveWrapper({
         ref={elementRef}
         tabIndex={editMode ? 0 : -1}
         className={`absolute transition-none outline-none ${
-          editMode ? 'cursor-move' : ''
-        }`}
+          editMode ? 'cursor-pointer' : ''
+        } ${shouldShowControls ? 'cursor-move' : ''}`}
         style={{
           left: currentConfig.x,
           top: currentConfig.y,
@@ -529,9 +542,9 @@ export default function ResponsiveWrapper({
           transform: `rotate(${currentConfig.rotation}deg)`,
           transformOrigin: 'top left',
           zIndex: currentConfig.zIndex,
-          opacity: isLoadingFromStrapi ? 0.7 : currentConfig.opacity,
-          transition: 'opacity 0.3s ease-in-out',
-          ...(editMode && {
+          opacity: currentConfig.opacity, // SEMPRE opacity normal - sem loading visual
+          transition: 'none', // SEM transições para evitar flickering
+          ...(shouldShowControls && {
             boxShadow: '0 0 0 2px #3b82f6',
             outline: '2px solid #3b82f6',
             outlineOffset: '2px'
@@ -539,21 +552,11 @@ export default function ResponsiveWrapper({
         }}
         onMouseDown={handleMouseDown}
       >
-        {isLoadingFromStrapi && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/10 backdrop-blur-[1px] z-10 pointer-events-none">
-            <div className="flex items-center gap-2 text-sm text-gray-600 bg-white/70 px-3 py-1 rounded-full shadow-sm">
-              <svg className="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <span>Carregando {componentId}...</span>
-            </div>
-          </div>
-        )}
+        {/* REMOVIDO: Loading visual que causava flickering */}
         
         {renderChildren()}
 
-        {editMode && (
+        {shouldShowControls && (
           <>
             <div
               className="absolute right-[-4px] top-0 w-2 h-full bg-blue-500 cursor-e-resize opacity-50 hover:opacity-100"
@@ -583,6 +586,14 @@ export default function ResponsiveWrapper({
               </button>
             </div>
           </>
+        )}
+        
+        {/* Indicador visual quando em modo de edição mas não selecionado */}
+        {editMode && !isSelected && (
+          <div 
+            className="absolute inset-0 border border-dashed border-gray-300 opacity-30 pointer-events-none"
+            style={{ borderRadius: '4px' }}
+          />
         )}
       </div>
         </>

@@ -1,0 +1,60 @@
+{
+  "plc_config": {
+    "ip": "192.168.0.33",
+    "rack": 0,
+    "slot": 1,
+    "db_number": 19
+  },
+  "tags": {
+    "nivel": {
+      "type": "real",
+      "offset": 0,
+      "description": "Nível da água (Real)"
+    },
+    "porta_jusante": {
+      "type": "int",
+      "offset": 4,
+      "description": "Porta Jusante (Inteiro)"
+    },
+    "semaforo_verde_0": {
+      "type": "bool",
+      "offset": 6.0,
+      "description": "Semáforo 0 - LED Verde"
+    },
+    "semaforo_vermelho_0": {
+      "type": "bool",
+      "offset": 6.1,
+      "description": "Semáforo 0 - LED Vermelho"
+    },
+    "semaforo_verde_1": {
+      "type": "bool",
+      "offset": 6.2,
+      "description": "Semáforo 1 - LED Verde"
+    },
+    "semaforo_vermelho_1": {
+      "type": "bool",
+      "offset": 6.3,
+      "description": "Semáforo 1 - LED Vermelho"
+    },
+    "semaforo_verde_2": {
+      "type": "bool",
+      "offset": 6.4,
+      "description": "Semáforo 2 - LED Verde"
+    },
+    "semaforo_vermelho_2": {
+      "type": "bool",
+      "offset": 6.5,
+      "description": "Semáforo 2 - LED Vermelho"
+    },
+    "semaforo_verde_3": {
+      "type": "bool",
+      "offset": 6.6,
+      "description": "Semáforo 3 - LED Verde"
+    },
+    "semaforo_vermelho_3": {
+      "type": "bool",
+      "offset": 6.7,
+      "description": "Semáforo 3 - LED Vermelho"
+    }
+  }
+}

@@ -19,7 +19,7 @@ export default function ModernHeader({
     }
   }
 }: ModernHeaderProps) {
-  const [notificationCount, setNotificationCount] = useState(3);
+  const [notificationCount] = useState(3); // ✅ Removido setNotificationCount não utilizado
 
   return (
     <header className="h-16 bg-[#131827] border-b border-slate-700 px-4 md:px-6 flex items-center justify-between shadow-lg">

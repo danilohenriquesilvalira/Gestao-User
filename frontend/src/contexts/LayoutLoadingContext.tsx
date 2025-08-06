@@ -27,8 +27,11 @@ export function LayoutLoadingProvider({ children }: { children: React.ReactNode 
   }, []);
   
   const registerComponent = useCallback((componentId: string) => {
-    console.log(`📝 Registrando componente: ${componentId}`);
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`📝 Registrando componente: ${componentId}`);
+    }
     setRegisteredComponents(prev => {
+      if (prev.has(componentId)) return prev; // ✅ EVITA LOOP - só adiciona se não existir
       const newSet = new Set(prev);
       newSet.add(componentId);
       return newSet;
@@ -36,8 +39,11 @@ export function LayoutLoadingProvider({ children }: { children: React.ReactNode 
   }, []);
 
   const setComponentLoaded = useCallback((componentId: string) => {
-    console.log(`✅ Componente carregado: ${componentId}`);
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`✅ Componente carregado: ${componentId}`);
+    }
     setLoadedComponents(prev => {
+      if (prev.has(componentId)) return prev; // ✅ EVITA LOOP - só adiciona se não existir
       const newSet = new Set(prev);
       newSet.add(componentId);
       return newSet;

@@ -16,17 +16,14 @@ interface NivelProps {
 
 export default function Nivel({
   nivel = 50,
-  scale = 1,  
   editMode = false,
   websocketValue = null, // Valor vindo do WebSocket
   // Props injetadas pelo ResponsiveWrapper para dimensionamento
-  width,
-  height,
   componentWidth,
   componentHeight
 }: NivelProps) {
   const [nivelAtual, setNivelAtual] = useState(nivel);
-  const [isManualControl, setIsManualControl] = useState(false);
+  const [isManualControl] = useState(false); // ✅ Removido setIsManualControl não usado
 
   // Atualiza o nível quando recebe dados do WebSocket
   useEffect(() => {

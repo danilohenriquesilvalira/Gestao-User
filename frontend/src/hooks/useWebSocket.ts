@@ -1,130 +1,239 @@
 'use client';
-
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface UseWebSocketReturn {
   nivelValue: number | null;
   motorValue: number | null;
+  semaforos: Record<string, boolean>;
   isConnected: boolean;
   error: string | null;
   lastMessage: string | null;
 }
 
+// ✅ WEBSOCKET SINGLETON GLOBAL - Evita múltiplas conexões
+let globalWebSocket: WebSocket | null = null;
+let globalListeners: Set<(data: any) => void> = new Set();
+let reconnectTimeout: NodeJS.Timeout | null = null;
+let isConnecting = false;
+let reconnectAttempts = 0;
+
+// ✅ CACHE GLOBAL DOS ÚLTIMOS DADOS RECEBIDOS
+let lastReceivedData: any = null;
+
+function connectGlobalWebSocket(url: string) {
+  if (globalWebSocket?.readyState === WebSocket.OPEN || isConnecting) {
+    console.log('🔄 WebSocket já conectado, reutilizando...');
+    return;
+  }
+
+  if (globalWebSocket) {
+    globalWebSocket.close();
+    globalWebSocket = null;
+  }
+
+  isConnecting = true;
+  console.log(`🔌 Conectando WebSocket GLOBAL: ${url}`);
+
+  try {
+    globalWebSocket = new WebSocket(url);
+
+    globalWebSocket.onopen = () => {
+      console.log('✅ WebSocket GLOBAL conectado');
+      isConnecting = false;
+      reconnectAttempts = 0;
+      notifyGlobalListeners({ type: 'connected', connected: true });
+      
+      // ✅ ENVIA DADOS EM CACHE PARA NOVOS LISTENERS (se existirem)
+      if (lastReceivedData) {
+        console.log('📤 Enviando dados em cache para novos listeners');
+        notifyGlobalListeners({ type: 'data', ...lastReceivedData });
+      }
+    };
+
+    globalWebSocket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        
+        // ✅ SALVA DADOS NO CACHE GLOBAL
+        if (!data.ping && data.semaforos) {
+          lastReceivedData = data;
+          console.log('💾 Dados salvos no cache:', data);
+        }
+        
+        notifyGlobalListeners({ type: 'data', ...data });
+      } catch (err) {
+        console.error('❌ Erro ao processar mensagem:', err);
+      }
+    };
+
+    globalWebSocket.onclose = (event) => {
+      console.log(`🔒 WebSocket fechado: código ${event.code}, razão: ${event.reason}`);
+      isConnecting = false;
+      notifyGlobalListeners({ type: 'disconnected', connected: false });
+      
+      // Só reconecta se ainda houver listeners E não foi fechamento intencional
+      if (globalListeners.size > 0 && event.code !== 1000) {
+        const delay = Math.min(2000 * Math.pow(1.5, reconnectAttempts), 10000);
+        reconnectAttempts++;
+        console.log(`🔄 Reconectando em ${delay}ms (tentativa ${reconnectAttempts})`);
+        
+        reconnectTimeout = setTimeout(() => {
+          connectGlobalWebSocket(url);
+        }, delay);
+      }
+    };
+
+    globalWebSocket.onerror = (error) => {
+      console.error('❌ Erro no WebSocket:', error);
+      isConnecting = false;
+      notifyGlobalListeners({ type: 'error', error: 'WebSocket desconectado' });
+    };
+
+  } catch (err) {
+    isConnecting = false;
+    console.error('❌ Erro ao criar WebSocket:', err);
+    notifyGlobalListeners({ type: 'error', error: 'Erro ao conectar WebSocket' });
+  }
+}
+
+function notifyGlobalListeners(data: any) {
+  globalListeners.forEach(listener => {
+    try {
+      listener(data);
+    } catch (err) {
+      console.error('❌ Erro no listener:', err);
+    }
+  });
+}
+
+function addGlobalListener(callback: (data: any) => void) {
+  globalListeners.add(callback);
+  console.log(`👂 Listener adicionado. Total: ${globalListeners.size}`);
+  
+  // ✅ ENVIA DADOS EM CACHE IMEDIATAMENTE PARA NOVOS LISTENERS
+  if (lastReceivedData) {
+    console.log('📤 Enviando dados em cache para novo listener');
+    setTimeout(() => {
+      callback({ type: 'data', ...lastReceivedData });
+    }, 100); // Pequeno delay para garantir que o component está montado
+  }
+}
+
+function removeGlobalListener(callback: (data: any) => void) {
+  globalListeners.delete(callback);
+  console.log(`❌ Listener removido. Total: ${globalListeners.size}`);
+  
+  // Se não há mais listeners, fecha conexão após delay
+  if (globalListeners.size === 0) {
+    setTimeout(() => {
+      if (globalListeners.size === 0) {
+        console.log('🔌 Fechando WebSocket - sem listeners');
+        if (reconnectTimeout) {
+          clearTimeout(reconnectTimeout);
+          reconnectTimeout = null;
+        }
+        if (globalWebSocket) {
+          globalWebSocket.close(1000, 'No more listeners');
+          globalWebSocket = null;
+        }
+        // ✅ MANTÉM CACHE MESMO APÓS DESCONEXÃO
+        // lastReceivedData permanece para próximas conexões
+      }
+    }, 1000);
+  }
+}
+
 export function useWebSocket(url: string): UseWebSocketReturn {
   const [nivelValue, setNivelValue] = useState<number | null>(null);
   const [motorValue, setMotorValue] = useState<number | null>(null);
+  const [semaforos, setSemaforos] = useState<Record<string, boolean>>({});
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastMessage, setLastMessage] = useState<string | null>(null);
-  const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const reconnectAttempts = useRef(0);
+  
+  const handlerRef = useRef<(data: any) => void | null>(null);
 
-  const connect = () => {
-    try {
-      console.log(`🔌 WEBSOCKET: Conectando ao ${url}`);
-      const ws = new WebSocket(url);
-      wsRef.current = ws;
-
-      ws.onopen = () => {
-        console.log('✅ WEBSOCKET: Conectado com sucesso');
-        setIsConnected(true);
-        setError(null);
-        reconnectAttempts.current = 0;
-      };
-
-      ws.onmessage = (event) => {
-        try {
-          const message = event.data;
-          console.log('📨 WEBSOCKET RAW MESSAGE:', message);
-          setLastMessage(message);
+  const handleMessage = useCallback((data: any) => {
+    console.log('📨 Mensagem recebida no hook:', data.type, data);
+    
+    if (data.type === 'connected') {
+      setIsConnected(true);
+      setError(null);
+      console.log('🟢 Hook: WebSocket conectado');
+    } else if (data.type === 'disconnected') {
+      setIsConnected(false);
+      console.log('🔴 Hook: WebSocket desconectado');
+    } else if (data.type === 'error') {
+      setError(data.error);
+      setIsConnected(false);
+      console.log('❌ Hook: Erro WebSocket');
+    } else if (data.type === 'data') {
+      // Filtra ping messages
+      if (data.ping) return;
+      
+      console.log('📊 Processando dados do PLC no hook:', data);
+      
+      // Processa dados do PLC
+      if (data.nivelValue !== undefined) {
+        console.log(`💧 Atualizando nível: ${data.nivelValue}`);
+        setNivelValue(data.nivelValue);
+      }
+      
+      if (data.motorValue !== undefined) {
+        console.log(`⚙️ Atualizando motor: ${data.motorValue}`);
+        setMotorValue(data.motorValue);
+      }
+      
+      // ✅ PROCESSA SEMÁFOROS COM LOG DETALHADO
+      if (data.semaforos) {
+        console.log('🚦 Processando semáforos:', data.semaforos);
+        setSemaforos(prevSemaforos => {
+          const hasChanges = Object.keys(data.semaforos).some(
+            key => prevSemaforos[key] !== data.semaforos[key]
+          );
           
-          // 🔍 REGEX DEBUG - Processa o formato: "Nivel:75,Motor:1"
-          const nivelMatch = message.match(/Nivel:(\d+)/);
-          const motorMatch = message.match(/Motor:(\d+)/);
-          
-          console.log('🔍 REGEX RESULTS:', {
-            nivelMatch,
-            motorMatch,
-            message
-          });
-          
-          if (nivelMatch) {
-            const value = parseInt(nivelMatch[1]);
-            const normalizedValue = Math.max(0, Math.min(100, value));
-            setNivelValue(normalizedValue);
-            console.log(`📊 NIVEL ATUALIZADO: ${normalizedValue}%`);
-          } else {
-            console.warn('⚠️ NIVEL não encontrado na mensagem');
+          if (hasChanges) {
+            console.log('🚦 SEMÁFOROS ATUALIZADOS NO HOOK:', data.semaforos);
+            return { ...prevSemaforos, ...data.semaforos };
           }
-          
-          if (motorMatch) {
-            const value = parseInt(motorMatch[1]);
-            const normalizedValue = Math.max(0, Math.min(2, value));
-            setMotorValue(normalizedValue);
-            console.log(`⚙️ MOTOR ATUALIZADO: ${normalizedValue} (${value === 0 ? 'INATIVO' : value === 1 ? 'OPERANDO' : 'FALHA'})`);
-          } else {
-            console.warn('⚠️ MOTOR não encontrado na mensagem');
-          }
-          
-          // 🔄 Fallback para formato antigo
-          if (!nivelMatch && !motorMatch) {
-            const oldMatch = message.match(/Valor do PLC: (\d+)/);
-            if (oldMatch) {
-              const value = parseInt(oldMatch[1]);
-              const normalizedValue = Math.max(0, Math.min(100, value));
-              setNivelValue(normalizedValue);
-              console.log(`📊 NIVEL (formato antigo): ${normalizedValue}%`);
-            } else {
-              console.error('❌ FORMATO DE MENSAGEM NÃO RECONHECIDO:', message);
-            }
-          }
-          
-        } catch (err) {
-          console.error('❌ ERRO ao processar mensagem:', err);
-          setError('Erro ao processar dados');
-        }
-      };
-
-      ws.onclose = (event) => {
-        console.log(`🔌 WEBSOCKET DESCONECTADO. Código: ${event.code}`);
-        setIsConnected(false);
-        
-        const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 30000);
-        reconnectAttempts.current++;
-        
-        console.log(`🔄 RECONECTANDO em ${delay}ms (tentativa ${reconnectAttempts.current})`);
-        
-        reconnectTimeoutRef.current = setTimeout(() => {
-          connect();
-        }, delay);
-      };
-
-      ws.onerror = (error) => {
-        console.error('❌ ERRO WEBSOCKET:', error);
-        setError('Erro de conexão WebSocket');
-        setIsConnected(false);
-      };
-
-    } catch (err) {
-      console.error('❌ ERRO ao criar WebSocket:', err);
-      setError('Erro ao conectar WebSocket');
+          return prevSemaforos;
+        });
+      }
+      
+      setLastMessage(JSON.stringify(data));
     }
-  };
+  }, []);
 
   useEffect(() => {
-    connect();
+    console.log('🎯 useWebSocket montado');
+    handlerRef.current = handleMessage;
+    addGlobalListener(handleMessage);
+    connectGlobalWebSocket(url);
 
     return () => {
-      console.log('🧹 LIMPANDO WebSocket...');
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-      }
-      if (wsRef.current) {
-        wsRef.current.close();
+      console.log('🔥 useWebSocket desmontado');
+      if (handlerRef.current) {
+        removeGlobalListener(handlerRef.current);
       }
     };
-  }, [url]);
+  }, [url, handleMessage]);
 
-  return { nivelValue, motorValue, isConnected, error, lastMessage };
+  // ✅ DEBUG: Log dos valores atuais
+  useEffect(() => {
+    console.log('🎯 Estado atual do hook:', {
+      isConnected,
+      nivelValue,
+      motorValue,
+      semaforos: Object.keys(semaforos).length > 0 ? semaforos : 'vazio'
+    });
+  }, [isConnected, nivelValue, motorValue, semaforos]);
+
+  return {
+    nivelValue,
+    motorValue,
+    semaforos,
+    isConnected,
+    error,
+    lastMessage
+  };
 }

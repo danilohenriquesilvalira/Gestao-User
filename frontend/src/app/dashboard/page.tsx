@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react';
 import ModernSidebar from '@/components/layout/ModernSidebar';
 import ModernHeader from '@/components/layout/ModernHeader';
-import ResponsiveWrapper from '@/components/core/ResponsiveWrapper';
 import GlobalAdvancedControls from '@/components/GlobalAdvancedControls';
 import Nivel from '@/components/industrial/Nivel';
-import Motor from '@/components/industrial/Motor';
 import { useWebSocket } from '@/hooks/useWebSocket';
+import Caldeira from '@/components/Eclusa/Caldeira';
+import Parede from '@/components/Eclusa/Parede';
+import PortaJusante from '@/components/Eclusa/PortaJusante';
+import Semaforo from '@/components/Eclusa/Semaforo';
 import { LayoutLoadingProvider, useLayoutLoading } from '@/contexts/LayoutLoadingContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import NotificationContainer from '@/components/ui/NotificationContainer';
@@ -188,90 +190,31 @@ function DashboardContent() {
 
           <ModernSidebar />
 
-          <div className="h-[calc(100vh-64px)] overflow-auto pb-20 md:pb-0">
-          </div>
-
-          <Nivel
-            nivel={75}
-            editMode={editMode}
-            websocketValue={nivelValue}
-          />
-
-          <Motor
-            status={1}
-            editMode={editMode}
-            websocketValue={motorValue}
-          />
-
-          <ResponsiveWrapper
-        componentId="eclusa-caldeira"
-        editMode={editMode}
-        defaultConfig={{
-          xs: { x: 0, y: 300, width: 300, height: 200, scale: 0.3, zIndex: 1, opacity: 1, rotation: 0 },
-          sm: { x: 0, y: 350, width: 400, height: 250, scale: 0.4, zIndex: 1, opacity: 1, rotation: 0 },
-          md: { x: 74, y: 400, width: 500, height: 300, scale: 0.5, zIndex: 1, opacity: 1, rotation: 0 },
-          lg: { x: 74, y: 200, width: 800, height: 400, scale: 0.6, zIndex: 1, opacity: 1, rotation: 0 },
-          xl: { x: 74, y: 150, width: 1000, height: 450, scale: 0.7, zIndex: 1, opacity: 1, rotation: 0 },
-          '2xl': { x: 74, y: 100, width: 1100, height: 480, scale: 0.8, zIndex: 1, opacity: 1, rotation: 0 },
-          '3xl': { x: 74, y: 50, width: 1200, height: 487, scale: 0.9, zIndex: 1, opacity: 1, rotation: 0 },
-          '4xl': { x: 74, y: 0, width: 1204, height: 487, scale: 1.0, zIndex: 1, opacity: 1, rotation: 0 },
-        }}
-      >
-        <div className="relative w-full h-full">
-          <svg
-            className="absolute inset-0 w-full h-full"
-            viewBox="0 0 1204 487"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            preserveAspectRatio="xMidYMid meet"
+          {/* ÁREA PRINCIPAL */}
+          <div 
+            className={`h-[calc(100vh-64px)] overflow-auto pb-20 md:pb-0 ${
+              editMode ? 'bg-blue-50/30' : ''
+            }`}
           >
-            <rect
-              x="0"
-              y="0"
-              width="1204"
-              height="120"
-              fill="#4AE800"
-              stroke="#CBCBCB"
-              strokeWidth="1"
-              rx="20"
-            />
-            <rect
-              x="0"
-              y="15"
-              width="1204"
-              height="472"
-              fill="white"
-              stroke="#CBCBCB"
-              strokeWidth="1"
-              rx="20"
-            />
-          </svg>
-
-          <div className="absolute inset-0 flex items-end justify-center pb-4">
-            <img
-              src="/Eclusa/Parede_Eclusa.svg"
-              alt="Parede da Eclusa"
-              className="absolute max-w-full h-auto object-contain"
-              style={{
-                bottom: '20px',
-                left: '50%',
-                transform: 'translateX(-50%)'
-              }}
+            {/* COMPONENTES ESTÁTICOS ORIGINAIS */}
+            <Nivel
+              nivel={75}
+              editMode={editMode}
+              websocketValue={nivelValue}
             />
 
-            <img
-              src="/Eclusa/Caldeira_Eclusa.svg"
-              alt="Caldeira da Eclusa"
-              className="absolute max-w-full h-auto object-contain z-10"
-              style={{
-                bottom: '60px',
-                left: '50%',
-                transform: 'translateX(-50%)'
-              }}
-            />
+            {/* ✅ COMPONENTES ECLUSA INDEPENDENTES - SEM CARD */}
+            <Caldeira editMode={editMode} />
+            <Parede editMode={editMode} />
+            <PortaJusante editMode={editMode} />
+            <Semaforo editMode={editMode} />
+            
+            {/* ✅ SEMÁFOROS CORRIGIDOS - APENAS OS QUE EXISTEM NO GO BACKEND */}
+            <Semaforo editMode={editMode} componentId="semaforo-1" />
+            <Semaforo editMode={editMode} componentId="semaforo-2" />
+            <Semaforo editMode={editMode} componentId="semaforo-3" />
           </div>
-        </div>
-      </ResponsiveWrapper>
+
         </>
       )}
     </div>

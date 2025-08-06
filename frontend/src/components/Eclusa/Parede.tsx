@@ -1,0 +1,42 @@
+// components/Eclusa/Parede.tsx - COMPONENTE INDEPENDENTE PAREDE
+'use client';
+import React from 'react';
+import Image from 'next/image';
+import ResponsiveWrapper from '@/components/ResponsiveWrapper';
+
+interface ParedeProps {
+  editMode?: boolean;
+}
+
+export default function Parede({
+  editMode = false
+}: ParedeProps) {
+  return (
+    <ResponsiveWrapper 
+      componentId="parede-eclusa"
+      editMode={editMode}
+      defaultConfig={{
+        xs: { x: 20, y: 150, width: 120, height: 80, scale: 1, zIndex: 5, opacity: 1, rotation: 0 },
+        sm: { x: 50, y: 200, width: 140, height: 95, scale: 1, zIndex: 5, opacity: 1, rotation: 0 },
+        md: { x: 100, y: 250, width: 160, height: 110, scale: 1, zIndex: 5, opacity: 1, rotation: 0 },
+        lg: { x: 200, y: 300, width: 180, height: 125, scale: 1, zIndex: 5, opacity: 1, rotation: 0 },
+        xl: { x: 300, y: 350, width: 200, height: 140, scale: 1, zIndex: 5, opacity: 1, rotation: 0 },
+        '2xl': { x: 400, y: 400, width: 220, height: 155, scale: 1, zIndex: 5, opacity: 1, rotation: 0 },
+        '3xl': { x: 500, y: 450, width: 240, height: 170, scale: 1, zIndex: 5, opacity: 1, rotation: 0 },
+        '4xl': { x: 600, y: 500, width: 260, height: 185, scale: 1, zIndex: 5, opacity: 1, rotation: 0 }
+      }}
+    >
+      <div 
+        className={`relative w-full h-full flex items-center justify-center ${editMode ? 'border-2 border-blue-500 bg-blue-50/20' : ''}`}
+      >
+        <Image
+          src="/Eclusa/Parede_Eclusa.svg"
+          alt="Parede da Eclusa"
+          fill
+          className="object-contain"
+          priority
+        />
+      </div>
+    </ResponsiveWrapper>
+  );
+}

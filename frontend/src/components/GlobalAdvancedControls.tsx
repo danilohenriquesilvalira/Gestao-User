@@ -32,6 +32,7 @@ export default function GlobalAdvancedControls({ editMode }: GlobalAdvancedContr
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isSaving, setIsSaving] = useState(false);
+  const [activeComponentForEdit, setActiveComponentForEdit] = useState<string>('');
   const dialogRef = useRef<HTMLDivElement>(null);
 
   // Posicionamento inicial inteligente
@@ -45,7 +46,7 @@ export default function GlobalAdvancedControls({ editMode }: GlobalAdvancedContr
     }
   }, [editMode]);
 
-  // Detecta componentes do localStorage
+  // 🔄 SISTEMA UNIFICADO DE DETECÇÃO DE COMPONENTES - SEM REDUNDÂNCIAS
   useEffect(() => {
     if (!editMode) return;
 
@@ -63,7 +64,9 @@ export default function GlobalAdvancedControls({ editMode }: GlobalAdvancedContr
               const configs = JSON.parse(configData);
               found.push({ id: componentId, configs });
             } catch (error) {
-              console.error(`Erro ao carregar ${componentId}:`, error);
+              if (process.env.NODE_ENV === 'development') {
+                console.error(`Erro ao carregar ${componentId}:`, error);
+              }
             }
           }
         }
@@ -76,18 +79,46 @@ export default function GlobalAdvancedControls({ editMode }: GlobalAdvancedContr
       if (found.length > 0 && !selectedComponent) {
         setSelectedComponent(found[0].id);
       }
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🔍 GlobalControls detectou ${found.length} componentes:`, found.map(c => c.id));
+      }
     };
 
+    // Detecta inicial
     detectComponents();
-    
-    // Listener para atualizações
-    const handleStorageUpdate = () => detectComponents();
-    window.addEventListener('storage', handleStorageUpdate);
-    
-    return () => window.removeEventListener('storage', handleStorageUpdate);
-  }, [editMode, selectedComponent]);
 
-  // Sistema de drag
+    // � LISTENER UNIFICADO PARA MUDANÇAS EM TEMPO REAL
+    const handleComponentChange = (e: Event) => {
+      const customEvent = e as CustomEvent; // eslint-disable-line @typescript-eslint/no-unused-vars
+      const isStorageEvent = e.type === 'storage';
+      
+      if (isStorageEvent) {
+        const storageEvent = e as StorageEvent;
+        if (storageEvent.key?.startsWith('component-')) {
+          if (process.env.NODE_ENV === 'development') {
+            console.log('🔄 Storage change detectado:', storageEvent.key);
+          }
+          detectComponents();
+        }
+      } else if (e.type === 'component-config-changed') {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🔄 Component config change detectado');
+        }
+        // Debounce para evitar múltiplas atualizações
+        setTimeout(detectComponents, 50);
+      }
+    };
+
+    // Registra listeners unificados
+    window.addEventListener('storage', handleComponentChange);
+    window.addEventListener('component-config-changed', handleComponentChange);
+
+    return () => {
+      window.removeEventListener('storage', handleComponentChange);
+      window.removeEventListener('component-config-changed', handleComponentChange);
+    };
+  }, [editMode, selectedComponent]);
   const handleMouseDown = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.closest('.drag-handle') && !target.closest('button') && !target.closest('select')) {
@@ -225,6 +256,57 @@ export default function GlobalAdvancedControls({ editMode }: GlobalAdvancedContr
     }
   };
 
+  // EXCLUSÃO DE COMPONENTE
+  const deleteComponent = (componentId: string) => {
+    if (!componentId) return;
+    
+    const confirmed = window.confirm(
+      `🗑️ Tem certeza que deseja EXCLUIR o componente "${componentId}"?\n\n` +
+      `Esta ação irá:\n` +
+      `• Remover todas as configurações do localStorage\n` +
+      `• Remover o componente da tela\n` +
+      `• Esta ação é IRREVERSÍVEL!\n\n` +
+      `Digite "EXCLUIR" para confirmar:`
+    );
+    
+    if (!confirmed) return;
+    
+    const doubleConfirm = window.prompt(
+      `⚠️ CONFIRMAÇÃO FINAL\n\nDigite "EXCLUIR" em maiúsculas para confirmar a exclusão do componente "${componentId}":`,
+      ""
+    );
+    
+    if (doubleConfirm !== "EXCLUIR") {
+      alert("❌ Exclusão cancelada. Você deve digitar exatamente 'EXCLUIR' para confirmar.");
+      return;
+    }
+    
+    try {
+      // Remove do localStorage
+      localStorage.removeItem(`component-${componentId}`);
+      
+      // Remove do estado local
+      setComponents(prev => prev.filter(c => c.id !== componentId));
+      
+      // Limpa seleção se era o selecionado
+      if (selectedComponent === componentId) {
+        const remainingComponents = components.filter(c => c.id !== componentId);
+        setSelectedComponent(remainingComponents.length > 0 ? remainingComponents[0].id : '');
+      }
+      
+      // Dispara evento para remover da tela
+      window.dispatchEvent(new CustomEvent('component-deleted', { 
+        detail: { componentId } 
+      }));
+      
+      alert(`🗑️ Componente "${componentId}" excluído com sucesso!`);
+      
+    } catch (error) {
+      console.error('❌ Erro ao excluir componente:', error);
+      alert(`❌ Erro ao excluir: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+    }
+  };
+
   // Dados do componente selecionado
   const selectedComponentData = components.find(c => c.id === selectedComponent);
   const currentConfig = selectedComponentData?.configs[breakpoint] || 
@@ -250,22 +332,25 @@ export default function GlobalAdvancedControls({ editMode }: GlobalAdvancedContr
       }}
       onMouseDown={handleMouseDown}
     >
-      {/* Header */}
-      <div className={`drag-handle bg-gray-50 border-b border-gray-200 p-3 rounded-t-lg flex items-center justify-between select-none ${
-        isDragging ? 'cursor-grabbing bg-gray-100' : 'cursor-grab hover:bg-gray-100'
+      {/* Header - MELHORADO */}
+      <div className={`drag-handle bg-gradient-to-r from-purple-50 to-blue-50 border-b border-gray-200 p-3 rounded-t-lg flex items-center justify-between select-none ${
+        isDragging ? 'cursor-grabbing bg-gradient-to-r from-purple-100 to-blue-100' : 'cursor-grab hover:from-purple-100 hover:to-blue-100'
       }`}>
-        <div className="flex items-center gap-2 pointer-events-none">
-          <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-          <span className="text-sm font-medium text-gray-700">Controles Globais</span>
-          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">{breakpoint}</span>
+        <div className="flex items-center gap-3 pointer-events-none">
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+          </div>
+          <span className="text-sm font-semibold text-gray-800">⚙️ Controles Globais</span>
+          <span className="text-xs text-purple-700 bg-purple-100 px-2 py-1 rounded-full font-medium">{breakpoint}</span>
         </div>
 
         <div className="flex items-center gap-2 pointer-events-auto">
           <button
             onClick={() => setIsMinimized(!isMinimized)}
-            className="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-200"
+            className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/60 transition-colors"
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
               {isMinimized ? (
                 <path d="M12 2l3.09 6.26L22 9l-6.91.74L12 22l-3.09-6.26L2 15l6.91-.74L12 2z"/>
               ) : (
@@ -280,19 +365,58 @@ export default function GlobalAdvancedControls({ editMode }: GlobalAdvancedContr
         <>
           {/* Seleção de Componente */}
           <div className="p-4 border-b border-gray-100 bg-gray-50">
-            <label className="text-sm font-medium text-gray-700 mb-2 block">Componente</label>
-            <select 
-              value={selectedComponent}
-              onChange={(e) => setSelectedComponent(e.target.value)}
-              className="w-full text-sm border border-gray-200 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
-            >
-              <option value="">Escolha um componente...</option>
-              {components.map(comp => (
-                <option key={comp.id} value={comp.id}>
-                  {comp.id.charAt(0).toUpperCase() + comp.id.slice(1)}
-                </option>
-              ))}
-            </select>
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Componente</label>
+                <select 
+                  value={selectedComponent}
+                  onChange={(e) => setSelectedComponent(e.target.value)}
+                  className="w-full text-sm border border-gray-200 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
+                >
+                  <option value="">Escolha um componente...</option>
+                  {components.map(comp => (
+                    <option key={comp.id} value={comp.id}>
+                      {comp.id.charAt(0).toUpperCase() + comp.id.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Controles de Seleção Visual */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Edição Visual</label>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      if (selectedComponent) {
+                        setActiveComponentForEdit(selectedComponent);
+                        window.dispatchEvent(new CustomEvent('select-component', {
+                          detail: { componentId: selectedComponent }
+                        }));
+                      }
+                    }}
+                    disabled={!selectedComponent}
+                    className="flex-1 px-3 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  >
+                    🎯 Selecionar
+                  </button>
+                  <button
+                    onClick={() => {
+                      setActiveComponentForEdit('');
+                      window.dispatchEvent(new CustomEvent('deselect-all-components'));
+                    }}
+                    className="flex-1 px-3 py-2 text-sm bg-gray-500 text-white rounded hover:bg-gray-600"
+                  >
+                    ✖️ Desselecionar
+                  </button>
+                </div>
+                {activeComponentForEdit && (
+                  <p className="text-xs text-blue-600 mt-1">
+                    🔷 Editando: <strong>{activeComponentForEdit}</strong>
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Botão de Salvamento */}
@@ -322,156 +446,141 @@ export default function GlobalAdvancedControls({ editMode }: GlobalAdvancedContr
           {selectedComponentData && (
             <div className="overflow-y-auto max-h-80 p-4 space-y-4">
               
-              {/* Posição */}
-              <div className="space-y-2">
+              {/* Posição - COM INPUTS PRECISOS */}
+              <div className="space-y-3">
                 <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   Posição
                 </h4>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">
-                      X: {Math.round(currentConfig.x || 0)}px
-                    </label>
+                    <label className="block text-xs text-gray-500 mb-1">X (pixels)</label>
                     <input
-                      type="range"
+                      type="number"
                       min="0"
                       max={window.innerWidth}
-                      value={currentConfig.x || 0}
-                      onChange={(e) => updateComponentConfig(selectedComponent, 'x', parseInt(e.target.value))}
-                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                      value={Math.round(currentConfig.x || 0)}
+                      onChange={(e) => updateComponentConfig(selectedComponent, 'x', parseInt(e.target.value) || 0)}
+                      className="w-full px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="0"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">
-                      Y: {Math.round(currentConfig.y || 0)}px
-                    </label>
+                    <label className="block text-xs text-gray-500 mb-1">Y (pixels)</label>
                     <input
-                      type="range"
+                      type="number"
                       min="0"
                       max={window.innerHeight}
-                      value={currentConfig.y || 0}
-                      onChange={(e) => updateComponentConfig(selectedComponent, 'y', parseInt(e.target.value))}
-                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                      value={Math.round(currentConfig.y || 0)}
+                      onChange={(e) => updateComponentConfig(selectedComponent, 'y', parseInt(e.target.value) || 0)}
+                      className="w-full px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="0"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Tamanho */}
-              <div className="space-y-2">
+              {/* Dimensões - COM INPUTS PRECISOS */}
+              <div className="space-y-3">
                 <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   Dimensões
                 </h4>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">
-                      Largura: {Math.round(currentConfig.width || 0)}px
-                    </label>
+                    <label className="block text-xs text-gray-500 mb-1">Largura (pixels)</label>
                     <input
-                      type="range"
-                      min="50"
-                      max="1500"
-                      value={currentConfig.width || 400}
-                      onChange={(e) => updateComponentConfig(selectedComponent, 'width', parseInt(e.target.value))}
-                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                      type="number"
+                      min="10"
+                      max="2000"
+                      value={Math.round(currentConfig.width || 0)}
+                      onChange={(e) => updateComponentConfig(selectedComponent, 'width', parseInt(e.target.value) || 10)}
+                      className="w-full px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                      placeholder="400"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">
-                      Altura: {Math.round(currentConfig.height || 0)}px
-                    </label>
+                    <label className="block text-xs text-gray-500 mb-1">Altura (pixels)</label>
                     <input
-                      type="range"
-                      min="30"
-                      max="800"
-                      value={currentConfig.height || 200}
-                      onChange={(e) => updateComponentConfig(selectedComponent, 'height', parseInt(e.target.value))}
-                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                      type="number"
+                      min="10"
+                      max="1500"
+                      value={Math.round(currentConfig.height || 0)}
+                      onChange={(e) => updateComponentConfig(selectedComponent, 'height', parseInt(e.target.value) || 10)}
+                      className="w-full px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                      placeholder="200"
                     />
                   </div>
                 </div>
               </div>
-
-              {/* Transformações */}
-              <div className="space-y-2">
+              {/* Transformações - COM INPUTS PRECISOS */}
+              <div className="space-y-3">
                 <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
                   Transformações
                 </h4>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">
-                      Escala: {(currentConfig.scale || 1).toFixed(1)}x
-                    </label>
+                    <label className="block text-xs text-gray-500 mb-1">Escala</label>
                     <input
-                      type="range"
+                      type="number"
                       min="0.1"
                       max="3"
                       step="0.1"
-                      value={currentConfig.scale || 1}
-                      onChange={(e) => updateComponentConfig(selectedComponent, 'scale', parseFloat(e.target.value))}
-                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                      value={Number((currentConfig.scale || 1).toFixed(1))}
+                      onChange={(e) => updateComponentConfig(selectedComponent, 'scale', parseFloat(e.target.value) || 1)}
+                      className="w-full px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      placeholder="1.0"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">
-                      Rotação: {Math.round(currentConfig.rotation || 0)}°
-                    </label>
+                    <label className="block text-xs text-gray-500 mb-1">Rotação (°)</label>
                     <input
-                      type="range"
-                      min="-180"
-                      max="180"
-                      value={currentConfig.rotation || 0}
-                      onChange={(e) => updateComponentConfig(selectedComponent, 'rotation', parseInt(e.target.value))}
-                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                      type="number"
+                      min="-360"
+                      max="360"
+                      step="15"
+                      value={Math.round(currentConfig.rotation || 0)}
+                      onChange={(e) => updateComponentConfig(selectedComponent, 'rotation', parseInt(e.target.value) || 0)}
+                      className="w-full px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Opacidade</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      value={Number((currentConfig.opacity || 1).toFixed(1))}
+                      onChange={(e) => updateComponentConfig(selectedComponent, 'opacity', parseFloat(e.target.value) || 1)}
+                      className="w-full px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      placeholder="1.0"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Camadas */}
-              <div className="space-y-2">
+              {/* Camadas - COM INPUT PRECISO */}
+              <div className="space-y-3">
                 <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                   Camadas
                 </h4>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">
-                      Opacidade: {Math.round((currentConfig.opacity || 1) * 100)}%
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.1"
-                      value={currentConfig.opacity || 1}
-                      onChange={(e) => updateComponentConfig(selectedComponent, 'opacity', parseFloat(e.target.value))}
-                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">
-                      Z-Index: {currentConfig.zIndex || 1}
-                    </label>
-                    <div className="flex gap-1">
-                      <input
-                        type="number"
-                        value={currentConfig.zIndex || 1}
-                        onChange={(e) => updateComponentConfig(selectedComponent, 'zIndex', parseInt(e.target.value) || 1)}
-                        className="flex-1 text-xs border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-purple-500"
-                        min="1"
-                        max="999"
-                      />
-                      <button 
-                        onClick={() => updateComponentConfig(selectedComponent, 'zIndex', (currentConfig.zIndex || 1) + 1)}
-                        className="w-6 h-6 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 flex items-center justify-center"
-                      >
-                        +
-                      </button>
-                    </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Z-Index (camada)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="999"
+                    value={Math.round(currentConfig.zIndex || 1)}
+                    onChange={(e) => updateComponentConfig(selectedComponent, 'zIndex', parseInt(e.target.value) || 1)}
+                    className="w-full px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="1"
+                  />
+                  <div className="text-xs text-gray-400 mt-1">
+                    Maior = frente, Menor = atrás
                   </div>
                 </div>
               </div>
@@ -490,7 +599,7 @@ export default function GlobalAdvancedControls({ editMode }: GlobalAdvancedContr
                     }}
                     className="px-2 py-1.5 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors text-xs"
                   >
-                    Centralizar
+                    🎯 Centralizar
                   </button>
                   <button 
                     onClick={() => {
@@ -500,9 +609,27 @@ export default function GlobalAdvancedControls({ editMode }: GlobalAdvancedContr
                     }}
                     className="px-2 py-1.5 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors text-xs"
                   >
-                    Reset
+                    🔄 Reset
                   </button>
                 </div>
+              </div>
+
+              {/* Zona de Perigo - Exclusão */}
+              <div className="pt-3 border-t border-red-200 bg-red-50 rounded p-3 -m-1">
+                <h4 className="text-sm font-medium text-red-700 mb-3 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  Zona de Perigo
+                </h4>
+                <button 
+                  onClick={() => deleteComponent(selectedComponent)}
+                  className="w-full px-2 py-1.5 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-xs flex items-center justify-center gap-2"
+                  disabled={!selectedComponent}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                  </svg>
+                  Excluir Componente
+                </button>
               </div>
             </div>
           )}

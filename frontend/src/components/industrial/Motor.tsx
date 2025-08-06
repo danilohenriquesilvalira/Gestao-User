@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import ResponsiveWrapper from '@/components/core/ResponsiveWrapper';
+import ResponsiveWrapper from '@/components/ResponsiveWrapper';
 
 interface MotorProps {
   // Status: 0 = inativo (cinza), 1 = operando (verde), 2 = falha (vermelho)
@@ -11,6 +11,9 @@ interface MotorProps {
   width?: number;
   height?: number;
   className?: string;
+  // Props injetadas pelo ResponsiveWrapper
+  componentWidth?: number;
+  componentHeight?: number;
 }
 
 const Motor: React.FC<MotorProps> = ({ 
@@ -19,7 +22,10 @@ const Motor: React.FC<MotorProps> = ({
   editMode = false,
   width = 82, 
   height = 40, 
-  className = '' 
+  className = '',
+  // Props injetadas pelo ResponsiveWrapper para dimensionamento real
+  componentWidth,
+  componentHeight
 }) => {
   
   // Usa o valor do WebSocket se disponível, senão usa o status prop
@@ -62,13 +68,17 @@ const Motor: React.FC<MotorProps> = ({
     >
       <div className="w-full h-full">
         <svg 
-          width={width} 
-          height={height} 
+          width={componentWidth || width} 
+          height={componentHeight || height} 
           viewBox="0 0 82 40" 
           fill="none" 
           xmlns="http://www.w3.org/2000/svg"
           className={`w-full h-full object-contain ${className}`}
-          style={{ transition: 'all 0.5s ease-in-out' }}
+          style={{ 
+            transition: 'all 0.5s ease-in-out',
+            transform: 'none', // Remove transformações fixas
+            transformOrigin: 'top left'
+          }}
         >
           <path d="M19.9999 9.45996H23.5334V26.3437H19.9999V9.45996Z" fill="url(#paint0_linear_1825_122)" stroke="#646567" strokeWidth="0.75" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
           

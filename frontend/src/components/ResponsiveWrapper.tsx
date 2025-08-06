@@ -1,4 +1,4 @@
-// ResponsiveWrapper - Componente wrapper responsivo para layout dinâmico
+// components/ResponsiveWrapper.tsx - VERSÃO COM SALVAMENTO MANUAL
 'use client';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
@@ -61,103 +61,101 @@ export default function ResponsiveWrapper({
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoadingFromStrapi, setIsLoadingFromStrapi] = useState(true);
 
-  // Carrega configurações - SISTEMA CORRIGIDO
+  // Carrega TODAS as configurações do PostgreSQL via Strapi (PRIORIDADE ABSOLUTA)
   useEffect(() => {
+    // Registra o componente no contexto global
     registerComponent(componentId);
     
-    async function loadConfig() {
+    async function loadAllConfigs() {
       if (typeof window !== 'undefined') {
         setIsLoadingFromStrapi(true);
         
         try {
-          // Primeiro tenta carregar do localStorage
-          const saved = localStorage.getItem(`component-${componentId}`);
-          let localConfigs = defaultConfigs;
+          const baseURL = (typeof window !== 'undefined' && window.location.origin.includes('localhost')) 
+            ? 'http://localhost:1337' 
+            : process?.env?.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+          console.log(`🔍 Carregando TODAS as configurações para ${componentId} do PostgreSQL...`);
           
-          if (saved) {
-            try {
-              localConfigs = JSON.parse(saved);
-              console.log(`📦 Carregado do localStorage para ${componentId}:`, localConfigs);
-            } catch (e) {
-              console.error('Erro ao carregar config do localStorage:', e);
-              localConfigs = defaultConfigs;
-            }
-          }
-          
-          // Depois tenta carregar configurações específicas do Strapi para TODOS os breakpoints
-          const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
-          console.log(`🔍 Buscando todas as configurações do Strapi para ${componentId}`);
-          
+          // Busca TODAS as configurações do componente de todos os breakpoints
           const response = await fetch(
             `${baseURL}/api/component-layouts?filters[componentId][$eq]=${componentId}`,
             { cache: 'no-store' }
           );
           
+          if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+          }
+          
           const data = await response.json();
+          console.log('📄 TODOS os dados do PostgreSQL:', data);
+          
+          // Converte dados do Strapi para formato interno
+          const loadedConfigs: Record<string, ResponsiveConfig> = { ...defaultConfigs };
           
           if (data && data.data && data.data.length > 0) {
-            const strapiConfigs = { ...localConfigs };
-            
-            // Aplica cada configuração encontrada no Strapi
             data.data.forEach((strapiConfig: any) => {
-              const bp = strapiConfig.breakpoint === 'xxl' ? '2xl' : 
-                        strapiConfig.breakpoint === 'xxxl' ? '3xl' : 
-                        strapiConfig.breakpoint === 'xxxxl' ? '4xl' : 
-                        strapiConfig.breakpoint;
+              // Converte breakpoints do Strapi de volta para formato interno
+              const internalBreakpoint = strapiConfig.breakpoint === 'xxl' ? '2xl' : 
+                                       strapiConfig.breakpoint === 'xxxl' ? '3xl' : 
+                                       strapiConfig.breakpoint === 'xxxxl' ? '4xl' : 
+                                       strapiConfig.breakpoint;
               
-              const validBreakpoints = ['xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl', '4xl'];
+              loadedConfigs[internalBreakpoint] = {
+                x: strapiConfig.x || 74,
+                y: strapiConfig.y || 70,
+                width: strapiConfig.width || 400,
+                height: strapiConfig.height || 200,
+                scale: strapiConfig.scale || 1,
+                zIndex: strapiConfig.zIndex || 1,
+                opacity: strapiConfig.opacity || 1,
+                rotation: strapiConfig.rotation || 0
+              };
               
-              if (bp && validBreakpoints.includes(bp)) {
-                (strapiConfigs as any)[bp] = {
-                  x: strapiConfig.x || 74,
-                  y: strapiConfig.y || 70,
-                  width: strapiConfig.width || 400,
-                  height: strapiConfig.height || 200,
-                  scale: strapiConfig.scale || 1,
-                  zIndex: strapiConfig.zIndex || 1,
-                  opacity: strapiConfig.opacity || 1,
-                  rotation: strapiConfig.rotation || 0
-                };
-              }
+              console.log(`⚙️ Configuração ${internalBreakpoint}:`, loadedConfigs[internalBreakpoint]);
             });
             
-            setConfigs(strapiConfigs);
-            localStorage.setItem(`component-${componentId}`, JSON.stringify(strapiConfigs));
-            console.log(`✅ Carregado do Strapi para ${componentId}:`, strapiConfigs);
+            console.log('✅ TODAS as configurações carregadas do PostgreSQL:', loadedConfigs);
           } else {
-            // Se não tem no Strapi, usa o localStorage
-            setConfigs(localConfigs);
-            console.log(`📂 Usando localStorage para ${componentId}:`, localConfigs);
+            console.log('ℹ️ Nenhuma configuração encontrada no PostgreSQL - usando padrões');
           }
-        } catch (error) {
-          console.error('Erro ao carregar config do Strapi:', error);
           
-          // Fallback para localStorage
+          setConfigs(loadedConfigs);
+          
+          // Atualiza localStorage APENAS como cache (FloatingEditor ainda precisa)
+          localStorage.setItem(`component-${componentId}`, JSON.stringify(loadedConfigs));
+          console.log('💾 Cache localStorage atualizado com dados do PostgreSQL');
+          
+          console.log(`🔍 DEBUG: Estado de configs após carregamento inicial:`, loadedConfigs);
+          console.log(`🔍 DEBUG: Configuração atual para breakpoint ${breakpoint}:`, loadedConfigs[breakpoint]);
+          
+        } catch (error) {
+          console.error('❌ Erro ao carregar do PostgreSQL:', error);
+          
+          // ÚLTIMO RECURSO: localStorage (não deveria acontecer em produção)
           const saved = localStorage.getItem(`component-${componentId}`);
           if (saved) {
             try {
-              const fallbackConfigs = JSON.parse(saved);
-              setConfigs(fallbackConfigs);
-              console.log(`🔄 Fallback para localStorage: ${componentId}`, fallbackConfigs);
+              setConfigs(JSON.parse(saved));
+              console.log('⚠️ Usando cache localStorage como último recurso');
             } catch (e) {
+              console.error('Erro ao carregar cache:', e);
               setConfigs(defaultConfigs);
-              console.log(`⚠️ Usando configuração padrão para ${componentId}`);
             }
           } else {
             setConfigs(defaultConfigs);
-            console.log(`🔧 Usando configuração padrão para ${componentId}`);
+            console.log('⚠️ Usando configurações padrão');
           }
         } finally {
           setIsLoadingFromStrapi(false);
           setIsLoaded(true);
-          console.log(`🎯 Componente ${componentId} carregado!`);
+          console.log(`✅ Componente ${componentId} totalmente carregado!`);
           setComponentLoaded(componentId);
         }
       }
     }
     
-    loadConfig();
-  }, [componentId]); // Remove breakpoint dependency para evitar recarregamentos desnecessários
+    loadAllConfigs();
+  }, [componentId]); // Remove breakpoint da dependência - carrega tudo de uma vez
 
   const currentConfig: ResponsiveConfig = configs[breakpoint] || configs.lg || {
     x: 74,
@@ -170,24 +168,29 @@ export default function ResponsiveWrapper({
     rotation: 0
   };
 
-  // Debug log para monitorar a configuração atual
+  // DEBUG: Log sempre que currentConfig mudar
   useEffect(() => {
-    console.log(`🎯 ${componentId} (${breakpoint}): Configuração atual:`, currentConfig);
-  }, [componentId, breakpoint, currentConfig]);
+    console.log(`🎯 DEBUG ${componentId}: currentConfig para ${breakpoint}:`, currentConfig);
+    console.log(`🎯 DEBUG ${componentId}: configs completos:`, configs);
+  }, [componentId, breakpoint, currentConfig, configs]);
 
   const saveConfig = useCallback((newConfig: ResponsiveConfig) => {
     const updated = { ...configs, [breakpoint]: newConfig };
     setConfigs(updated);
+    
+    // SEMPRE atualiza localStorage com TODAS as configurações para o FloatingEditor
     if (typeof window !== 'undefined') {
       localStorage.setItem(`component-${componentId}`, JSON.stringify(updated));
+      console.log(`💾 Configurações atualizadas no cache para ${componentId}:`, updated);
     }
+    
     onConfigChange?.(updated);
   }, [configs, breakpoint, componentId, onConfigChange]);
 
-  // Salvar configuração no Strapi
+  // SALVAR NO STRAPI - MANUAL
   const saveToStrapi = useCallback(async () => {
     if (!currentConfig) {
-      alert('Erro: Configuração atual não encontrada');
+      alert('❌ Erro: Configuração atual não encontrada');
       return;
     }
 
@@ -197,8 +200,13 @@ export default function ResponsiveWrapper({
                               breakpoint === '3xl' ? 'xxxl' : 
                               breakpoint === '4xl' ? 'xxxxl' : breakpoint;
 
-      const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+      const baseURL = (typeof window !== 'undefined' && window.location.origin.includes('localhost')) 
+        ? 'http://localhost:1337' 
+        : process?.env?.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+      console.log(`💾 Salvando layout de ${componentId} no breakpoint ${strapiBreakpoint}...`);
+      console.log('📋 Configuração atual a ser salva:', currentConfig);
       
+      // Busca se já existe
       const checkResponse = await fetch(
         `${baseURL}/api/component-layouts?filters[componentId][$eq]=${componentId}&filters[breakpoint][$eq]=${strapiBreakpoint}`
       );
@@ -208,7 +216,11 @@ export default function ResponsiveWrapper({
       }
       
       const checkData = await checkResponse.json();
+      console.log('📋 Verificando se já existe:', checkData);
+      
+      // Extrai o documentId e id com segurança para Strapi v5
       const existingEntry = checkData?.data && checkData.data.length > 0 ? checkData.data[0] : null;
+      const existingId = existingEntry?.id;
       const existingDocumentId = existingEntry?.documentId;
 
       const configData = {
@@ -223,10 +235,14 @@ export default function ResponsiveWrapper({
         opacity: Number(currentConfig.opacity) || 1,
         rotation: Number(currentConfig.rotation) || 0
       };
+      
+      console.log('📤 Enviando configuração:', configData);
 
       let saveResponse;
       
       if (existingDocumentId) {
+        // Atualiza usando documentId (Strapi v5)
+        console.log(`🔄 Atualizando configuração existente documentId ${existingDocumentId}`);
         saveResponse = await fetch(`${baseURL}/api/component-layouts/${existingDocumentId}`, {
           method: 'PUT',
           headers: { 
@@ -236,6 +252,8 @@ export default function ResponsiveWrapper({
           body: JSON.stringify({ data: configData })
         });
       } else {
+        // Cria
+        console.log('🆕 Criando nova configuração');
         saveResponse = await fetch(`${baseURL}/api/component-layouts`, {
           method: 'POST',
           headers: { 
@@ -251,40 +269,39 @@ export default function ResponsiveWrapper({
         throw new Error(`Erro HTTP ${saveResponse.status}: ${errorText}`);
       }
 
-      localStorage.setItem(`component-${componentId}`, JSON.stringify(configs));
-      alert(`Configuração ${existingDocumentId ? 'atualizada' : 'criada'} com sucesso!`);
+      const saveResult = await saveResponse.json();
+      console.log('✅ Resposta do salvamento:', saveResult);
+      
+      // Atualiza localStorage com todas as configurações atuais
+      const allConfigsUpdated = { ...configs, [breakpoint]: currentConfig };
+      localStorage.setItem(`component-${componentId}`, JSON.stringify(allConfigsUpdated));
+      console.log('💾 Cache localStorage atualizado após salvamento');
+      
+      alert(`✅ Configuração ${existingDocumentId ? 'atualizada' : 'criada'} com sucesso no PostgreSQL!`);
       
     } catch (error) {
-      console.error('Erro ao salvar no Strapi:', error);
-      alert(`Erro ao salvar: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+      console.error('❌ Erro ao salvar no Strapi:', error);
+      alert(`❌ Erro ao salvar no banco: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
     } finally {
       setIsSaving(false);
     }
   }, [componentId, breakpoint, currentConfig, configs]);
 
-  // Escuta mudanças do FloatingEditorDialog - Sistema melhorado
   useEffect(() => {
-    const handleConfigChange = (e: CustomEvent) => {
-      if (e.detail.componentId === componentId) {
-        console.log(`🔄 ResponsiveWrapper: Aplicando nova configuração para ${componentId}:`, e.detail.config);
-        
-        // Atualiza imediatamente as configurações
-        const updated = { ...configs, [breakpoint]: e.detail.config };
+    const handleConfigChange = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail.componentId === componentId) {
+        const updated = { ...configs, [breakpoint]: customEvent.detail.config };
         setConfigs(updated);
-        
-        // Também salva no localStorage para persistência
-        if (typeof window !== 'undefined') {
-          localStorage.setItem(`component-${componentId}`, JSON.stringify(updated));
-        }
-        
-        // Chama callback se fornecido
-        onConfigChange?.(updated);
       }
     };
 
-    window.addEventListener('component-config-changed', handleConfigChange as EventListener);
-    return () => window.removeEventListener('component-config-changed', handleConfigChange as EventListener);
-  }, [componentId, configs, breakpoint, onConfigChange]);
+    window.addEventListener('component-config-changed', handleConfigChange);
+    
+    return () => {
+      window.removeEventListener('component-config-changed', handleConfigChange);
+    };
+  }, [componentId, breakpoint, configs]);
 
   useEffect(() => {
     if (!editMode) return;
@@ -294,7 +311,7 @@ export default function ResponsiveWrapper({
 
       const step = e.shiftKey ? 10 : 1;
       const resizeStep = e.shiftKey ? 20 : 5;
-      const newConfig = { ...currentConfig };
+      let newConfig = { ...currentConfig };
 
       if (!e.ctrlKey && !e.altKey) {
         switch(e.key) {
@@ -461,23 +478,17 @@ export default function ResponsiveWrapper({
       return children;
     }
 
-    // Props para injetar no componente filho
-    const injectedProps: InjectedProps = {
-      width: currentConfig.width,
-      height: currentConfig.height,
-      componentWidth: currentConfig.width,
-      componentHeight: currentConfig.height
-    };
-
-    // Log para debug
-    console.log(`📐 ResponsiveWrapper: Injetando dimensões em ${componentId}:`, injectedProps);
-
     if (typeof children.type === 'string') {
       return children;
     }
 
     if (typeof children.type === 'function') {
-      return React.cloneElement(children, injectedProps);
+      return React.cloneElement(children, {
+        width: currentConfig.width,
+        height: currentConfig.height,
+        componentWidth: currentConfig.width,
+        componentHeight: currentConfig.height
+      } as InjectedProps);
     }
 
     return children;
@@ -506,7 +517,6 @@ export default function ResponsiveWrapper({
 
       <div
         ref={elementRef}
-        data-component-id={componentId}
         tabIndex={editMode ? 0 : -1}
         className={`absolute transition-none outline-none ${
           editMode ? 'cursor-move' : ''

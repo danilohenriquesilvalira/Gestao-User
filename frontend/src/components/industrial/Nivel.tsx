@@ -1,19 +1,29 @@
 'use client';
 import { useState, useEffect } from 'react';
-import ResponsiveWrapper from '@/components/core/ResponsiveWrapper';
+import ResponsiveWrapper from '@/components/ResponsiveWrapper';
 
 interface NivelProps {
   nivel?: number;
   scale?: number;
   editMode?: boolean;
   websocketValue?: number | null; // Novo prop para valor do WebSocket
+  // Props injetadas pelo ResponsiveWrapper
+  width?: number;
+  height?: number;
+  componentWidth?: number;
+  componentHeight?: number;
 }
 
 export default function Nivel({
   nivel = 50,
   scale = 1,  
   editMode = false,
-  websocketValue = null // Valor vindo do WebSocket
+  websocketValue = null, // Valor vindo do WebSocket
+  // Props injetadas pelo ResponsiveWrapper para dimensionamento
+  width,
+  height,
+  componentWidth,
+  componentHeight
 }: NivelProps) {
   const [nivelAtual, setNivelAtual] = useState(nivel);
   const [isManualControl, setIsManualControl] = useState(false);
@@ -43,14 +53,15 @@ export default function Nivel({
       <div className="w-full h-full">        
         <svg
           className="w-full h-full object-contain"
-          width="1167"
-          height="165"
+          width={componentWidth || 1167}
+          height={componentHeight || 165}
           viewBox="0 0 1167 165"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           style={{
-            transform: `scale(${scale})`,
-            transformOrigin: 'bottom center'
+            // Remove scale fixo e deixa o ResponsiveWrapper controlar
+            transform: 'none',
+            transformOrigin: 'top left'
           }}
         >
           <defs>

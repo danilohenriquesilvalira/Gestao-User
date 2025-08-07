@@ -4,6 +4,10 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 interface UseWebSocketReturn {
   nivelValue: number | null;
   motorValue: number | null;
+  contrapesoDirectoValue: number | null;
+  contrapesoEsquerdoValue: number | null;
+  motorDireitoValue: number | null;
+  motorEsquerdoValue: number | null;
   semaforos: Record<string, boolean>;
   isConnected: boolean;
   error: string | null;
@@ -146,6 +150,10 @@ function removeGlobalListener(callback: (data: any) => void) {
 export function useWebSocket(url: string): UseWebSocketReturn {
   const [nivelValue, setNivelValue] = useState<number | null>(null);
   const [motorValue, setMotorValue] = useState<number | null>(null);
+  const [contrapesoDirectoValue, setContrapesoDirectoValue] = useState<number | null>(null);
+  const [contrapesoEsquerdoValue, setContrapesoEsquerdoValue] = useState<number | null>(null);
+  const [motorDireitoValue, setMotorDireitoValue] = useState<number | null>(null);
+  const [motorEsquerdoValue, setMotorEsquerdoValue] = useState<number | null>(null);
   const [semaforos, setSemaforos] = useState<Record<string, boolean>>({});
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -173,15 +181,41 @@ export function useWebSocket(url: string): UseWebSocketReturn {
       
       console.log('📊 Processando dados do PLC no hook:', data);
       
-      // Processa dados do PLC
+      // Processa dados do PLC com validação de ranges
       if (data.nivelValue !== undefined) {
-        console.log(`💧 Atualizando nível: ${data.nivelValue}`);
-        setNivelValue(data.nivelValue);
+        const limitedNivel = Math.max(0, Math.min(100, data.nivelValue));
+        console.log(`💧 Atualizando nível: ${data.nivelValue} -> ${limitedNivel}`);
+        setNivelValue(limitedNivel);
       }
       
       if (data.motorValue !== undefined) {
-        console.log(`⚙️ Atualizando motor: ${data.motorValue}`);
-        setMotorValue(data.motorValue);
+        const limitedMotor = Math.max(0, Math.min(100, data.motorValue));
+        console.log(`⚙️ Atualizando motor: ${data.motorValue} -> ${limitedMotor}`);
+        setMotorValue(limitedMotor);
+      }
+      
+      if (data.contrapesoDirectoValue !== undefined) {
+        const limitedContrapeso = Math.max(0, Math.min(100, data.contrapesoDirectoValue));
+        console.log(`⚖️ Atualizando contrapeso direito: ${data.contrapesoDirectoValue} -> ${limitedContrapeso}`);
+        setContrapesoDirectoValue(limitedContrapeso);
+      }
+      
+      if (data.contrapesoEsquerdoValue !== undefined) {
+        const limitedContrapeso = Math.max(0, Math.min(100, data.contrapesoEsquerdoValue));
+        console.log(`⚖️ Atualizando contrapeso esquerdo: ${data.contrapesoEsquerdoValue} -> ${limitedContrapeso}`);
+        setContrapesoEsquerdoValue(limitedContrapeso);
+      }
+      
+      if (data.motorDireitoValue !== undefined) {
+        const limitedMotor = Math.max(0, Math.min(2, data.motorDireitoValue));
+        console.log(`🔧 Atualizando motor direito: ${data.motorDireitoValue} -> ${limitedMotor}`);
+        setMotorDireitoValue(limitedMotor);
+      }
+      
+      if (data.motorEsquerdoValue !== undefined) {
+        const limitedMotor = Math.max(0, Math.min(2, data.motorEsquerdoValue));
+        console.log(`🔧 Atualizando motor esquerdo: ${data.motorEsquerdoValue} -> ${limitedMotor}`);
+        setMotorEsquerdoValue(limitedMotor);
       }
       
       // ✅ PROCESSA SEMÁFOROS COM LOG DETALHADO
@@ -224,13 +258,21 @@ export function useWebSocket(url: string): UseWebSocketReturn {
       isConnected,
       nivelValue,
       motorValue,
+      contrapesoDirectoValue,
+      contrapesoEsquerdoValue,
+      motorDireitoValue,
+      motorEsquerdoValue,
       semaforos: Object.keys(semaforos).length > 0 ? semaforos : 'vazio'
     });
-  }, [isConnected, nivelValue, motorValue, semaforos]);
+  }, [isConnected, nivelValue, motorValue, contrapesoDirectoValue, contrapesoEsquerdoValue, motorDireitoValue, motorEsquerdoValue, semaforos]);
 
   return {
     nivelValue,
     motorValue,
+    contrapesoDirectoValue,
+    contrapesoEsquerdoValue,
+    motorDireitoValue,
+    motorEsquerdoValue,
     semaforos,
     isConnected,
     error,

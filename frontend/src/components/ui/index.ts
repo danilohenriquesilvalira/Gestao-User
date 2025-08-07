@@ -5,3 +5,4 @@ export { Checkbox } from './Checkbox';
 export { Logo } from './Logo';
 export { EdpLogo } from './LogoAnimado';
 export { Notification, useNotification } from './Notification';
+export { default as StatusIndicator } from './StatusIndicator';

@@ -12,9 +12,9 @@
       "description": "Nível da água (Real)"
     },
     "porta_jusante": {
-      "type": "int",
-      "offset": 4,
-      "description": "Porta Jusante (Inteiro)"
+      "type": "real",
+      "offset": 16,
+      "description": "Porta Jusante (Real)"
     },
     "semaforo_verde_0": {
       "type": "bool",
@@ -55,6 +55,26 @@
       "type": "bool",
       "offset": 6.7,
       "description": "Semáforo 3 - LED Vermelho"
+    },
+    "contrapeso_direito": {
+      "type": "real",
+      "offset": 8,
+      "description": "ContraPeso Direito (Real)"
+    },
+    "contrapeso_esquerdo": {
+      "type": "real",
+      "offset": 12,
+      "description": "ContraPeso Esquerdo (Real)"
+    },
+    "porta_jusante_motor_direito": {
+      "type": "int",
+      "offset": 20,
+      "description": "Motor Direito Porta Jusante (Int)"
+    },
+    "porta_jusante_motor_esquerdo": {
+      "type": "int",
+      "offset": 22,
+      "description": "Motor Esquerdo Porta Jusante (Int)"
     }
   }
 }

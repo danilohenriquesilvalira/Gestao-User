@@ -21,9 +21,10 @@ interface ComponentData {
 
 interface GlobalAdvancedControlsProps {
   editMode: boolean;
+  pageFilter?: string; // Novo prop para filtrar por página
 }
 
-export default function GlobalAdvancedControls({ editMode }: GlobalAdvancedControlsProps) {
+export default function GlobalAdvancedControls({ editMode, pageFilter }: GlobalAdvancedControlsProps) {
   const breakpoint = useBreakpoint();
   const [selectedComponent, setSelectedComponent] = useState<string>('');
   const [components, setComponents] = useState<ComponentData[]>([]);
@@ -34,6 +35,31 @@ export default function GlobalAdvancedControls({ editMode }: GlobalAdvancedContr
   const [isSaving, setIsSaving] = useState(false);
   const [activeComponentForEdit, setActiveComponentForEdit] = useState<string>('');
   const dialogRef = useRef<HTMLDivElement>(null);
+
+  // 🏷️ FUNÇÃO PARA FORMATAÇÃO DE NOMES DE COMPONENTES
+  const getComponentDisplayName = (componentId: string): string => {
+    const componentNames: { [key: string]: string } = {
+      // Porta Jusante
+      'porta-jusante-base-principal': '🚪 Porta Jusante - Base',
+      'porta-jusante-regua-principal': '🚪 Porta Jusante - Regua',
+      
+      // Porta Montante
+      'porta-montante-base-principal': '🚪 Porta Montante - Base',
+      'porta-montante-regua-principal': '🚪 Porta Montante - Regua',
+      'contrapeso-montante-direito': '⚖️ Contrapeso Montante Direito',
+      'contrapeso-montante-esquerdo': '⚖️ Contrapeso Montante Esquerdo',
+      
+      // Componentes Gerais
+      'caldeira-principal': '🔥 Caldeira Principal',
+      'parede-principal': '🧱 Parede Principal',
+      'nivel-principal': '📊 Sensor de Nível',
+      'motor-principal': '⚙️ Motor Principal',
+      'valvula-principal': '🔧 Válvula Principal',
+      'semaforo-principal': '🚦 Semáforo',
+    };
+
+    return componentNames[componentId] || `🔧 ${componentId.charAt(0).toUpperCase() + componentId.slice(1).replace(/-/g, ' ')}`;
+  };
 
   // Posicionamento inicial inteligente
   useEffect(() => {
@@ -57,12 +83,33 @@ export default function GlobalAdvancedControls({ editMode }: GlobalAdvancedContr
         const key = localStorage.key(i);
         if (key?.startsWith('component-')) {
           const componentId = key.replace('component-', '');
+          
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`🔍 Verificando componente: ${componentId}, pageFilter: ${pageFilter}`);
+          }
+          
+          // Filtrar por página se pageFilter for fornecido
+          if (pageFilter) {
+            // Lógica mais robusta: divide o filtro em termos e verifica se pelo menos um está presente
+            const filterTerms = pageFilter.split('-');
+            const hasMatch = filterTerms.some(term => componentId.includes(term));
+            if (!hasMatch) {
+              if (process.env.NODE_ENV === 'development') {
+                console.log(`❌ Componente ${componentId} não passa no filtro ${pageFilter} (termos: ${filterTerms.join(', ')})`);
+              }
+              continue;
+            }
+          }
+          
           const configData = localStorage.getItem(key);
           
           if (configData) {
             try {
               const configs = JSON.parse(configData);
               found.push({ id: componentId, configs });
+              if (process.env.NODE_ENV === 'development') {
+                console.log(`✅ Componente ${componentId} adicionado`);
+              }
             } catch (error) {
               if (process.env.NODE_ENV === 'development') {
                 console.error(`Erro ao carregar ${componentId}:`, error);
@@ -105,8 +152,8 @@ export default function GlobalAdvancedControls({ editMode }: GlobalAdvancedContr
         if (process.env.NODE_ENV === 'development') {
           console.log('🔄 Component config change detectado');
         }
-        // Debounce para evitar múltiplas atualizações
-        setTimeout(detectComponents, 50);
+        // Redetecção imediata para novos componentes
+        detectComponents();
       }
     };
 
@@ -118,7 +165,7 @@ export default function GlobalAdvancedControls({ editMode }: GlobalAdvancedContr
       window.removeEventListener('storage', handleComponentChange);
       window.removeEventListener('component-config-changed', handleComponentChange);
     };
-  }, [editMode, selectedComponent]);
+  }, [editMode, selectedComponent, pageFilter]);
   const handleMouseDown = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.closest('.drag-handle') && !target.closest('button') && !target.closest('select')) {
@@ -218,14 +265,14 @@ export default function GlobalAdvancedControls({ editMode }: GlobalAdvancedContr
       const configData = {
         componentId,
         breakpoint: strapiBreakpoint,
-        x: Number(currentConfig.x) || 74,
-        y: Number(currentConfig.y) || 70,
-        width: Number(currentConfig.width) || 400,
-        height: Number(currentConfig.height) || 200,
+        x: Math.round(Number(currentConfig.x)) || 74,
+        y: Math.round(Number(currentConfig.y)) || 70,
+        width: Math.round(Number(currentConfig.width)) || 400,
+        height: Math.round(Number(currentConfig.height)) || 200,
         scale: Number(currentConfig.scale) || 1,
-        zIndex: Number(currentConfig.zIndex) || 1,
+        zIndex: Math.round(Number(currentConfig.zIndex)) || 1,
         opacity: Number(currentConfig.opacity) || 1,
-        rotation: Number(currentConfig.rotation) || 0
+        rotation: Math.round(Number(currentConfig.rotation)) || 0
       };
 
       let saveResponse;
@@ -244,7 +291,18 @@ export default function GlobalAdvancedControls({ editMode }: GlobalAdvancedContr
         });
       }
 
-      if (!saveResponse.ok) throw new Error(`Erro HTTP ${saveResponse.status}`);
+      if (!saveResponse.ok) {
+        const errorText = await saveResponse.text();
+        console.error('Erro detalhado:', {
+          status: saveResponse.status,
+          statusText: saveResponse.statusText,
+          componentId,
+          breakpoint: strapiBreakpoint,
+          url: saveResponse.url,
+          errorText
+        });
+        throw new Error(`Erro HTTP ${saveResponse.status}: ${errorText}`);
+      }
       
       alert(`✅ ${componentId} salvo no PostgreSQL!`);
       
@@ -376,7 +434,7 @@ export default function GlobalAdvancedControls({ editMode }: GlobalAdvancedContr
                   <option value="">Escolha um componente...</option>
                   {components.map(comp => (
                     <option key={comp.id} value={comp.id}>
-                      {comp.id.charAt(0).toUpperCase() + comp.id.slice(1)}
+                      {getComponentDisplayName(comp.id)}
                     </option>
                   ))}
                 </select>
@@ -412,7 +470,7 @@ export default function GlobalAdvancedControls({ editMode }: GlobalAdvancedContr
                 </div>
                 {activeComponentForEdit && (
                   <p className="text-xs text-blue-600 mt-1">
-                    🔷 Editando: <strong>{activeComponentForEdit}</strong>
+                    🔷 Editando: <strong>{getComponentDisplayName(activeComponentForEdit)}</strong>
                   </p>
                 )}
               </div>

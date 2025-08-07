@@ -203,16 +203,20 @@ func (h *Hub) sendCurrentPLCValues(client *Client) {
 		// ✅ VALORES PADRÃO só se PLC nunca foi lido
 		log.Printf("📡 PLC ainda não foi lido - enviando valores padrão")
 		defaultValues := map[string]interface{}{
-			"nivel":               float32(0.0),
-			"porta_jusante":       int16(0),
-			"semaforo_verde_0":    false,
-			"semaforo_vermelho_0": false,
-			"semaforo_verde_1":    false,
-			"semaforo_vermelho_1": false,
-			"semaforo_verde_2":    false,
-			"semaforo_vermelho_2": false,
-			"semaforo_verde_3":    false,
-			"semaforo_vermelho_3": false,
+			"nivel":                        float32(0.0),
+			"porta_jusante":                float32(0.0),
+			"contrapeso_direito":           float32(0.0),
+			"contrapeso_esquerdo":          float32(0.0),
+			"porta_jusante_motor_direito":  int16(0),
+			"porta_jusante_motor_esquerdo": int16(0),
+			"semaforo_verde_0":             false,
+			"semaforo_vermelho_0":          false,
+			"semaforo_verde_1":             false,
+			"semaforo_vermelho_1":          false,
+			"semaforo_verde_2":             false,
+			"semaforo_vermelho_2":          false,
+			"semaforo_verde_3":             false,
+			"semaforo_vermelho_3":          false,
 		}
 		message = buildMessage(defaultValues)
 	}
@@ -367,11 +371,63 @@ func buildMessage(values map[string]interface{}) map[string]interface{} {
 	data := make(map[string]interface{})
 
 	if nivel, ok := values["nivel"]; ok {
-		data["nivelValue"] = nivel
+		// Limita nível entre 0 e 100
+		if nivelFloat, isFloat := nivel.(float32); isFloat {
+			limitedNivel := math.Max(0, math.Min(100, float64(nivelFloat)))
+			data["nivelValue"] = float32(limitedNivel)
+		} else {
+			data["nivelValue"] = float32(0)
+		}
 	}
 
 	if porta, ok := values["porta_jusante"]; ok {
-		data["motorValue"] = porta
+		// Limita porta entre 0 e 100
+		if portaFloat, isFloat := porta.(float32); isFloat {
+			limitedPorta := math.Max(0, math.Min(100, float64(portaFloat)))
+			data["motorValue"] = float32(limitedPorta)
+		} else {
+			data["motorValue"] = float32(0)
+		}
+	}
+
+	if contrapesoDireito, ok := values["contrapeso_direito"]; ok {
+		// Limita contrapeso direito entre 0 e 100
+		if contrapesoFloat, isFloat := contrapesoDireito.(float32); isFloat {
+			limitedContrapeso := math.Max(0, math.Min(100, float64(contrapesoFloat)))
+			data["contrapesoDirectoValue"] = float32(limitedContrapeso)
+		} else {
+			data["contrapesoDirectoValue"] = float32(0)
+		}
+	}
+
+	if contrapesoEsquerdo, ok := values["contrapeso_esquerdo"]; ok {
+		// Limita contrapeso esquerdo entre 0 e 100
+		if contrapesoFloat, isFloat := contrapesoEsquerdo.(float32); isFloat {
+			limitedContrapeso := math.Max(0, math.Min(100, float64(contrapesoFloat)))
+			data["contrapesoEsquerdoValue"] = float32(limitedContrapeso)
+		} else {
+			data["contrapesoEsquerdoValue"] = float32(0)
+		}
+	}
+
+	if motorDireito, ok := values["porta_jusante_motor_direito"]; ok {
+		// Motores são int16, mas limitamos entre 0 e 2 (status)
+		if motorInt, isInt := motorDireito.(int16); isInt {
+			limitedMotor := int16(math.Max(0, math.Min(2, float64(motorInt))))
+			data["motorDireitoValue"] = limitedMotor
+		} else {
+			data["motorDireitoValue"] = int16(0)
+		}
+	}
+
+	if motorEsquerdo, ok := values["porta_jusante_motor_esquerdo"]; ok {
+		// Motores são int16, mas limitamos entre 0 e 2 (status)
+		if motorInt, isInt := motorEsquerdo.(int16); isInt {
+			limitedMotor := int16(math.Max(0, math.Min(2, float64(motorInt))))
+			data["motorEsquerdoValue"] = limitedMotor
+		} else {
+			data["motorEsquerdoValue"] = int16(0)
+		}
 	}
 
 	semaforos := make(map[string]bool)

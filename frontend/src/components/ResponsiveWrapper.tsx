@@ -92,6 +92,22 @@ export default function ResponsiveWrapper({
       } catch (e) {
         console.error('Erro ao carregar cache:', e);
         setConfigs(defaultConfigs);
+        // Salva as configurações padrão se houve erro
+        localStorage.setItem(`component-${componentId}`, JSON.stringify(defaultConfigs));
+      }
+    } else {
+      // Se não tem no localStorage, salva as configurações padrão
+      const configsToSave = { ...defaultConfigs, ...defaultConfig };
+      setConfigs(configsToSave);
+      localStorage.setItem(`component-${componentId}`, JSON.stringify(configsToSave));
+      
+      // Dispara evento para GlobalAdvancedControls detectar o novo componente
+      window.dispatchEvent(new CustomEvent('component-config-changed', { 
+        detail: { componentId, config: configsToSave } 
+      }));
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`💾 Configurações iniciais salvas para ${componentId}:`, configsToSave);
       }
     }
     
@@ -101,7 +117,7 @@ export default function ResponsiveWrapper({
     if (process.env.NODE_ENV === 'development') {
       console.log(`🎯 ResponsiveWrapper ${componentId} inicializado`);
     }
-  }, [componentId, registerComponent, setComponentLoaded]);
+  }, [componentId, registerComponent, setComponentLoaded, defaultConfig]);
 
   // Sistema de seleção de componentes
   useEffect(() => {

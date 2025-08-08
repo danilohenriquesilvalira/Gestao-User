@@ -218,6 +218,12 @@ func (h *Hub) sendCurrentPLCValues(client *Client) {
 			"semaforo_verde_3":             false,
 			"semaforo_vermelho_3":          false,
 		}
+
+		// ✅ NOVO: Adiciona valores padrão do PipeSystem [0..23]
+		for i := 0; i < 24; i++ {
+			tagName := fmt.Sprintf("pipe_system_%d", i)
+			defaultValues[tagName] = false
+		}
 		message = buildMessage(defaultValues)
 	}
 
@@ -430,6 +436,57 @@ func buildMessage(values map[string]interface{}) map[string]interface{} {
 		}
 	}
 
+	// Porta Montante tags
+	if portaMontante, ok := values["porta_montante"]; ok {
+		// Limita porta montante entre 0 e 100
+		if portaFloat, isFloat := portaMontante.(float32); isFloat {
+			limitedPorta := math.Max(0, math.Min(100, float64(portaFloat)))
+			data["portaMontanteValue"] = float32(limitedPorta)
+		} else {
+			data["portaMontanteValue"] = float32(0)
+		}
+	}
+
+	if contrapesoDirectoMontante, ok := values["porta_montante_contrapeso_direito"]; ok {
+		// Limita contrapeso direito montante entre 0 e 100
+		if contrapesoFloat, isFloat := contrapesoDirectoMontante.(float32); isFloat {
+			limitedContrapeso := math.Max(0, math.Min(100, float64(contrapesoFloat)))
+			data["portaMontanteContrapesoDirectoValue"] = float32(limitedContrapeso)
+		} else {
+			data["portaMontanteContrapesoDirectoValue"] = float32(0)
+		}
+	}
+
+	if contrapesoEsquerdoMontante, ok := values["porta_montante_contrapeso_esquerdo"]; ok {
+		// Limita contrapeso esquerdo montante entre 0 e 100
+		if contrapesoFloat, isFloat := contrapesoEsquerdoMontante.(float32); isFloat {
+			limitedContrapeso := math.Max(0, math.Min(100, float64(contrapesoFloat)))
+			data["portaMontanteContrapesoEsquerdoValue"] = float32(limitedContrapeso)
+		} else {
+			data["portaMontanteContrapesoEsquerdoValue"] = float32(0)
+		}
+	}
+
+	if motorDireitoMontante, ok := values["porta_montante_motor_direito"]; ok {
+		// Motores são int16, mas limitamos entre 0 e 2 (status)
+		if motorInt, isInt := motorDireitoMontante.(int16); isInt {
+			limitedMotor := int16(math.Max(0, math.Min(2, float64(motorInt))))
+			data["portaMontanteMotorDireitoValue"] = limitedMotor
+		} else {
+			data["portaMontanteMotorDireitoValue"] = int16(0)
+		}
+	}
+
+	if motorEsquerdoMontante, ok := values["porta_montante_motor_esquerdo"]; ok {
+		// Motores são int16, mas limitamos entre 0 e 2 (status)
+		if motorInt, isInt := motorEsquerdoMontante.(int16); isInt {
+			limitedMotor := int16(math.Max(0, math.Min(2, float64(motorInt))))
+			data["portaMontanteMotorEsquerdoValue"] = limitedMotor
+		} else {
+			data["portaMontanteMotorEsquerdoValue"] = int16(0)
+		}
+	}
+
 	semaforos := make(map[string]bool)
 
 	for i := 0; i <= 3; i++ {
@@ -457,6 +514,21 @@ func buildMessage(values map[string]interface{}) map[string]interface{} {
 	}
 
 	data["semaforos"] = semaforos
+
+	// ✅ NOVO: Processa PipeSystem array [0..23]
+	for i := 0; i < 24; i++ {
+		tagName := fmt.Sprintf("pipe_system_%d", i)
+		if value, ok := values[tagName]; ok {
+			if boolVal, isBool := value.(bool); isBool {
+				data[tagName] = boolVal
+			} else {
+				data[tagName] = false
+			}
+		} else {
+			data[tagName] = false
+		}
+	}
+
 	data["timestamp"] = time.Now().Unix()
 	data["connected"] = true
 

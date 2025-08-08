@@ -13,6 +13,7 @@ import Semaforo from '@/components/Eclusa/Semaforo';
 import { LayoutLoadingProvider, useLayoutLoading } from '@/contexts/LayoutLoadingContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import NotificationContainer from '@/components/ui/NotificationContainer';
+import { EdpLoading } from '@/components/ui/EdpLoading';
 
 // Debug Component para responsividade
 function ScreenDebug() {
@@ -69,62 +70,39 @@ function DashboardContent() {
   const { isAllLoaded } = useLayoutLoading();
   const { nivelValue, motorValue, isConnected, error, lastMessage } = useWebSocket('ws://localhost:8080/ws');
 
+  // ✅ CONDIÇÃO MELHORADA: Layout carregado + WebSocket com dados iniciais
+  const isFullyReady = isAllLoaded && (
+    isConnected && ( 
+      motorValue !== null || // Dados da porta jusante chegaram
+      editMode // OU está em modo edição (sempre permite)
+    )
+  );
+
   const handleLogout = () => {
     window.location.replace('/');
   };
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-white">
-      {/* TELA DE LOADING GLOBAL - Moderna e Rápida */}
-      {!isAllLoaded && (
-        <div className="fixed inset-0 bg-gradient-to-br from-gray-50 to-gray-100 z-[9999] flex items-center justify-center">
-          <div className="text-center">
-            {/* Spinner SVG Moderno */}
-            <div className="relative mb-8">
-              <svg 
-                className="animate-spin h-16 w-16 mx-auto" 
-                viewBox="0 0 24 24" 
-                fill="none"
-              >
-                <circle 
-                  cx="12" 
-                  cy="12" 
-                  r="10" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  className="text-gray-300"
-                />
-                <path 
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" 
-                  fill="currentColor" 
-                  className="text-blue-600"
-                />
-              </svg>
-              
-              {/* Pulse interno */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-3 h-3 bg-blue-600 rounded-full animate-pulse"></div>
-              </div>
-            </div>
-            
-            {/* Texto simples */}
-            <div className="space-y-3">
-              <h2 className="text-2xl font-bold text-gray-800">Carregando</h2>
-              <div className="flex items-center justify-center space-x-1">
-                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* TELA DE LOADING GLOBAL - Com EdpLoading Personalizado */}
+      {!isFullyReady && (
+        <EdpLoading
+          title="Eclusa de Navegação"
+          subtitle="Sistema de Gestão Industrial EDP"
+          status={
+            !isAllLoaded ? 'Inicializando interface...' : 
+            !isConnected ? 'Conectando ao PLC...' : 
+            'Sincronizando dados do sistema...'
+          }
+          size="lg"
+        />
       )}
 
-      {/* CONTEÚDO DO DASHBOARD - Só mostra quando TUDO estiver carregado */}
-      {isAllLoaded && (
+      {/* CONTEÚDO DO DASHBOARD - Só mostra quando TUDO estiver carregado E WebSocket com dados */}
+      {isFullyReady && (
         <>
           <ModernHeader
-            title="Dashboard Principal"
+            title="Eclusa de Navegação"
             user="danilohenriquesilvalira"
             onLogout={handleLogout}
           />

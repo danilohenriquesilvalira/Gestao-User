@@ -4,17 +4,14 @@ import { useState, useEffect } from 'react';
 import ModernSidebar from '@/components/layout/ModernSidebar';
 import ModernHeader from '@/components/layout/ModernHeader';
 import GlobalAdvancedControls from '@/components/GlobalAdvancedControls';
-import PortaJusante from '@/components/Eclusa/PortaJusante';
-import { BasePorta, PortaJusanteRegua, ContraPesoDireito, ContraPesoEsquerdo } from '@/components/Eclusa/PortaJusante/index';
-import { StatusIndicator } from '@/components/ui';
-import Motor from '@/components/industrial/Motor';
+import { PipeSystem, ValvulaOnOff } from '@/components/Eclusa/Enchimento';
 import { useWebSocket } from '@/hooks/useWebSocket';
-import { limitPercentage, limitMotorStatus, formatPercentage, formatMotorStatus } from '@/lib/plcValidation';
 import { LayoutLoadingProvider, useLayoutLoading } from '@/contexts/LayoutLoadingContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import NotificationContainer from '@/components/ui/NotificationContainer';
 import { EdpLoading } from '@/components/ui/EdpLoading';
 
+// Debug Component para responsividade
 function ScreenDebug() {
   const [screenInfo, setScreenInfo] = useState({ width: 0, height: 0 });
 
@@ -31,7 +28,7 @@ function ScreenDebug() {
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
-  const getBreakpoint = (width: number): string => {
+  const getBreakpoint = (width: number) => {
     if (width >= 3840) return '6xl (3840px+)';
     if (width >= 2560) return '5xl (2560px+)';
     if (width >= 1920) return '4xl (1920px+)';
@@ -53,21 +50,45 @@ function ScreenDebug() {
   );
 }
 
-export default function PortaJusantePage() {
+export default function EnchimentoPage() {
   return (
     <NotificationProvider>
       <LayoutLoadingProvider>
-        <PortaJusanteContent />
+        <EnchimentoContent />
         <NotificationContainer />
       </LayoutLoadingProvider>
     </NotificationProvider>
   );
 }
 
-function PortaJusanteContent() {
+function EnchimentoContent() {
   const [editMode, setEditMode] = useState(false);
   const { isAllLoaded } = useLayoutLoading();
-  const { nivelValue, motorValue, contrapesoDirectoValue, contrapesoEsquerdoValue, motorDireitoValue, motorEsquerdoValue, isConnected, error, lastMessage } = useWebSocket('ws://localhost:8080/ws');
+  const { 
+    nivelValue, 
+    motorValue, 
+    pipeSystem,
+    isConnected, 
+    error, 
+    lastMessage 
+  } = useWebSocket('ws://localhost:8080/ws');
+
+  const getPipeStatesFromWebSocket = () => {
+    const pipeStates: {[key: string]: 0 | 1} = {};
+    
+    for (let i = 0; i < pipeSystem.length && i < 24; i++) {
+      pipeStates[`pipe${i + 1}`] = pipeSystem[i] ? 1 : 0;
+    }
+    
+    return pipeStates;
+  };
+
+  const isFullyReady = isAllLoaded && (
+    isConnected && ( 
+      nivelValue !== null ||
+      editMode
+    )
+  );
 
   const handleLogout = () => {
     window.location.replace('/');
@@ -75,22 +96,77 @@ function PortaJusanteContent() {
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-white">
-      {!isAllLoaded && (
+      {!isFullyReady && (
         <EdpLoading
-          title="Porta Jusante"
-          subtitle="Sistema de Controle Industrial EDP"
-          status="Inicializando componentes da porta jusante..."
+          title="Sistema de Enchimento"
+          subtitle="Controle de Enchimento Industrial EDP"
+          status={
+            !isAllLoaded ? 'Inicializando interface...' : 
+            !isConnected ? 'Conectando ao PLC...' : 
+            'Sincronizando dados do sistema...'
+          }
           size="lg"
         />
       )}
 
-      {isAllLoaded && (
+      {isFullyReady && (
         <>
           <ModernHeader
-            title="Porta Jusante - Sistema de Controle"
+            title="Sistema de Enchimento"
             user="danilohenriquesilvalira"
             onLogout={handleLogout}
           />
+
+          <div className="flex h-[calc(100vh-64px)]">
+            <ModernSidebar />
+            
+            <div className="flex-1 relative overflow-hidden bg-gray-50">
+              
+              <div className="w-full h-full flex items-center justify-center p-4">
+                <PipeSystem
+                  editMode={editMode}
+                  pipeStates={getPipeStatesFromWebSocket()}
+                />
+              </div>
+              
+              {/* VÁLVULAS DO SISTEMA DE ENCHIMENTO */}
+              <ValvulaOnOff
+                state={motorValue !== null ? (motorValue === 0 ? 0 : motorValue === 1 ? 1 : 2) : 0}
+                editMode={editMode}
+                componentId="valvula-X00"
+              />
+              
+              <ValvulaOnOff
+                state={0}
+                editMode={editMode}
+                componentId="valvula-X01"
+              />
+              
+              <ValvulaOnOff
+                state={0}
+                editMode={editMode}
+                componentId="valvula-X02"
+              />
+              
+              <ValvulaOnOff
+                state={0}
+                editMode={editMode}
+                componentId="valvula-X04"
+              />
+              
+              <ValvulaOnOff
+                state={0}
+                editMode={editMode}
+                componentId="valvula-X05"
+              />
+              
+              <ValvulaOnOff
+                state={0}
+                editMode={editMode}
+                componentId="valvula-X06"
+              />
+            </div>
+          </div>
 
           <ScreenDebug />
 
@@ -102,26 +178,18 @@ function PortaJusanteContent() {
               </div>
               
               {nivelValue !== null && (
-                <div className="text-blue-400">📊 Nível: {formatPercentage(nivelValue)}</div>
+                <div className="text-blue-400">📊 Nível: {nivelValue}%</div>
               )}
               
               {motorValue !== null && (
                 <div className="text-green-400">
-                  ⚙️ Motor: {formatMotorStatus(motorValue)}
+                  ⚙️ Motor: {motorValue === 0 ? 'INATIVO' : motorValue === 1 ? 'OPERANDO' : 'FALHA'}
                 </div>
               )}
               
-              {motorDireitoValue !== null && (
-                <div className="text-cyan-400">
-                  🔧 Motor Direito: {formatMotorStatus(motorDireitoValue)}
-                </div>
-              )}
-              
-              {motorEsquerdoValue !== null && (
-                <div className="text-yellow-400">
-                  🔧 Motor Esquerdo: {formatMotorStatus(motorEsquerdoValue)}
-                </div>
-              )}
+              <div className="text-orange-400">
+                🔧 Pipes Ativos: {pipeSystem.filter(Boolean).length}/24
+              </div>
               
               {error && (
                 <div className="text-red-400">❌ Erro: {error}</div>
@@ -159,64 +227,7 @@ function PortaJusanteContent() {
             </button>
           )}
 
-          <GlobalAdvancedControls editMode={editMode} pageFilter="porta-jusante" />
-
-          <ModernSidebar />
-
-          <div 
-            className={`h-[calc(100vh-64px)] overflow-auto pb-20 md:pb-0 ${
-              editMode ? 'bg-blue-50/30' : ''
-            }`}
-          >
-            <BasePorta 
-              editMode={editMode} 
-              componentId="porta-jusante-base-principal"
-            />
-            
-            <PortaJusanteRegua 
-              editMode={editMode} 
-              componentId="porta-jusante-regua-principal"
-              nivel={limitPercentage(motorValue)}
-            />
-            
-            <ContraPesoDireito 
-              editMode={editMode} 
-              componentId="porta-jusante-contrapeso-direito"
-              nivel={limitPercentage(contrapesoDirectoValue)}
-            />
-            
-            <ContraPesoEsquerdo 
-              editMode={editMode} 
-              componentId="porta-jusante-contrapeso-esquerdo"
-              nivel={limitPercentage(contrapesoEsquerdoValue)}
-            />
-            
-           <StatusIndicator
-  editMode={editMode}
-  componentId="porta-jusante-status-porta"
-  label="Porta Jusante"
-  websocketValue={motorValue ?? 0}  // ✅ Posição da porta (motor, não nível!)
-  size="md"
-/>
-            
-            {/* Motor direito - normal */}
-            <Motor
-              editMode={editMode}
-              componentId="porta-jusante-motor-direito"
-              status={limitMotorStatus(motorDireitoValue)}
-              websocketValue={motorDireitoValue}
-            />
-            
-            {/* Motor esquerdo - ESPELHADO */}
-            <Motor
-              editMode={editMode}
-              componentId="porta-jusante-motor-esquerdo"
-              status={limitMotorStatus(motorEsquerdoValue)}
-              websocketValue={motorEsquerdoValue}
-              direction="right"
-            />
-            
-          </div>
+          <GlobalAdvancedControls editMode={editMode} pageFilter="enchimento" />
 
         </>
       )}

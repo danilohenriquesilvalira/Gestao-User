@@ -8,7 +8,15 @@ interface UseWebSocketReturn {
   contrapesoEsquerdoValue: number | null;
   motorDireitoValue: number | null;
   motorEsquerdoValue: number | null;
+  // Novos valores para Porta Montante
+  portaMontanteValue: number | null;
+  portaMontanteContrapesoDirectoValue: number | null;
+  portaMontanteContrapesoEsquerdoValue: number | null;
+  portaMontanteMotorDireitoValue: number | null;
+  portaMontanteMotorEsquerdoValue: number | null;
   semaforos: Record<string, boolean>;
+  // ✅ NOVO: Array PipeSystem [0..23]
+  pipeSystem: boolean[];
   isConnected: boolean;
   error: string | null;
   lastMessage: string | null;
@@ -154,7 +162,17 @@ export function useWebSocket(url: string): UseWebSocketReturn {
   const [contrapesoEsquerdoValue, setContrapesoEsquerdoValue] = useState<number | null>(null);
   const [motorDireitoValue, setMotorDireitoValue] = useState<number | null>(null);
   const [motorEsquerdoValue, setMotorEsquerdoValue] = useState<number | null>(null);
+  
+  // Novos estados para Porta Montante
+  const [portaMontanteValue, setPortaMontanteValue] = useState<number | null>(null);
+  const [portaMontanteContrapesoDirectoValue, setPortaMontanteContrapesoDirectoValue] = useState<number | null>(null);
+  const [portaMontanteContrapesoEsquerdoValue, setPortaMontanteContrapesoEsquerdoValue] = useState<number | null>(null);
+  const [portaMontanteMotorDireitoValue, setPortaMontanteMotorDireitoValue] = useState<number | null>(null);
+  const [portaMontanteMotorEsquerdoValue, setPortaMontanteMotorEsquerdoValue] = useState<number | null>(null);
+  
   const [semaforos, setSemaforos] = useState<Record<string, boolean>>({});
+  // ✅ NOVO: Array PipeSystem [0..23] - inicializado com 24 elementos false
+  const [pipeSystem, setPipeSystem] = useState<boolean[]>(new Array(24).fill(false));
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastMessage, setLastMessage] = useState<string | null>(null);
@@ -217,6 +235,54 @@ export function useWebSocket(url: string): UseWebSocketReturn {
         console.log(`🔧 Atualizando motor esquerdo: ${data.motorEsquerdoValue} -> ${limitedMotor}`);
         setMotorEsquerdoValue(limitedMotor);
       }
+
+      // ✅ PROCESSA VALORES DA PORTA MONTANTE
+      if (data.portaMontanteValue !== undefined) {
+        const limitedPorta = Math.max(0, Math.min(100, data.portaMontanteValue));
+        console.log(`🚪 Atualizando porta montante: ${data.portaMontanteValue} -> ${limitedPorta}`);
+        setPortaMontanteValue(limitedPorta);
+      }
+
+      if (data.portaMontanteContrapesoDirectoValue !== undefined) {
+        const limitedContrapeso = Math.max(0, Math.min(100, data.portaMontanteContrapesoDirectoValue));
+        console.log(`⚖️ Atualizando contrapeso direito montante: ${data.portaMontanteContrapesoDirectoValue} -> ${limitedContrapeso}`);
+        setPortaMontanteContrapesoDirectoValue(limitedContrapeso);
+      }
+
+      if (data.portaMontanteContrapesoEsquerdoValue !== undefined) {
+        const limitedContrapeso = Math.max(0, Math.min(100, data.portaMontanteContrapesoEsquerdoValue));
+        console.log(`⚖️ Atualizando contrapeso esquerdo montante: ${data.portaMontanteContrapesoEsquerdoValue} -> ${limitedContrapeso}`);
+        setPortaMontanteContrapesoEsquerdoValue(limitedContrapeso);
+      }
+
+      if (data.portaMontanteMotorDireitoValue !== undefined) {
+        const limitedMotor = Math.max(0, Math.min(2, data.portaMontanteMotorDireitoValue));
+        console.log(`🔧 Atualizando motor direito montante: ${data.portaMontanteMotorDireitoValue} -> ${limitedMotor}`);
+        setPortaMontanteMotorDireitoValue(limitedMotor);
+      }
+
+      if (data.portaMontanteMotorEsquerdoValue !== undefined) {
+        const limitedMotor = Math.max(0, Math.min(2, data.portaMontanteMotorEsquerdoValue));
+        console.log(`🔧 Atualizando motor esquerdo montante: ${data.portaMontanteMotorEsquerdoValue} -> ${limitedMotor}`);
+        setPortaMontanteMotorEsquerdoValue(limitedMotor);
+      }
+      
+      // ✅ NOVO: PROCESSA ARRAY PIPESYSTEM [0..23]
+      const newPipeSystem = new Array(24).fill(false);
+      let hasPipeSystemData = false;
+      
+      for (let i = 0; i < 24; i++) {
+        const key = `pipe_system_${i}`;
+        if (data[key] !== undefined) {
+          newPipeSystem[i] = Boolean(data[key]);
+          hasPipeSystemData = true;
+        }
+      }
+      
+      if (hasPipeSystemData) {
+        console.log('🔧 Atualizando PipeSystem array:', newPipeSystem);
+        setPipeSystem(newPipeSystem);
+      }
       
       // ✅ PROCESSA SEMÁFOROS COM LOG DETALHADO
       if (data.semaforos) {
@@ -273,7 +339,15 @@ export function useWebSocket(url: string): UseWebSocketReturn {
     contrapesoEsquerdoValue,
     motorDireitoValue,
     motorEsquerdoValue,
+    // Novos valores da Porta Montante
+    portaMontanteValue,
+    portaMontanteContrapesoDirectoValue,
+    portaMontanteContrapesoEsquerdoValue,
+    portaMontanteMotorDireitoValue,
+    portaMontanteMotorEsquerdoValue,
     semaforos,
+    // ✅ NOVO: Array PipeSystem [0..23]
+    pipeSystem,
     isConnected,
     error,
     lastMessage

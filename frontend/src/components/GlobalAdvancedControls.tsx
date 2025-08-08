@@ -42,6 +42,7 @@ export default function GlobalAdvancedControls({ editMode, pageFilter }: GlobalA
       // Porta Jusante
       'porta-jusante-base-principal': '🚪 Porta Jusante - Base',
       'porta-jusante-regua-principal': '🚪 Porta Jusante - Regua',
+      'porta-jusante': '🚪 Porta Jusante',
       
       // Porta Montante
       'porta-montante-base-principal': '🚪 Porta Montante - Base',
@@ -49,13 +50,34 @@ export default function GlobalAdvancedControls({ editMode, pageFilter }: GlobalA
       'contrapeso-montante-direito': '⚖️ Contrapeso Montante Direito',
       'contrapeso-montante-esquerdo': '⚖️ Contrapeso Montante Esquerdo',
       
-      // Componentes Gerais
+      // Enchimento
+      'pipe-system-principal': '🔧 Sistema de Tubulações',
+      'valvula-X00': '🔧 Válvula X00',
+      'valvula-X01': '🔧 Válvula X01',
+      'valvula-X02': '🔧 Válvula X02',
+      'valvula-X04': '🔧 Válvula X04',
+      'valvula-X05': '🔧 Válvula X05',
+      'valvula-X06': '🔧 Válvula X06',
+      'enchimento-tanque-principal': '🏗️ Tanque de Enchimento',
+      'enchimento-bomba-principal': '🚿 Bomba de Enchimento',
+      'enchimento-valvula-entrada': '🔧 Válvula de Entrada',
+      'enchimento-valvula-saida': '🔧 Válvula de Saída',
+      'enchimento-sensor-nivel': '📊 Sensor Nível Enchimento',
+      'enchimento-motor-bomba': '⚙️ Motor da Bomba',
+      'enchimento-controlador': '🎛️ Controlador de Enchimento',
+      
+      // Eclusa (Dashboard)
       'caldeira-principal': '🔥 Caldeira Principal',
       'parede-principal': '🧱 Parede Principal',
       'nivel-principal': '📊 Sensor de Nível',
+      'semaforo': '🚦 Semáforo Principal',
+      'semaforo-1': '🚦 Semáforo 1',
+      'semaforo-2': '🚦 Semáforo 2', 
+      'semaforo-3': '🚦 Semáforo 3',
+      
+      // Componentes Gerais
       'motor-principal': '⚙️ Motor Principal',
-      'valvula-principal': '🔧 Válvula Principal',
-      'semaforo-principal': '🚦 Semáforo',
+      'valvula-principal': '� Válvula Principal',
     };
 
     return componentNames[componentId] || `🔧 ${componentId.charAt(0).toUpperCase() + componentId.slice(1).replace(/-/g, ' ')}`;
@@ -78,26 +100,51 @@ export default function GlobalAdvancedControls({ editMode, pageFilter }: GlobalA
 
     const detectComponents = () => {
       const found: ComponentData[] = [];
+      const allComponents: string[] = [];
+      
+      // Debug: Lista TODOS os componentes no localStorage
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith('component-')) {
+          allComponents.push(key.replace('component-', ''));
+        }
+      }
+      
+      console.log(`🔍 [DEBUG] TODOS os componentes no localStorage:`, allComponents);
+      console.log(`🔍 [DEBUG] PageFilter ativo: ${pageFilter}`);
       
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key?.startsWith('component-')) {
           const componentId = key.replace('component-', '');
           
-          if (process.env.NODE_ENV === 'development') {
-            console.log(`🔍 Verificando componente: ${componentId}, pageFilter: ${pageFilter}`);
-          }
+          console.log(`🔍 [DEBUG] Verificando componente: ${componentId}`);
           
           // Filtrar por página se pageFilter for fornecido
           if (pageFilter) {
-            // Lógica mais robusta: divide o filtro em termos e verifica se pelo menos um está presente
-            const filterTerms = pageFilter.split('-');
-            const hasMatch = filterTerms.some(term => componentId.includes(term));
-            if (!hasMatch) {
-              if (process.env.NODE_ENV === 'development') {
-                console.log(`❌ Componente ${componentId} não passa no filtro ${pageFilter} (termos: ${filterTerms.join(', ')})`);
-              }
+            // Lógica melhorada: inclui componentes específicos para cada página
+            let shouldInclude = false;
+            
+            if (pageFilter === 'enchimento') {
+              // Para página de enchimento: inclui componentes relacionados ao sistema de enchimento
+              shouldInclude = componentId.startsWith('enchimento-') || 
+                             componentId.startsWith('pipe-system-') ||
+                             componentId.startsWith('valvula-X') ||  // ✅ NOVO: Válvulas X00-X05
+                             componentId.includes('enchimento') ||
+                             componentId.includes('valvula');
+              
+              console.log(`🔍 [DEBUG] ${componentId} -> shouldInclude: ${shouldInclude}`);
+            } else {
+              // Lógica original para outras páginas
+              const filterTerms = pageFilter.split('-');
+              shouldInclude = filterTerms.some(term => componentId.includes(term));
+            }
+            
+            if (!shouldInclude) {
+              console.log(`❌ [DEBUG] Componente ${componentId} REJEITADO pelo filtro ${pageFilter}`);
               continue;
+            } else {
+              console.log(`✅ [DEBUG] Componente ${componentId} ACEITO pelo filtro ${pageFilter}`);
             }
           }
           

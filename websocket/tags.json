@@ -75,6 +75,151 @@
       "type": "int",
       "offset": 22,
       "description": "Motor Esquerdo Porta Jusante (Int)"
+    },
+    "porta_montante": {
+      "type": "real",
+      "offset": 24,
+      "description": "Porta Montante (Real)"
+    },
+    "porta_montante_contrapeso_direito": {
+      "type": "real",
+      "offset": 28,
+      "description": "ContraPeso Direito Porta Montante (Real)"
+    },
+    "porta_montante_contrapeso_esquerdo": {
+      "type": "real",
+      "offset": 32,
+      "description": "ContraPeso Esquerdo Porta Montante (Real)"
+    },
+    "porta_montante_motor_direito": {
+      "type": "int",
+      "offset": 36,
+      "description": "Motor Direito Porta Montante (Int)"
+    },
+    "porta_montante_motor_esquerdo": {
+      "type": "int",
+      "offset": 38,
+      "description": "Motor Esquerdo Porta Montante (Int)"
+    },
+    "pipe_system_0": {
+      "type": "bool",
+      "offset": 40.0,
+      "description": "PipeSystem Array [0] - Pipe 1"
+    },
+    "pipe_system_1": {
+      "type": "bool",
+      "offset": 40.1,
+      "description": "PipeSystem Array [1] - Pipe 2"
+    },
+    "pipe_system_2": {
+      "type": "bool",
+      "offset": 40.2,
+      "description": "PipeSystem Array [2] - Pipe 3"
+    },
+    "pipe_system_3": {
+      "type": "bool",
+      "offset": 40.3,
+      "description": "PipeSystem Array [3] - Pipe 4"
+    },
+    "pipe_system_4": {
+      "type": "bool",
+      "offset": 40.4,
+      "description": "PipeSystem Array [4] - Pipe 5"
+    },
+    "pipe_system_5": {
+      "type": "bool",
+      "offset": 40.5,
+      "description": "PipeSystem Array [5] - Pipe 6"
+    },
+    "pipe_system_6": {
+      "type": "bool",
+      "offset": 40.6,
+      "description": "PipeSystem Array [6] - Pipe 7"
+    },
+    "pipe_system_7": {
+      "type": "bool",
+      "offset": 40.7,
+      "description": "PipeSystem Array [7] - Pipe 8"
+    },
+    "pipe_system_8": {
+      "type": "bool",
+      "offset": 41.0,
+      "description": "PipeSystem Array [8] - Pipe 9"
+    },
+    "pipe_system_9": {
+      "type": "bool",
+      "offset": 41.1,
+      "description": "PipeSystem Array [9] - Pipe 10"
+    },
+    "pipe_system_10": {
+      "type": "bool",
+      "offset": 41.2,
+      "description": "PipeSystem Array [10] - Pipe 11"
+    },
+    "pipe_system_11": {
+      "type": "bool",
+      "offset": 41.3,
+      "description": "PipeSystem Array [11] - Pipe 12"
+    },
+    "pipe_system_12": {
+      "type": "bool",
+      "offset": 41.4,
+      "description": "PipeSystem Array [12] - Pipe 13"
+    },
+    "pipe_system_13": {
+      "type": "bool",
+      "offset": 41.5,
+      "description": "PipeSystem Array [13] - Pipe 14"
+    },
+    "pipe_system_14": {
+      "type": "bool",
+      "offset": 41.6,
+      "description": "PipeSystem Array [14] - Pipe 15"
+    },
+    "pipe_system_15": {
+      "type": "bool",
+      "offset": 41.7,
+      "description": "PipeSystem Array [15] - Pipe 16"
+    },
+    "pipe_system_16": {
+      "type": "bool",
+      "offset": 42.0,
+      "description": "PipeSystem Array [16] - Pipe 17"
+    },
+    "pipe_system_17": {
+      "type": "bool",
+      "offset": 42.1,
+      "description": "PipeSystem Array [17] - Pipe 18"
+    },
+    "pipe_system_18": {
+      "type": "bool",
+      "offset": 42.2,
+      "description": "PipeSystem Array [18] - Pipe 19"
+    },
+    "pipe_system_19": {
+      "type": "bool",
+      "offset": 42.3,
+      "description": "PipeSystem Array [19] - Pipe 20"
+    },
+    "pipe_system_20": {
+      "type": "bool",
+      "offset": 42.4,
+      "description": "PipeSystem Array [20] - Pipe 21"
+    },
+    "pipe_system_21": {
+      "type": "bool",
+      "offset": 42.5,
+      "description": "PipeSystem Array [21] - Pipe 22"
+    },
+    "pipe_system_22": {
+      "type": "bool",
+      "offset": 42.6,
+      "description": "PipeSystem Array [22] - Pipe 23"
+    },
+    "pipe_system_23": {
+      "type": "bool",
+      "offset": 42.7,
+      "description": "PipeSystem Array [23] - Pipe 24"
     }
   }
 }

@@ -12,7 +12,7 @@ interface PortaJusanteProps {
 export default function PortaJusante({
   editMode = false
 }: PortaJusanteProps) {
-  const [abertura, setAbertura] = useState(100); // Estado inicial: 100% ABERTA
+  const [abertura, setAbertura] = useState<number | null>(null); // ✅ ESTADO INICIAL: null (não renderiza até ter dados)
   const { nivelValue, motorValue, isConnected } = useWebSocket('ws://localhost:8080/ws');
 
   // Atualiza abertura via WebSocket - usando motorValue como exemplo
@@ -23,6 +23,14 @@ export default function PortaJusante({
       setAbertura(aberturaPercentual);
     }
   }, [motorValue]);
+
+  // ✅ SE NÃO TEM DADOS AINDA, NÃO RENDERIZA (evita flash)
+  if (abertura === null && !editMode) {
+    return null;
+  }
+
+  // ✅ EM EDIT MODE, SEMPRE MOSTRA (para posicionamento)
+  const displayAbertura = editMode ? 50 : (abertura ?? 0);
 
   return (
     <ResponsiveWrapper 
@@ -46,7 +54,7 @@ export default function PortaJusante({
             style={{
               width: '85px',
               height: '181px',
-              transform: `scaleX(${abertura / 100}) translateX(${(100 - abertura) * 0.85}px)`, 
+              transform: `scaleX(${displayAbertura / 100}) translateX(${(100 - displayAbertura) * 0.85}px)`, 
               transformOrigin: 'right center', // Movimento da DIREITA para ESQUERDA
               transition: 'transform 0.5s ease-in-out', // Animação suave
             }}

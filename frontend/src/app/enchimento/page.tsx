@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import ModernSidebar from '@/components/layout/ModernSidebar';
 import ModernHeader from '@/components/layout/ModernHeader';
 import GlobalAdvancedControls from '@/components/GlobalAdvancedControls';
-import { PipeSystem, ValvulaOnOff } from '@/components/Eclusa/Enchimento';
+import { PipeSystem, ValvulaOnOff, ValveDirecional, ValvulaGaveta, ValvulaVertical, ValvulaFlange, BasePistaoEnchimento, PistaoEnchimento, CilindroEnchimento, MotorEnchimento } from '@/components/Eclusa/Enchimento';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { LayoutLoadingProvider, useLayoutLoading } from '@/contexts/LayoutLoadingContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
@@ -165,43 +165,222 @@ function EnchimentoContent() {
                 editMode={editMode}
                 componentId="valvula-X06"
               />
+              
+              {/* VÁLVULAS DIRECIONAIS DO SISTEMA DE ENCHIMENTO */}
+              {/* Lado Direito */}
+              <ValveDirecional
+                isOpen={false}
+                editMode={editMode}
+                componentId="VD0"
+                side="direito"
+              />
+              
+              <ValveDirecional
+                isOpen={false}
+                editMode={editMode}
+                componentId="VD1"
+                side="direito"
+              />
+              
+              <ValveDirecional
+                isOpen={false}
+                editMode={editMode}
+                componentId="VD2"
+                side="direito"
+              />
+              
+              {/* Lado Esquerdo (Espelhadas) */}
+              <ValveDirecional
+                isOpen={false}
+                editMode={editMode}
+                componentId="VD3"
+                side="esquerdo"
+              />
+              
+              <ValveDirecional
+                isOpen={false}
+                editMode={editMode}
+                componentId="VD4"
+                side="esquerdo"
+              />
+              
+              <ValveDirecional
+                isOpen={false}
+                editMode={editMode}
+                componentId="VD5"
+                side="esquerdo"
+              />
+              
+
+              
+              {/* VÁLVULAS GAVETA DO SISTEMA DE ENCHIMENTO */}
+              {/* Lado Direito */}
+              <ValvulaGaveta
+                estado={false}
+                editMode={editMode}
+                componentId="VG0"
+                side="direito"
+              />
+              
+              <ValvulaGaveta
+                estado={false}
+                editMode={editMode}
+                componentId="VG1"
+                side="direito"
+              />
+              
+              {/* Lado Esquerdo (Espelhadas) */}
+              <ValvulaGaveta
+                estado={false}
+                editMode={editMode}
+                componentId="VG2"
+                side="esquerdo"
+              />
+              
+              <ValvulaGaveta
+                estado={false}
+                editMode={editMode}
+                componentId="VG3"
+                side="esquerdo"
+              />
+              
+              <ValvulaGaveta
+                estado={false}
+                editMode={editMode}
+                componentId="VG4"
+                side="direito"
+              />
+              
+              <ValvulaGaveta
+                estado={false}
+                editMode={editMode}
+                componentId="VG5"
+                side="esquerdo"
+              />
+              
+              {/* VÁLVULAS HORIZONTAIS DO SISTEMA DE ENCHIMENTO */}
+              <ValvulaVertical
+                isOpen={false}
+                editMode={editMode}
+                componentId="VH0"
+                side="direito"
+              />
+              
+              <ValvulaVertical
+                isOpen={false}
+                editMode={editMode}
+                componentId="VH1"
+                side="esquerdo"
+              />
+              
+              {/* VÁLVULAS FLANGE DO SISTEMA DE ENCHIMENTO */}
+              {/* Lado Direito */}
+              <ValvulaFlange
+                isActuated={false}
+                editMode={editMode}
+                componentId="VF0"
+                side="direito"
+              />
+              
+              <ValvulaFlange
+                isActuated={false}
+                editMode={editMode}
+                componentId="VF1"
+                side="direito"
+              />
+              
+              <ValvulaFlange
+                isActuated={false}
+                editMode={editMode}
+                componentId="VF2"
+                side="direito"
+              />
+              
+              {/* Lado Esquerdo (Espelhadas) */}
+              <ValvulaFlange
+                isActuated={false}
+                editMode={editMode}
+                componentId="VF3"
+                side="esquerdo"
+              />
+              
+              <ValvulaFlange
+                isActuated={false}
+                editMode={editMode}
+                componentId="VF4"
+                side="esquerdo"
+              />
+              
+              <ValvulaFlange
+                isActuated={false}
+                editMode={editMode}
+                componentId="VF5"
+                side="esquerdo"
+              />
+              
+              {/* BASES DOS PISTÕES */}
+              <BasePistaoEnchimento
+                side="esquerdo"
+                editMode={editMode}
+                componentId="base-pistao-enchimento-esquerdo"
+              />
+              
+              <BasePistaoEnchimento
+                side="direito"
+                editMode={editMode}
+                componentId="base-pistao-enchimento-direito"
+              />
+              
+              {/* PISTÕES COM LÓGICA DE NÍVEL */}
+              <PistaoEnchimento
+                nivel={nivelValue !== null ? nivelValue : 0} // ✅ CONECTADO AO WEBSOCKET
+                side="esquerdo"
+                editMode={editMode}
+                componentId="pistao-enchimento-esquerdo"
+              />
+              
+              <PistaoEnchimento
+                nivel={nivelValue !== null ? nivelValue : 0} // ✅ CONECTADO AO WEBSOCKET
+                side="direito"
+                editMode={editMode}
+                componentId="pistao-enchimento-direito"
+              />
+              
+              {/* CILINDROS COM LÓGICA DE ESTADO MOTOR */}
+              <CilindroEnchimento
+                estado={motorValue !== null ? motorValue : 0} // ✅ CONECTADO AO WEBSOCKET
+                side="esquerdo"
+                editMode={editMode}
+                componentId="cilindro-enchimento-esquerdo"
+              />
+              
+              <CilindroEnchimento
+                estado={motorValue !== null ? motorValue : 0} // ✅ CONECTADO AO WEBSOCKET
+                side="direito"
+                editMode={editMode}
+                componentId="cilindro-enchimento-direito"
+              />
+              
+              {/* MOTORES COM LÓGICA DE STATUS */}
+              <MotorEnchimento
+                status={motorValue !== null ? (motorValue as 0 | 1 | 2) : 0} // ✅ CONECTADO AO WEBSOCKET
+                side="esquerdo"
+                editMode={editMode}
+                componentId="motor-enchimento-esquerdo"
+              />
+              
+              <MotorEnchimento
+                status={motorValue !== null ? (motorValue as 0 | 1 | 2) : 0} // ✅ CONECTADO AO WEBSOCKET
+                side="direito"
+                editMode={editMode}
+                componentId="motor-enchimento-direito"
+              />
+
+
             </div>
           </div>
 
           <ScreenDebug />
-
-          <div className="fixed top-20 left-4 bg-black text-white p-3 rounded text-xs z-40 max-w-[350px]">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <span>PLC: {isConnected ? 'Conectado' : 'Desconectado'}</span>
-              </div>
-              
-              {nivelValue !== null && (
-                <div className="text-blue-400">📊 Nível: {nivelValue}%</div>
-              )}
-              
-              {motorValue !== null && (
-                <div className="text-green-400">
-                  ⚙️ Motor: {motorValue === 0 ? 'INATIVO' : motorValue === 1 ? 'OPERANDO' : 'FALHA'}
-                </div>
-              )}
-              
-              <div className="text-orange-400">
-                🔧 Pipes Ativos: {pipeSystem.filter(Boolean).length}/24
-              </div>
-              
-              {error && (
-                <div className="text-red-400">❌ Erro: {error}</div>
-              )}
-
-              {lastMessage && (
-                <div className="text-gray-400 text-xs">
-                  📡 Última msg: {lastMessage.substring(0, 25)}...
-                </div>
-              )}
-            </div>
-          </div>
 
           {!editMode && (
             <button

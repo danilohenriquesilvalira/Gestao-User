@@ -84,10 +84,11 @@ export default function ResponsiveWrapper({
     }, [configs, breakpoint]
   );
 
-  // Cálculo de dimensões da área de seleção
+  // Cálculo de dimensões da área de seleção (exatamente o tamanho do componente)
   const selectionDimensions = useMemo(() => {
-    const width = Math.max(currentConfig.width, MIN_SELECTION_SIZE);
-    const height = Math.max(currentConfig.height, MIN_SELECTION_SIZE);
+    let width = Math.max(currentConfig.width, MIN_SELECTION_SIZE);
+    let height = Math.max(currentConfig.height, MIN_SELECTION_SIZE);
+    
     return { width, height };
   }, [currentConfig.width, currentConfig.height]);
 
@@ -688,6 +689,9 @@ export default function ResponsiveWrapper({
                 position: 'absolute',
                 top: 0,
                 left: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 pointerEvents: editMode ? 'none' : 'auto'
               }}
             >

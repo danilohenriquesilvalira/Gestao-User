@@ -58,6 +58,34 @@ export default function GlobalAdvancedControls({ editMode, pageFilter }: GlobalA
       'valvula-X04': '🔧 Válvula X04',
       'valvula-X05': '🔧 Válvula X05',
       'valvula-X06': '🔧 Válvula X06',
+      'VD0': '🔧 Válvula Direcional VD0',
+      'VD1': '🔧 Válvula Direcional VD1',
+      'VD2': '🔧 Válvula Direcional VD2',
+      'VD3': '🔧 Válvula Direcional VD3',
+      'VD4': '🔧 Válvula Direcional VD4',
+      'VD5': '🔧 Válvula Direcional VD5',
+      'VG0': '🔧 Válvula Gaveta VG0',
+      'VG1': '🔧 Válvula Gaveta VG1',
+      'VG2': '🔧 Válvula Gaveta VG2',
+      'VG3': '🔧 Válvula Gaveta VG3',
+      'VG4': '🔧 Válvula Gaveta VG4',
+      'VG5': '🔧 Válvula Gaveta VG5',
+      'VH0': '🔧 Válvula Horizontal VH0',
+      'VH1': '🔧 Válvula Horizontal VH1',
+      'VF0': '🔧 Válvula Flange VF0',
+      'VF1': '🔧 Válvula Flange VF1',
+      'VF2': '🔧 Válvula Flange VF2',
+      'VF3': '🔧 Válvula Flange VF3',
+      'VF4': '🔧 Válvula Flange VF4',
+      'VF5': '🔧 Válvula Flange VF5',
+      'base-pistao-enchimento-esquerdo': '🏗️ Base Pistão Esquerdo',
+      'base-pistao-enchimento-direito': '🏗️ Base Pistão Direito',
+      'pistao-enchimento-esquerdo': '🔧 Pistão Esquerdo',
+      'pistao-enchimento-direito': '🔧 Pistão Direito',
+      'cilindro-enchimento-esquerdo': '🔩 Cilindro Esquerdo',
+      'cilindro-enchimento-direito': '🔩 Cilindro Direito',
+      'motor-enchimento-esquerdo': '⚙️ Motor Esquerdo',
+      'motor-enchimento-direito': '⚙️ Motor Direito',
       'enchimento-tanque-principal': '🏗️ Tanque de Enchimento',
       'enchimento-bomba-principal': '🚿 Bomba de Enchimento',
       'enchimento-valvula-entrada': '🔧 Válvula de Entrada',
@@ -129,9 +157,20 @@ export default function GlobalAdvancedControls({ editMode, pageFilter }: GlobalA
               // Para página de enchimento: inclui componentes relacionados ao sistema de enchimento
               shouldInclude = componentId.startsWith('enchimento-') || 
                              componentId.startsWith('pipe-system-') ||
-                             componentId.startsWith('valvula-X') ||  // ✅ NOVO: Válvulas X00-X05
+                             componentId.startsWith('valvula-X') ||  // ✅ Válvulas X00-X06
+                             componentId.startsWith('VD') ||  // ✅ NOVO: Válvulas Direcionais VD0-VD5
+                             componentId.startsWith('VG') ||  // ✅ NOVO: Válvulas Gaveta VG0-VG5
+                             componentId.startsWith('VH') ||  // ✅ NOVO: Válvulas Horizontais VH0-VH1
+                             componentId.startsWith('VF') ||  // ✅ NOVO: Válvulas Flange VF0-VF5
+                             componentId.startsWith('base-pistao-enchimento-') ||  // ✅ NOVO: Bases dos pistões
+                             componentId.startsWith('pistao-enchimento-') ||  // ✅ NOVO: Pistões
+                             componentId.startsWith('cilindro-enchimento-') ||  // ✅ NOVO: Cilindros
+                             componentId.startsWith('motor-enchimento-') ||  // ✅ NOVO: Motores
                              componentId.includes('enchimento') ||
-                             componentId.includes('valvula');
+                             componentId.includes('valvula') ||
+                             componentId.includes('pistao') ||
+                             componentId.includes('cilindro') ||
+                             componentId.includes('motor');
               
               console.log(`🔍 [DEBUG] ${componentId} -> shouldInclude: ${shouldInclude}`);
             } else {

@@ -1,7 +1,5 @@
 // components/Eclusa/PortaJusante.tsx - COMPONENTE PORTA JUSANTE COM WEBSOCKET
-'use client';
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
 import ResponsiveWrapper from '@/components/ResponsiveWrapper';
 import { useWebSocket } from '@/hooks/useWebSocket';
 
@@ -59,13 +57,12 @@ export default function PortaJusante({
               transition: 'transform 0.5s ease-in-out', // Animação suave
             }}
           >
-            <Image
+            <img
               src="/Eclusa/Porta_jusante.svg"
               alt="Porta Jusante"
-              width={85}
-              height={181}
+              width="85"
+              height="181"
               className="object-contain"
-              priority
             />
           </div>
         </div>

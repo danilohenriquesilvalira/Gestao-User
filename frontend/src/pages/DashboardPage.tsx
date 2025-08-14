@@ -1,21 +1,19 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import ModernSidebar from '@/components/layout/ModernSidebar';
 import ModernHeader from '@/components/layout/ModernHeader';
 import GlobalAdvancedControls from '@/components/GlobalAdvancedControls';
-import { PortaMontanteRegua, BasePortaMontante } from '@/components/Eclusa/PortaMontante/index';
-import ContraPeso_MontanteDireito from '@/components/Eclusa/PortaMontante/ContraPeso_MontanteDireito';
-import ContraPeso_MontanteEsquerdo from '@/components/Eclusa/PortaMontante/ContraPeso_MontanteEsquerdo';
-import Motor from '@/components/industrial/Motor';
-import { StatusIndicator } from '@/components/ui';
+import Nivel from '@/components/industrial/Nivel';
 import { useWebSocket } from '@/hooks/useWebSocket';
-import { limitPercentage, limitMotorStatus, formatPercentage, formatMotorStatus } from '@/lib/plcValidation';
+import Caldeira from '@/components/Eclusa/Caldeira';
+import Parede from '@/components/Eclusa/Parede';
+import PortaJusante from '@/components/Eclusa/PortaJusante';
+import Semaforo from '@/components/Eclusa/Semaforo';
 import { LayoutLoadingProvider, useLayoutLoading } from '@/contexts/LayoutLoadingContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import NotificationContainer from '@/components/ui/NotificationContainer';
 import { EdpLoading } from '@/components/ui/EdpLoading';
 
+// Debug Component para responsividade
 function ScreenDebug() {
   const [screenInfo, setScreenInfo] = useState({ width: 0, height: 0 });
 
@@ -32,7 +30,7 @@ function ScreenDebug() {
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
-  const getBreakpoint = (width: number): string => {
+  const getBreakpoint = (width: number) => {
     if (width >= 3840) return '6xl (3840px+)';
     if (width >= 2560) return '5xl (2560px+)';
     if (width >= 1920) return '4xl (1920px+)';
@@ -54,32 +52,29 @@ function ScreenDebug() {
   );
 }
 
-export default function PortaMontantePage() {
+export default function DashboardPage() {
   return (
     <NotificationProvider>
       <LayoutLoadingProvider>
-        <PortaMontanteContent />
+        <DashboardContent />
         <NotificationContainer />
       </LayoutLoadingProvider>
     </NotificationProvider>
   );
 }
 
-function PortaMontanteContent() {
+function DashboardContent() {
   const [editMode, setEditMode] = useState(false);
   const { isAllLoaded } = useLayoutLoading();
-  const { 
-    nivelValue, 
-    // Valores específicos da Porta Montante
-    portaMontanteValue, 
-    portaMontanteContrapesoDirectoValue, 
-    portaMontanteContrapesoEsquerdoValue, 
-    portaMontanteMotorDireitoValue, 
-    portaMontanteMotorEsquerdoValue,
-    isConnected, 
-    error, 
-    lastMessage 
-  } = useWebSocket('ws://localhost:8080/ws');
+  const { nivelValue, motorValue, isConnected, error, lastMessage } = useWebSocket('ws://localhost:8080/ws');
+
+  // ✅ CONDIÇÃO MELHORADA: Layout carregado + WebSocket com dados iniciais
+  const isFullyReady = isAllLoaded && (
+    isConnected && ( 
+      motorValue !== null || // Dados da porta jusante chegaram
+      editMode // OU está em modo edição (sempre permite)
+    )
+  );
 
   const handleLogout = () => {
     window.location.replace('/');
@@ -87,19 +82,25 @@ function PortaMontanteContent() {
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-white">
-      {!isAllLoaded && (
+      {/* TELA DE LOADING GLOBAL - Com EdpLoading Personalizado */}
+      {!isFullyReady && (
         <EdpLoading
-          title="Porta Montante"
-          subtitle="Sistema de Controle Industrial EDP"
-          status="Inicializando componentes da porta montante..."
+          title="Eclusa de Navegação"
+          subtitle="Sistema de Gestão Industrial EDP"
+          status={
+            !isAllLoaded ? 'Inicializando interface...' : 
+            !isConnected ? 'Conectando ao PLC...' : 
+            'Sincronizando dados do sistema...'
+          }
           size="lg"
         />
       )}
 
-      {isAllLoaded && (
+      {/* CONTEÚDO DO DASHBOARD - Só mostra quando TUDO estiver carregado E WebSocket com dados */}
+      {isFullyReady && (
         <>
           <ModernHeader
-            title="Porta Montante - Sistema de Controle"
+            title="Eclusa de Navegação"
             user="danilohenriquesilvalira"
             onLogout={handleLogout}
           />
@@ -114,36 +115,12 @@ function PortaMontanteContent() {
               </div>
               
               {nivelValue !== null && (
-                <div className="text-blue-400">📊 Nível: {formatPercentage(nivelValue)}</div>
+                <div className="text-blue-400">📊 Nível: {nivelValue}%</div>
               )}
               
-              {portaMontanteValue !== null && (
+              {motorValue !== null && (
                 <div className="text-green-400">
-                  ⚙️ Motor: {formatMotorStatus(portaMontanteValue)}
-                </div>
-              )}
-              
-              {portaMontanteMotorDireitoValue !== null && (
-                <div className="text-cyan-400">
-                  🔧 Motor Direito: {formatMotorStatus(portaMontanteMotorDireitoValue)}
-                </div>
-              )}
-              
-              {portaMontanteMotorEsquerdoValue !== null && (
-                <div className="text-yellow-400">
-                  🔧 Motor Esquerdo: {formatMotorStatus(portaMontanteMotorEsquerdoValue)}
-                </div>
-              )}
-
-              {portaMontanteContrapesoDirectoValue !== null && (
-                <div className="text-orange-400">
-                  ⚖️ Contrapeso Dir: {formatPercentage(portaMontanteContrapesoDirectoValue)}
-                </div>
-              )}
-
-              {portaMontanteContrapesoEsquerdoValue !== null && (
-                <div className="text-purple-400">
-                  ⚖️ Contrapeso Esq: {formatPercentage(portaMontanteContrapesoEsquerdoValue)}
+                  ⚙️ Motor: {motorValue === 0 ? 'INATIVO' : motorValue === 1 ? 'OPERANDO' : 'FALHA'}
                 </div>
               )}
               
@@ -159,6 +136,7 @@ function PortaMontanteContent() {
             </div>
           </div>
 
+          {/* BOTÃO DE EDIT MODE DIRETO */}
           {!editMode && (
             <button
               onClick={() => setEditMode(!editMode)}
@@ -183,65 +161,34 @@ function PortaMontanteContent() {
             </button>
           )}
 
-          <GlobalAdvancedControls editMode={editMode} pageFilter="montante" />
+          {/* PAINEL FLUTUANTE GLOBAL */}
+          <GlobalAdvancedControls editMode={editMode} />
 
           <ModernSidebar />
 
+          {/* ÁREA PRINCIPAL */}
           <div 
             className={`h-[calc(100vh-64px)] overflow-auto pb-20 md:pb-0 ${
               editMode ? 'bg-blue-50/30' : ''
             }`}
           >
-            {/* COMPONENTES DA PORTA MONTANTE */}
-            <BasePortaMontante 
-              editMode={editMode} 
-              componentId="porta-montante-base-principal"
-            />
-            
-            <PortaMontanteRegua 
-              editMode={editMode} 
-              componentId="porta-montante-regua-principal"
-              abertura={limitPercentage(portaMontanteValue)}
-            />
-
-            <ContraPeso_MontanteDireito 
-              editMode={editMode} 
-              componentId="contrapeso-montante-direito"
-              nivel={limitPercentage(portaMontanteContrapesoDirectoValue)}
-            />
-
-            <ContraPeso_MontanteEsquerdo 
-              editMode={editMode} 
-              componentId="contrapeso-montante-esquerdo"
-              nivel={limitPercentage(portaMontanteContrapesoEsquerdoValue)}
-            />
-
-            {/* Status Indicator - Indica se a porta está fechada, em movimento ou aberta */}
-            <StatusIndicator
+            {/* COMPONENTES ESTÁTICOS ORIGINAIS */}
+            <Nivel
+              nivel={75}
               editMode={editMode}
-              componentId="porta-montante-status-porta"
-              label="Porta Montante"
-              websocketValue={portaMontanteValue ?? 0}
-              size="md"
+              websocketValue={nivelValue}
             />
 
-            {/* Motor direito - normal */}
-            <Motor
-              editMode={editMode}
-              componentId="porta-montante-motor-direito"
-              status={limitMotorStatus(portaMontanteMotorDireitoValue)}
-              websocketValue={portaMontanteMotorDireitoValue}
-            />
+            {/* ✅ COMPONENTES ECLUSA INDEPENDENTES - SEM CARD */}
+            <Caldeira editMode={editMode} />
+            <Parede editMode={editMode} />
+            <PortaJusante editMode={editMode} />
+            <Semaforo editMode={editMode} />
             
-            {/* Motor esquerdo - ESPELHADO */}
-            <Motor
-              editMode={editMode}
-              componentId="porta-montante-motor-esquerdo"
-              status={limitMotorStatus(portaMontanteMotorEsquerdoValue)}
-              websocketValue={portaMontanteMotorEsquerdoValue}
-              direction="right"
-            />
-            
+            {/* ✅ SEMÁFOROS CORRIGIDOS - APENAS OS QUE EXISTEM NO GO BACKEND */}
+            <Semaforo editMode={editMode} componentId="semaforo-1" />
+            <Semaforo editMode={editMode} componentId="semaforo-2" />
+            <Semaforo editMode={editMode} componentId="semaforo-3" />
           </div>
 
         </>

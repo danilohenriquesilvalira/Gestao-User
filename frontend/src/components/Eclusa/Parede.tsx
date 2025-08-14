@@ -1,7 +1,6 @@
 // components/Eclusa/Parede.tsx - COMPONENTE INDEPENDENTE PAREDE
-'use client';
+
 import React from 'react';
-import Image from 'next/image';
 import ResponsiveWrapper from '@/components/ResponsiveWrapper';
 
 interface ParedeProps {
@@ -29,12 +28,10 @@ export default function Parede({
       <div 
         className={`relative w-full h-full flex items-center justify-center ${editMode ? 'border-2 border-blue-500 bg-blue-50/20' : ''}`}
       >
-        <Image
+        <img
           src="/Eclusa/Parede_Eclusa.svg"
           alt="Parede da Eclusa"
-          fill
-          className="object-contain"
-          priority
+          className="w-full h-full object-contain"
         />
       </div>
     </ResponsiveWrapper>

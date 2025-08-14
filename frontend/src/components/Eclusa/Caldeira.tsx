@@ -1,7 +1,6 @@
 // components/Eclusa/Caldeira.tsx - COMPONENTE INDEPENDENTE CALDEIRA
-'use client';
+
 import React from 'react';
-import Image from 'next/image';
 import ResponsiveWrapper from '@/components/ResponsiveWrapper';
 
 interface CaldeiraProps {
@@ -29,12 +28,10 @@ export default function Caldeira({
       <div 
         className={`relative w-full h-full flex items-center justify-center ${editMode ? 'border-2 border-blue-500 bg-blue-50/20' : ''}`}
       >
-        <Image
+        <img
           src="/Eclusa/Caldeira_Eclusa.svg"
           alt="Caldeira da Eclusa"
-          fill
-          className="object-contain"
-          priority
+          className="w-full h-full object-contain"
         />
         
         {editMode && (

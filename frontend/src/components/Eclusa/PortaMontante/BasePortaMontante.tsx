@@ -1,7 +1,6 @@
-'use client';
+
 
 import React from 'react';
-import Image from 'next/image';
 import ResponsiveWrapper from '@/components/ResponsiveWrapper';
 
 interface BasePortaMontanteProps {
@@ -38,13 +37,12 @@ const BasePortaMontante: React.FC<BasePortaMontanteProps> = ({
       }}
     >
       <div className={`w-full h-full ${editMode ? 'border-2 border-blue-500 bg-blue-50/20' : ''}`}>
-        <Image
+        <img
           src="/PortaMontante/BasePortaMontante.svg"
           alt="Base Porta Montante"
           width={componentWidth || width}
           height={componentHeight || height}
           className="w-full h-full object-contain"
-          priority
         />
         
         {editMode && (

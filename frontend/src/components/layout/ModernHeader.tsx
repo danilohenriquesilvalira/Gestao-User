@@ -1,7 +1,6 @@
-'use client';
+
 
 import { useState } from 'react';
-import Image from 'next/image';
 
 interface ModernHeaderProps {
   title?: string;
@@ -26,19 +25,19 @@ export default function ModernHeader({
       
       {/* Logo e Título */}
       <div className="flex items-center gap-1 md:gap-0">
-        <Image
+        <img
           src="/Logo_EDP.svg"
           alt="EDP Logo"
-          width={24}
-          height={24}
+          width="24"
+          height="24"
           className="md:w-8 md:h-8 hover:scale-110 transition-transform"
         />
         <div className="hidden sm:flex items-center gap-2">
-          <Image
+          <img
             src="/Letra_EDP.svg"
             alt="EDP"
-            width={64} 
-            height={24}
+            width="64" 
+            height="24"
             className="md:w-20 md:h-8"
           />
           {/* Container para a linha e o título para melhor organização */}

@@ -1,4 +1,3 @@
-'use client';
 import React, { useState } from 'react';
 import ResponsiveWrapper from '@/components/ResponsiveWrapper';
 
@@ -55,7 +54,7 @@ const ContraPeso_MontanteEsquerdo: React.FC<ContraPesoMontanteEsquerdoProps> = (
               width="100%" 
               height="100%" 
               viewBox={`0 0 91 ${svgHeight}`} 
-              preserveAspectRatio="xMidYTop meet"
+              preserveAspectRatio="xMidYMid meet"
               fill="none" 
               xmlns="http://www.w3.org/2000/svg"
             >

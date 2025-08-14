@@ -1,4 +1,3 @@
-'use client';
 
 import React from 'react';
 import ResponsiveWrapper from '@/components/ResponsiveWrapper';
@@ -275,7 +274,7 @@ const PipeSystem: React.FC<PipeSystemProps> = ({
         <PipeSystemSVG />
       </div>
       
-      <style jsx>{`
+      <style>{`
         .pipe-system {
           width: 100%;
           height: 100%;
@@ -286,7 +285,6 @@ const PipeSystem: React.FC<PipeSystemProps> = ({
         }
         
         .pipe-active {
-          animation: pipe-flow 2s ease-in-out infinite;
           filter: drop-shadow(0 0 6px #FC6500);
         }
         
@@ -294,20 +292,6 @@ const PipeSystem: React.FC<PipeSystemProps> = ({
           /* Apenas a cor marrom estática */
         }
         
-        @keyframes pipe-flow {
-          0% { 
-            stroke: #FC6500;
-            filter: drop-shadow(0 0 6px #FC6500);
-          }
-          50% { 
-            stroke: #FF8533;
-            filter: drop-shadow(0 0 12px #FC6500);
-          }
-          100% { 
-            stroke: #FC6500;
-            filter: drop-shadow(0 0 6px #FC6500);
-          }
-        }
         
         .pipe-system-wrapper {
           display: flex;

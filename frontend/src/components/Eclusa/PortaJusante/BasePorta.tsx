@@ -1,7 +1,6 @@
-'use client';
+
 
 import React from 'react';
-import Image from 'next/image';
 import ResponsiveWrapper from '@/components/ResponsiveWrapper';
 
 interface BasePortaProps {
@@ -32,16 +31,14 @@ export default function BasePorta({
       <div className={`w-full h-full flex items-center justify-center ${editMode ? 'border-2 border-green-500 bg-green-50/20' : ''}`}>
         {/* Container da Base da Porta */}
         <div className="relative w-full h-full">
-          <Image
+          <img
             src="/PortaJusante/BasePorta.svg"
             alt="Base da Porta Jusante"
-            fill
             style={{
               objectFit: 'contain',
               objectPosition: 'center'
             }}
-            className="drop-shadow-lg"
-            priority
+            className="w-full h-full drop-shadow-lg"
           />
           
           {/* Overlay de informações no modo edição */}

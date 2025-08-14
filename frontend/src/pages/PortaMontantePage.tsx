@@ -1,13 +1,12 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import ModernSidebar from '@/components/layout/ModernSidebar';
 import ModernHeader from '@/components/layout/ModernHeader';
 import GlobalAdvancedControls from '@/components/GlobalAdvancedControls';
-import PortaJusante from '@/components/Eclusa/PortaJusante';
-import { BasePorta, PortaJusanteRegua, ContraPesoDireito, ContraPesoEsquerdo } from '@/components/Eclusa/PortaJusante/index';
-import { StatusIndicator } from '@/components/ui';
+import { PortaMontanteRegua, BasePortaMontante } from '@/components/Eclusa/PortaMontante/index';
+import ContraPeso_MontanteDireito from '@/components/Eclusa/PortaMontante/ContraPeso_MontanteDireito';
+import ContraPeso_MontanteEsquerdo from '@/components/Eclusa/PortaMontante/ContraPeso_MontanteEsquerdo';
 import Motor from '@/components/industrial/Motor';
+import { StatusIndicator } from '@/components/ui';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { limitPercentage, limitMotorStatus, formatPercentage, formatMotorStatus } from '@/lib/plcValidation';
 import { LayoutLoadingProvider, useLayoutLoading } from '@/contexts/LayoutLoadingContext';
@@ -53,21 +52,32 @@ function ScreenDebug() {
   );
 }
 
-export default function PortaJusantePage() {
+export default function PortaMontantePage() {
   return (
     <NotificationProvider>
       <LayoutLoadingProvider>
-        <PortaJusanteContent />
+        <PortaMontanteContent />
         <NotificationContainer />
       </LayoutLoadingProvider>
     </NotificationProvider>
   );
 }
 
-function PortaJusanteContent() {
+function PortaMontanteContent() {
   const [editMode, setEditMode] = useState(false);
   const { isAllLoaded } = useLayoutLoading();
-  const { nivelValue, motorValue, contrapesoDirectoValue, contrapesoEsquerdoValue, motorDireitoValue, motorEsquerdoValue, isConnected, error, lastMessage } = useWebSocket('ws://localhost:8080/ws');
+  const { 
+    nivelValue, 
+    // Valores específicos da Porta Montante
+    portaMontanteValue, 
+    portaMontanteContrapesoDirectoValue, 
+    portaMontanteContrapesoEsquerdoValue, 
+    portaMontanteMotorDireitoValue, 
+    portaMontanteMotorEsquerdoValue,
+    isConnected, 
+    error, 
+    lastMessage 
+  } = useWebSocket('ws://localhost:8080/ws');
 
   const handleLogout = () => {
     window.location.replace('/');
@@ -77,9 +87,9 @@ function PortaJusanteContent() {
     <div className="h-screen w-screen overflow-hidden bg-white">
       {!isAllLoaded && (
         <EdpLoading
-          title="Porta Jusante"
+          title="Porta Montante"
           subtitle="Sistema de Controle Industrial EDP"
-          status="Inicializando componentes da porta jusante..."
+          status="Inicializando componentes da porta montante..."
           size="lg"
         />
       )}
@@ -87,7 +97,7 @@ function PortaJusanteContent() {
       {isAllLoaded && (
         <>
           <ModernHeader
-            title="Porta Jusante - Sistema de Controle"
+            title="Porta Montante - Sistema de Controle"
             user="danilohenriquesilvalira"
             onLogout={handleLogout}
           />
@@ -105,21 +115,21 @@ function PortaJusanteContent() {
                 <div className="text-blue-400">📊 Nível: {formatPercentage(nivelValue)}</div>
               )}
               
-              {motorValue !== null && (
+              {portaMontanteValue !== null && (
                 <div className="text-green-400">
-                  ⚙️ Motor: {formatMotorStatus(motorValue)}
+                  ⚙️ Porta Montante: {formatPercentage(portaMontanteValue)}
                 </div>
               )}
               
-              {motorDireitoValue !== null && (
+              {portaMontanteMotorDireitoValue !== null && (
                 <div className="text-cyan-400">
-                  🔧 Motor Direito: {formatMotorStatus(motorDireitoValue)}
+                  🔧 Motor Direito: {formatMotorStatus(portaMontanteMotorDireitoValue)}
                 </div>
               )}
               
-              {motorEsquerdoValue !== null && (
+              {portaMontanteMotorEsquerdoValue !== null && (
                 <div className="text-yellow-400">
-                  🔧 Motor Esquerdo: {formatMotorStatus(motorEsquerdoValue)}
+                  🔧 Motor Esquerdo: {formatMotorStatus(portaMontanteMotorEsquerdoValue)}
                 </div>
               )}
               
@@ -159,65 +169,49 @@ function PortaJusanteContent() {
             </button>
           )}
 
-          <GlobalAdvancedControls editMode={editMode} pageFilter="porta-jusante" />
-
+          <GlobalAdvancedControls editMode={editMode} />
           <ModernSidebar />
 
-          <div 
-            className={`h-[calc(100vh-64px)] overflow-auto pb-20 md:pb-0 ${
-              editMode ? 'bg-blue-50/30' : ''
-            }`}
-          >
-            <BasePorta 
+          <div className={`h-[calc(100vh-64px)] overflow-auto pb-20 md:pb-0 ${editMode ? 'bg-blue-50/30' : ''}`}>
+            {/* COMPONENTES DA PORTA MONTANTE */}
+            <BasePortaMontante 
               editMode={editMode} 
-              componentId="porta-jusante-base-principal"
+              componentId="porta-montante-base-principal"
             />
             
-            <PortaJusanteRegua 
+            <PortaMontanteRegua 
               editMode={editMode} 
-              componentId="porta-jusante-regua-principal"
-              nivel={limitPercentage(motorValue)}
+              componentId="porta-montante-regua-principal"
+              abertura={limitPercentage(portaMontanteValue)}
             />
             
-            <ContraPesoDireito 
+            <ContraPeso_MontanteDireito 
               editMode={editMode} 
-              componentId="porta-jusante-contrapeso-direito"
-              nivel={limitPercentage(contrapesoDirectoValue)}
+              componentId="contrapeso-montante-direito"
+              nivel={limitPercentage(portaMontanteContrapesoDirectoValue)}
             />
             
-            <ContraPesoEsquerdo 
+            <ContraPeso_MontanteEsquerdo 
               editMode={editMode} 
-              componentId="porta-jusante-contrapeso-esquerdo"
-              nivel={limitPercentage(contrapesoEsquerdoValue)}
+              componentId="contrapeso-montante-esquerdo"
+              nivel={limitPercentage(portaMontanteContrapesoEsquerdoValue)}
             />
             
-           <StatusIndicator
-  editMode={editMode}
-  componentId="porta-jusante-status-porta"
-  label="Porta Jusante"
-  websocketValue={motorValue ?? 0}  // ✅ Posição da porta (motor, não nível!)
-  size="md"
-/>
-            
-            {/* Motor direito - normal */}
-            <Motor
+            {/* MOTORES DA PORTA MONTANTE */}
+            <Motor 
               editMode={editMode}
-              componentId="porta-jusante-motor-direito"
-              status={limitMotorStatus(motorDireitoValue)}
-              websocketValue={motorDireitoValue}
-            />
-            
-            {/* Motor esquerdo - ESPELHADO */}
-            <Motor
-              editMode={editMode}
-              componentId="porta-jusante-motor-esquerdo"
-              status={limitMotorStatus(motorEsquerdoValue)}
-              websocketValue={motorEsquerdoValue}
+              componentId="motor-montante-direito"
+              status={limitMotorStatus(portaMontanteMotorDireitoValue)}
               direction="right"
             />
             
+            <Motor 
+              editMode={editMode}
+              componentId="motor-montante-esquerdo" 
+              status={limitMotorStatus(portaMontanteMotorEsquerdoValue)}
+              direction="left"
+            />
           </div>
-
         </>
       )}
     </div>

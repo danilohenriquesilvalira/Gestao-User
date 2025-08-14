@@ -1,4 +1,3 @@
-'use client';
 
 import React from 'react';
 import ResponsiveWrapper from '@/components/ResponsiveWrapper';
@@ -89,7 +88,7 @@ const ValvulaOnOff: React.FC<ValvulaOnOffProps> = ({
         </svg>
       </div>
       
-      <style jsx>{`
+      <style>{`
         .valvula-svg {
           transition: all 0.3s ease;
         }

@@ -9,4 +9,5 @@ export { default as BasePistaoEnchimento } from './BasePistaoEnchimento';
 export { default as PistaoEnchimento } from './PistaoEnchimento';
 export { default as CilindroEnchimento } from './CilindroEnchimento';
 export { default as MotorEnchimento } from './MotorEnchimento';
+export { default as TanqueDeOleo } from './TanqueDeOleo';
 

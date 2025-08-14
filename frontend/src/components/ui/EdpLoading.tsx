@@ -1,4 +1,3 @@
-'use client';
 
 import React from 'react';
 import { EdpLogo } from './LogoAnimado';
@@ -32,7 +31,7 @@ export const EdpLoading: React.FC<EdpLoadingProps> = ({
   return (
     <>
       {/* Estilos CSS customizados para as animações */}
-      <style jsx>{`
+      <style>{`
         @keyframes edp-pulse {
           0%, 100% { 
             opacity: 1;

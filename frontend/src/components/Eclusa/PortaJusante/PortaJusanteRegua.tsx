@@ -1,7 +1,6 @@
-'use client';
+
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
 import ResponsiveWrapper from '@/components/ResponsiveWrapper';
 
 interface PortaJusanteReguaProps {
@@ -63,11 +62,11 @@ const PortaJusanteRegua: React.FC<PortaJusanteReguaProps> = ({
     >
       <div className={`relative ${className} ${editMode ? 'border-2 border-blue-500 bg-blue-50/20' : ''}`} style={{ width: '100%', height: '100%' }}>
         {/* SVG da porta jusante régua */}
-        <Image
+        <img
           src="/PortaJusante/Porta_Jusante_Regua.svg"
           alt="Porta Jusante Régua"
-          width={435}
-          height={438}
+          width="435"
+          height="438"
           style={{
             width: '100%',
             height: '100%',
@@ -77,7 +76,6 @@ const PortaJusanteRegua: React.FC<PortaJusanteReguaProps> = ({
             transition: 'bottom 0.3s ease-in-out'
           }}
           className="absolute"
-          priority
         />
         
         {/* Overlay de informações no modo edição */}

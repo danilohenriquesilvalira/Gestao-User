@@ -1,14 +1,12 @@
-'use client';
-
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { EyeIcon, EyeSlashIcon, LockClosedIcon, UserIcon, ArrowRightIcon } from '@heroicons/react/24/outline'; // ✅ Removido XMarkIcon e ExclamationTriangleIcon não utilizados
+import { EyeIcon, EyeSlashIcon, LockClosedIcon, UserIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Checkbox } from '@/components/ui/Checkbox';
-import Image from 'next/image';
 
 // Importa o componente EdpLogo
 import { EdpLogo } from '@/components/ui/LogoAnimado';
@@ -110,6 +108,7 @@ const TypingEffect = ({ startTyping }: { startTyping: boolean }) => {
 };
 
 export default function LoginPage() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [startTyping, setStartTyping] = useState(false);
@@ -136,7 +135,7 @@ export default function LoginPage() {
       });
       
       if (response.ok) {
-        window.location.href = '/dashboard';
+        navigate('/dashboard');
       } else {
         showNotification('Credenciais inválidas', 'error');
       }
@@ -150,7 +149,7 @@ export default function LoginPage() {
 
   return (
     <>
-      <style jsx global>{`
+      <style>{`
         @keyframes typing-cursor-primary {
           from { border-right-color: #55FD5B; }
           to { border-right-color: rgba(85, 253, 91, 0); }
@@ -237,12 +236,10 @@ export default function LoginPage() {
                 className="relative h-24 md:h-32 lg:h-40 xl:h-48 2xl:h-60 3xl:h-68 w-auto opacity-0 animate-fadeInUp"
                 style={{ animationDelay: '0.5s' }}
               >
-                <Image
+                <img
                   src="/Letra_EDP.svg"
                   alt="Letra EDP"
-                  layout="fill"
-                  objectFit="contain"
-                  className="!relative !w-auto"
+                  className="h-full w-auto object-contain"
                 />
               </div>
             </div>
@@ -271,21 +268,17 @@ export default function LoginPage() {
               <div className="flex flex-col items-center justify-center space-y-4 mb-10">
                 <div className="flex items-center space-x-4">
                   <div className="relative h-12 w-auto md:h-14 lg:h-16">
-                    <Image 
+                    <img 
                       src="/Logo_EDP.svg" 
                       alt="Logo EDP" 
-                      layout="fill"
-                      objectFit="contain"
-                      className="!relative !w-auto"
+                      className="h-full w-auto object-contain"
                     />
                   </div>
                   <div className="relative h-10 w-auto md:h-12 lg:h-14">
-                    <Image
+                    <img
                       src="/Letra_Azul_EDP.svg"
                       alt="Letra EDP"
-                      layout="fill"
-                      objectFit="contain"
-                      className="!relative !w-auto"
+                      className="h-full w-auto object-contain"
                     />
                   </div>
                 </div>

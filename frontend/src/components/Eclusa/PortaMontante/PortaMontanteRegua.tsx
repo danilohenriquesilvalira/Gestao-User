@@ -51,7 +51,14 @@ const PortaMontanteRegua: React.FC<PortaMontanteReguaProps> = ({
         '4xl': { x: 650, y: 550, width: 560, height: 500, scale: 0.85, zIndex: 8, opacity: 1, rotation: 0 }
       }}
     >
-      <div className={`w-full h-full flex flex-col items-center justify-center ${editMode ? 'border-2 border-blue-500 bg-blue-50/20' : ''}`}>
+      <div className="porta-montante-regua-wrapper" style={{ 
+        width: '100%', 
+        height: '100%',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
         {/* Container com posição relativa para posicionar o SVG - agora 100% responsivo */}
         <div 
           className="relative w-full h-full"
@@ -271,10 +278,6 @@ const PortaMontanteRegua: React.FC<PortaMontanteReguaProps> = ({
           </div>
         )}
 
-        {editMode && (
-          <div className="absolute inset-0 border-2 border-dashed border-purple-400 bg-purple-50/20 rounded flex items-center justify-center pointer-events-none">
-          </div>
-        )}
       </div>
     </ResponsiveWrapper>
   );

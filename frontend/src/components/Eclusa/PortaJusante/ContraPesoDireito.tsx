@@ -53,7 +53,14 @@ const ContraPesoDireito: React.FC<ContraPesoDireitoProps> = ({
         '4xl': { x: 400, y: 400, width: 500, height: 1200, scale: 1, zIndex: 1, opacity: 1, rotation: 0 }
       }}
     >
-      <div className={`flex items-center gap-4 w-full h-full ${editMode ? 'border-2 border-orange-500 bg-orange-50/20' : ''}`}>
+      <div className="contrapeso-direito-wrapper" style={{ 
+        width: '100%', 
+        height: '100%',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
         {/* Container do SVG escalado pelo ResponsiveWrapper */}
         <div className="relative w-full h-full">
           <svg 
@@ -110,12 +117,6 @@ const ContraPesoDireito: React.FC<ContraPesoDireitoProps> = ({
             </defs>
           </svg>
         </div>
-        
-        {editMode && (
-          <div className="absolute top-2 left-2 bg-orange-600 text-white px-2 py-1 rounded text-xs font-medium">
-            ContraPeso Direito ({abertura}%)
-          </div>
-        )}
         
         {nivel === undefined && (
           <div className="flex flex-col items-center">

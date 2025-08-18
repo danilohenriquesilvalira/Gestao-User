@@ -53,7 +53,14 @@ const Semaforo: React.FC<SemaforoProps> = ({
         '4xl': { x: 700, y: 550, width: 240, height: 350, scale: 1, zIndex: 10, opacity: 1, rotation: 0 }
       }}
     >
-      <div className={`relative w-full h-full flex items-center justify-center ${editMode ? 'border-2 border-blue-500 bg-blue-50/20' : ''}`}>
+      <div className="semaforo-wrapper" style={{ 
+        width: '100%', 
+        height: '100%',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
         <svg 
           width="100%" 
           height="100%" 

@@ -36,22 +36,23 @@ const BasePortaMontante: React.FC<BasePortaMontanteProps> = ({
         '4xl': { x: 400, y: 450, width: 480, height: 360, scale: 1.15, zIndex: 5, opacity: 1, rotation: 0 }
       }}
     >
-      <div className={`w-full h-full ${editMode ? 'border-2 border-blue-500 bg-blue-50/20' : ''}`}>
+      <div className="base-porta-montante-wrapper" style={{ 
+        width: '100%', 
+        height: '100%',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
         <img
           src="/PortaMontante/BasePortaMontante.svg"
           alt="Base Porta Montante"
-          width={componentWidth || width}
-          height={componentHeight || height}
-          className="w-full h-full object-contain"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain'
+          }}
         />
-        
-        {editMode && (
-          <div className="absolute inset-0 border-2 border-dashed border-purple-400 bg-purple-50/20 rounded flex items-center justify-center pointer-events-none">
-            <div className="text-xs font-bold text-purple-600 bg-white px-2 py-1 rounded">
-              Base Porta Montante - {Math.round(componentWidth || width)}×{Math.round(componentHeight || height)}
-            </div>
-          </div>
-        )}
       </div>
     </ResponsiveWrapper>
   );

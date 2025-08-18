@@ -43,7 +43,14 @@ const ContraPeso_Montante: React.FC<ContraPesoMontanteProps> = ({
         '4xl': { x: 450, y: 500, width: 260, height: 750, scale: 0.95, zIndex: 7, opacity: 1, rotation: 0 }
       }}
     >
-      <div className={`w-full h-full flex flex-col items-center justify-center ${editMode ? 'border-2 border-blue-500 bg-blue-50/20' : ''}`}>
+      <div className="contrapeso-montante-wrapper" style={{ 
+        width: '100%', 
+        height: '100%',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
         {/* Container do SVG completo */}
         <div className="relative flex items-center gap-4">
           <div className="relative" style={{ width: '100px', height: `${svgHeight}px` }}>
@@ -128,11 +135,6 @@ const ContraPeso_Montante: React.FC<ContraPesoMontanteProps> = ({
             </div>
           )}
         </div>
-
-        {editMode && (
-          <div className="absolute inset-0 border-2 border-dashed border-orange-400 bg-orange-50/20 rounded flex items-center justify-center pointer-events-none">
-          </div>
-        )}
       </div>
     </ResponsiveWrapper>
   );

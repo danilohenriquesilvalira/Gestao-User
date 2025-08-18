@@ -25,13 +25,22 @@ export default function Parede({
         '4xl': { x: 600, y: 500, width: 260, height: 185, scale: 1, zIndex: 5, opacity: 1, rotation: 0 }
       }}
     >
-      <div 
-        className={`relative w-full h-full flex items-center justify-center ${editMode ? 'border-2 border-blue-500 bg-blue-50/20' : ''}`}
-      >
+      <div className="parede-eclusa-wrapper" style={{ 
+        width: '100%', 
+        height: '100%',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
         <img
           src="/Eclusa/Parede_Eclusa.svg"
           alt="Parede da Eclusa"
-          className="w-full h-full object-contain"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain'
+          }}
         />
       </div>
     </ResponsiveWrapper>

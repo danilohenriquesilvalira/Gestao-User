@@ -19,6 +19,7 @@ interface ResponsiveWrapperProps {
   editMode?: boolean;
   defaultConfig?: Partial<Record<string, ResponsiveConfig>>;
   onConfigChange?: (config: Record<string, ResponsiveConfig>) => void;
+  allowOverflow?: boolean; // NOVO: Permite overflow para componentes com movimento
 }
 
 interface InjectedProps {
@@ -33,7 +34,8 @@ export default function ResponsiveWrapper({
   componentId,
   editMode = false,
   defaultConfig = {},
-  onConfigChange
+  onConfigChange,
+  allowOverflow = false // NOVO: Permite overflow para componentes com movimento
 }: ResponsiveWrapperProps) {
   const breakpoint = useBreakpoint();
   const elementRef = useRef<HTMLDivElement>(null);
@@ -423,6 +425,13 @@ export default function ResponsiveWrapper({
     };
   }, [isDragging, handleMouseMove]);
 
+  // Detectar automaticamente componentes que precisam de overflow visível
+  const needsOverflow = allowOverflow || 
+                       componentId.includes('porta') || 
+                       componentId.includes('regua') ||
+                       componentId.includes('elevador') ||
+                       componentId.includes('movimento');
+
   const renderChildren = () => {
     if (!React.isValidElement(children)) {
       return children;
@@ -497,7 +506,8 @@ export default function ResponsiveWrapper({
                 top: 0,
                 left: 0,
                 pointerEvents: editMode ? 'none' : 'auto',
-                overflow: 'hidden'
+                // CORREÇÃO: Permite overflow quando necessário para componentes com movimento
+                overflow: needsOverflow ? 'visible' : 'hidden'
               }}
             >
               {renderChildren()}
@@ -550,6 +560,7 @@ export default function ResponsiveWrapper({
                     {componentType === 'background' ? '🖼️' : componentType === 'foreground' ? '🎯' : '⚙️'}
                   </span>
                   <span>{componentId} | Z:{currentConfig.zIndex}</span>
+                  {needsOverflow && <span className="bg-purple-600 px-1 rounded" title="Overflow visível">📐</span>}
                   
                   <button
                     onClick={saveToStrapi}

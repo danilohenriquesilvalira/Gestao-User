@@ -28,7 +28,14 @@ export default function BasePorta({
         '4xl': { x: 400, y: 400, width: 550, height: 825, scale: 1, zIndex: 1, opacity: 1, rotation: 0 }
       }}
     >
-      <div className={`w-full h-full flex items-center justify-center ${editMode ? 'border-2 border-green-500 bg-green-50/20' : ''}`}>
+      <div className="base-porta-jusante-wrapper" style={{ 
+        width: '100%', 
+        height: '100%',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
         {/* Container da Base da Porta */}
         <div className="relative w-full h-full">
           <img
@@ -36,17 +43,12 @@ export default function BasePorta({
             alt="Base da Porta Jusante"
             style={{
               objectFit: 'contain',
-              objectPosition: 'center'
+              objectPosition: 'center',
+              width: '100%',
+              height: '100%'
             }}
-            className="w-full h-full drop-shadow-lg"
+            className="drop-shadow-lg"
           />
-          
-          {/* Overlay de informações no modo edição */}
-          {editMode && (
-            <div className="absolute top-2 left-2 bg-green-600 text-white px-2 py-1 rounded text-xs font-medium">
-              Base Porta Jusante
-            </div>
-          )}
           
         </div>
       </div>

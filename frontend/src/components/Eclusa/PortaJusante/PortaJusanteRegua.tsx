@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import ResponsiveWrapper from '@/components/ResponsiveWrapper';
 
@@ -22,7 +20,6 @@ const PortaJusanteRegua: React.FC<PortaJusanteReguaProps> = ({
 }) => {
   const [aberturaInterna, setAberturaInterna] = useState(0);
   
-  // Usa o valor externo se fornecido (seja via nivel ou abertura), senão usa o interno
   const valorAbertura = aberturaExterna !== undefined 
     ? aberturaExterna 
     : nivel !== undefined 
@@ -33,7 +30,6 @@ const PortaJusanteRegua: React.FC<PortaJusanteReguaProps> = ({
     setAberturaInterna(Number(event.target.value));
   };
 
-  // Atualiza o estado interno quando o valor externo muda
   useEffect(() => {
     if (nivel !== undefined) {
       setAberturaInterna(nivel);
@@ -49,43 +45,56 @@ const PortaJusanteRegua: React.FC<PortaJusanteReguaProps> = ({
     <ResponsiveWrapper 
       componentId={componentId}
       editMode={editMode}
+      allowOverflow={true} // NOVO: Permite overflow para movimento
       defaultConfig={{
-        xs: { x: 100, y: 100, width: 300, height: 320, scale: 1, zIndex: 1, opacity: 1, rotation: 0 },
-        sm: { x: 150, y: 150, width: 350, height: 370, scale: 1, zIndex: 1, opacity: 1, rotation: 0 },
-        md: { x: 200, y: 200, width: 400, height: 420, scale: 1, zIndex: 1, opacity: 1, rotation: 0 },
-        lg: { x: 250, y: 250, width: 450, height: 470, scale: 1, zIndex: 1, opacity: 1, rotation: 0 },
-        xl: { x: 300, y: 300, width: 500, height: 520, scale: 1, zIndex: 1, opacity: 1, rotation: 0 },
-        '2xl': { x: 350, y: 350, width: 550, height: 570, scale: 1, zIndex: 1, opacity: 1, rotation: 0 },
-        '3xl': { x: 400, y: 400, width: 600, height: 620, scale: 1, zIndex: 1, opacity: 1, rotation: 0 },
-        '4xl': { x: 450, y: 450, width: 650, height: 670, scale: 1, zIndex: 1, opacity: 1, rotation: 0 }
+        xs: { x: 100, y: 100, width: 300, height: 438, scale: 1, zIndex: 25, opacity: 1, rotation: 0 },
+        sm: { x: 150, y: 150, width: 350, height: 438, scale: 1, zIndex: 25, opacity: 1, rotation: 0 },
+        md: { x: 200, y: 200, width: 400, height: 438, scale: 1, zIndex: 25, opacity: 1, rotation: 0 },
+        lg: { x: 250, y: 250, width: 435, height: 438, scale: 1, zIndex: 25, opacity: 1, rotation: 0 },
+        xl: { x: 300, y: 300, width: 435, height: 438, scale: 1, zIndex: 25, opacity: 1, rotation: 0 },
+        '2xl': { x: 350, y: 350, width: 435, height: 438, scale: 1, zIndex: 25, opacity: 1, rotation: 0 },
+        '3xl': { x: 400, y: 400, width: 435, height: 438, scale: 1, zIndex: 25, opacity: 1, rotation: 0 },
+        '4xl': { x: 450, y: 450, width: 435, height: 438, scale: 1, zIndex: 25, opacity: 1, rotation: 0 }
       }}
     >
-      <div className={`relative ${className} ${editMode ? 'border-2 border-blue-500 bg-blue-50/20' : ''}`} style={{ width: '100%', height: '100%' }}>
-        {/* SVG da porta jusante régua */}
-        <img
-          src="/PortaJusante/Porta_Jusante_Regua.svg"
-          alt="Porta Jusante Régua"
-          width="435"
-          height="438"
+      <div 
+        className={`relative ${className} ${editMode ? 'border-2 border-blue-500 bg-blue-50/20' : ''}`} 
+        style={{ 
+          width: '100%', 
+          height: '100%',
+          overflow: 'visible' // Permite que o conteúdo saia dos limites
+        }}
+      >
+        {/* Container para o movimento */}
+        <div 
           style={{
+            position: 'absolute',
             width: '100%',
             height: '100%',
-            objectFit: 'contain',
-            objectPosition: 'center',
             bottom: `${deslocamentoVertical}px`,
             transition: 'bottom 0.3s ease-in-out'
           }}
-          className="absolute"
-        />
+        >
+          <img
+            src="/PortaJusante/Porta_Jusante_Regua.svg"
+            alt="Porta Jusante Régua"
+            width="435"
+            height="438"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              objectPosition: 'center'
+            }}
+          />
+        </div>
         
-        {/* Overlay de informações no modo edição */}
         {editMode && (
-          <div className="absolute top-2 left-2 bg-blue-600 text-white px-2 py-1 rounded text-xs font-medium">
+          <div className="absolute top-2 left-2 bg-blue-600 text-white px-2 py-1 rounded text-xs font-medium z-10">
             Porta Jusante Régua ({valorAbertura}%)
           </div>
         )}
         
-        {/* Controle de abertura posicionado acima da porta e centralizado - só mostrar se não receber valor externo */}
         {nivel === undefined && aberturaExterna === undefined && !websocketData && (
           <div
             className="absolute left-1/2 transform -translate-x-1/2"

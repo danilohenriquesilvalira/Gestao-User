@@ -249,7 +249,7 @@ export default function LoginPage() {
             {/* Copyright Section for the left panel */}
             <div className="mt-auto text-center text-gray-400 text-sm md:text-base absolute bottom-4">
               <p className="flex items-center justify-center space-x-1">
-                <span>© 2024 Todos os direitos reservados</span>
+                <span>© 2025 Todos os direitos reservados</span>
                 <span className="font-bold text-edp-neon">EDP Portugal</span>
                 <span className="text-xs">&reg;</span>
               </p>

@@ -6,7 +6,8 @@ import { NotificationProvider } from './contexts/NotificationContext'
 // Pages
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
-import DashboardPage from './pages/DashboardPage'
+import Dashboard from './pages/Dashboard'
+import CaldeiraEclusa from './pages/CaldeiraEclusa'
 import PortaJusantePage from './pages/PortaJusantePage'
 import PortaMontantePage from './pages/PortaMontantePage'
 import EnchimentoPage from './pages/EnchimentoPage'
@@ -22,7 +23,8 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/caldeira-eclusa" element={<CaldeiraEclusa />} />
             <Route path="/porta_jusante" element={<PortaJusantePage />} />
             <Route path="/porta_montante" element={<PortaMontantePage />} />
             <Route path="/enchimento" element={<EnchimentoPage />} />

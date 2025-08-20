@@ -82,11 +82,11 @@ export const EclusasGrid: React.FC = () => {
   ];
 
   return (
-    <div className="w-full max-w-none">
-      {/* Grid Responsivo - Altura limitada para deixar espaço para gráficos */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 max-h-[420px] overflow-y-auto">
+    <div className="w-full">
+      {/* Grid responsivo para 5 eclusas */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {eclusasData.map((eclusa, index) => (
-          <div key={eclusa.name} className="h-96">
+          <div key={eclusa.name} className="h-80">
             <EclusaCard
               name={eclusa.name}
               color={eclusa.color}

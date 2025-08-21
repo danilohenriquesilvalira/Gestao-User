@@ -62,6 +62,21 @@ const PAGE_COMPONENTS = {
   jusante: [
     'porta-jusante-',
     'contrapeso-jusante-'
+  ],
+  eclusa: [
+    'caldeira-eclusa',
+    'parede-eclusa', 
+    'porta-jusante',
+    'porta-montante',
+    'base-porta-jusante',
+    'base-porta-jusante-2',
+    'tubulacao-caldeira',
+    'radar-eclusa',
+    'semaforo',
+    'semaforo-1',
+    'semaforo-2',
+    'semaforo-3',
+    'graficos-cotas'
   ]
 };
 

@@ -13,6 +13,12 @@ interface UseWebSocketReturn {
   portaMontanteContrapesoEsquerdoValue: number | null;
   portaMontanteMotorDireitoValue: number | null;
   portaMontanteMotorEsquerdoValue: number | null;
+  // Novo valor para Radar
+  radarDistanciaValue: number | null;
+  // Valores das Cotas
+  cotaMontanteValue: number | null;
+  cotaCaldeiraValue: number | null;
+  cotaJusanteValue: number | null;
   semaforos: Record<string, boolean>;
   // ✅ NOVO: Array PipeSystem [0..23]
   pipeSystem: boolean[];
@@ -168,6 +174,10 @@ export function useWebSocket(url: string): UseWebSocketReturn {
   const [portaMontanteContrapesoEsquerdoValue, setPortaMontanteContrapesoEsquerdoValue] = useState<number | null>(null);
   const [portaMontanteMotorDireitoValue, setPortaMontanteMotorDireitoValue] = useState<number | null>(null);
   const [portaMontanteMotorEsquerdoValue, setPortaMontanteMotorEsquerdoValue] = useState<number | null>(null);
+  const [radarDistanciaValue, setRadarDistanciaValue] = useState<number | null>(null);
+  const [cotaMontanteValue, setCotaMontanteValue] = useState<number | null>(null);
+  const [cotaCaldeiraValue, setCotaCaldeiraValue] = useState<number | null>(null);
+  const [cotaJusanteValue, setCotaJusanteValue] = useState<number | null>(null);
   
   const [semaforos, setSemaforos] = useState<Record<string, boolean>>({});
   // ✅ NOVO: Array PipeSystem [0..23] - inicializado com 24 elementos false
@@ -265,6 +275,32 @@ export function useWebSocket(url: string): UseWebSocketReturn {
         console.log(`🔧 Atualizando motor esquerdo montante: ${data.portaMontanteMotorEsquerdoValue} -> ${limitedMotor}`);
         setPortaMontanteMotorEsquerdoValue(limitedMotor);
       }
+
+      // ✅ PROCESSA VALOR DO RADAR
+      if (data.radarDistanciaValue !== undefined) {
+        const limitedRadar = Math.max(0, Math.min(100, data.radarDistanciaValue));
+        console.log(`📡 Atualizando radar distância: ${data.radarDistanciaValue} -> ${limitedRadar}`);
+        setRadarDistanciaValue(limitedRadar);
+      }
+
+      // ✅ PROCESSA VALORES DAS COTAS
+      if (data.cotaMontanteValue !== undefined) {
+        const limitedCota = Math.max(0, Math.min(25, data.cotaMontanteValue));
+        console.log(`⬆️ Atualizando cota montante: ${data.cotaMontanteValue} -> ${limitedCota}`);
+        setCotaMontanteValue(limitedCota);
+      }
+
+      if (data.cotaCaldeiraValue !== undefined) {
+        const limitedCota = Math.max(0, Math.min(25, data.cotaCaldeiraValue));
+        console.log(`🔄 Atualizando cota caldeira: ${data.cotaCaldeiraValue} -> ${limitedCota}`);
+        setCotaCaldeiraValue(limitedCota);
+      }
+
+      if (data.cotaJusanteValue !== undefined) {
+        const limitedCota = Math.max(0, Math.min(25, data.cotaJusanteValue));
+        console.log(`⬇️ Atualizando cota jusante: ${data.cotaJusanteValue} -> ${limitedCota}`);
+        setCotaJusanteValue(limitedCota);
+      }
       
       // ✅ NOVO: PROCESSA ARRAY PIPESYSTEM [0..23]
       const newPipeSystem = new Array(24).fill(false);
@@ -344,6 +380,10 @@ export function useWebSocket(url: string): UseWebSocketReturn {
     portaMontanteContrapesoEsquerdoValue,
     portaMontanteMotorDireitoValue,
     portaMontanteMotorEsquerdoValue,
+    radarDistanciaValue,
+    cotaMontanteValue,
+    cotaCaldeiraValue,
+    cotaJusanteValue,
     semaforos,
     // ✅ NOVO: Array PipeSystem [0..23]
     pipeSystem,

@@ -45,32 +45,29 @@ export default function PortaJusante({
         '4xl': { x: 650, y: 550, width: 155, height: 320, scale: 1, zIndex: 8, opacity: 1, rotation: 0 }
       }}
     >
-      <div className={`w-full h-full flex flex-col items-center justify-center ${editMode ? 'border-2 border-blue-500 bg-blue-50/20' : ''}`}>
+      <div className="w-full h-full flex flex-col items-center justify-center">
         {/* Container da Porta com animação */}
-        <div className="relative flex-1 flex items-center justify-center">
+        <div className="relative flex-1 flex items-center justify-center w-full h-full">
           <div
             style={{
-              width: '85px',
-              height: '181px',
-              transform: `scaleX(${displayAbertura / 100}) translateX(${(100 - displayAbertura) * 0.85}px)`, 
-              transformOrigin: 'right center', // Movimento da DIREITA para ESQUERDA
+              width: '100%',
+              height: '100%',
+              transform: `scaleX(${displayAbertura / 100})`, 
+              transformOrigin: 'right center', // Abre da direita para esquerda
               transition: 'transform 0.5s ease-in-out', // Animação suave
             }}
           >
             <img
               src="/Eclusa/Porta_jusante.svg"
               alt="Porta Jusante"
-              width="85"
-              height="181"
-              className="object-contain"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain'
+              }}
             />
           </div>
         </div>
-
-        {editMode && (
-          <div className="absolute inset-0 border-2 border-dashed border-purple-400 bg-purple-50/20 rounded flex items-center justify-center pointer-events-none">
-          </div>
-        )}
       </div>
     </ResponsiveWrapper>
   );

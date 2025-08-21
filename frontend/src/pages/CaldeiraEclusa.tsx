@@ -7,7 +7,13 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import Caldeira from '@/components/Eclusa/Caldeira';
 import Parede from '@/components/Eclusa/Parede';
 import PortaJusante from '@/components/Eclusa/PortaJusante';
+import PortaMontante from '@/components/Eclusa/PortaMontante';
+import BasePortaJusante from '@/components/Eclusa/BasePortaJusante';
+import BasePortaJusante2 from '@/components/Eclusa/BasePortaJusante2';
+import RadarEclusa from '@/components/Eclusa/RadarEclusa';
 import Semaforo from '@/components/Eclusa/Semaforo';
+import TubulacaoCaldeira from '@/components/Eclusa/TubulacaoCaldeira';
+import GraficosCotas from '@/components/Eclusa/GraficosCotas';
 import { LayoutLoadingProvider, useLayoutLoading } from '@/contexts/LayoutLoadingContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import NotificationContainer from '@/components/ui/NotificationContainer';
@@ -183,7 +189,13 @@ function DashboardContent() {
             <Caldeira editMode={editMode} />
             <Parede editMode={editMode} />
             <PortaJusante editMode={editMode} />
+            <PortaMontante editMode={editMode} />
+            <BasePortaJusante editMode={editMode} />
+            <BasePortaJusante2 editMode={editMode} />
+            <TubulacaoCaldeira editMode={editMode} />
+            <RadarEclusa editMode={editMode} />
             <Semaforo editMode={editMode} />
+            <GraficosCotas editMode={editMode} />
             
             {/* ✅ SEMÁFOROS CORRIGIDOS - APENAS OS QUE EXISTEM NO GO BACKEND */}
             <Semaforo editMode={editMode} componentId="semaforo-1" />

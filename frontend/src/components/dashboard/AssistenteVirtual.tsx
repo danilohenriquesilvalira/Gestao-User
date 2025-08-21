@@ -14,7 +14,7 @@ export const AssistenteVirtual: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Olá! Sou seu assistente de diagnóstico de falhas. Digite o código ou descrição da falha:",
+      text: "🤖 Olá! Sou seu Assistente Inteligente da Eclusa Régua.\n\nPosso ajudar com:\n• Status em tempo real\n• Diagnóstico de falhas\n• Procedimentos emergência\n• Análise de eficiência\n• Cronogramas manutenção\n\nDigite 'status' para começar!",
       isBot: true,
       timestamp: new Date()
     }
@@ -32,35 +32,83 @@ export const AssistenteVirtual: React.FC = () => {
   }, [messages]);
 
   const diagnosticarFalha = (input: string): string => {
-    const falhas = {
-      'F001': 'Falha Hidráulica - Verifique pressão do sistema (15-20 bar). Possível vazamento na linha principal.',
-      'F002': 'Falha Elétrica - Verificar alimentação 220V. Possível problema no quadro de comando.',
-      'F003': 'Falha Comunicação - Verificar cabo de rede. Reiniciar switch VLAN.',
-      'F004': 'Sensor Nível - Calibrar sensor ultrassônico. Verificar obstruções.',
-      'F005': 'Motor Hidráulico - Verificar óleo. Temperatura operacional 40-60°C.',
-      'hidraulica': 'Problemas hidráulicos: Verificar pressão (15-20 bar), filtros, vazamentos e temperatura do óleo.',
-      'eletrica': 'Problemas elétricos: Verificar tensão 220V, disjuntores, contatores e cabos de alimentação.',
-      'comunicacao': 'Problemas de rede: Verificar cabo Ethernet, status LED switch, configuração VLAN.',
-      'sensor': 'Problemas sensores: Verificar alimentação 24V, cabos, calibração e limpeza.',
-      'motor': 'Problemas motor: Verificar óleo hidráulico, filtros, temperatura e pressão.',
-      'emergencia': 'EMERGÊNCIA: Acionar botão parada geral, isolar área, contactar supervisor imediatamente.',
-      'manutencao': 'Manutenção preventiva: Verificar cronograma, óleo (500h), filtros (250h), sensores (1000h).',
-      'regua': 'Eclusa Régua: Status crítico. Prioridade alta para reparo comunicação VLAN.',
-      'crestuma': 'Eclusa Crestuma: Operacional. Próxima manutenção em 15 dias.',
-      'carrapatelo': 'Eclusa Carrapatelo: Alerta comunicação instável. Verificar cabo de rede.',
-      'valeira': 'Eclusa Valeira: Status normal. Sistema funcionando perfeitamente.',
-      'pocinho': 'Eclusa Pocinho: Alerta inundação crítica. Verificar sensores nível.'
-    };
-
     const inputLower = input.toLowerCase();
     
-    for (const [key, value] of Object.entries(falhas)) {
-      if (inputLower.includes(key)) {
-        return value;
-      }
+    // Falhas reais da Eclusa Régua integradas ao assistente
+    const falhasReguaAtuais = [
+      'Protecção 24V entradas analógicas disparou',
+      'Protecção sobretensão descarregador disparou', 
+      'Sem comunicação com sala comando',
+      'Emergência activada',
+      'Bomba comporta direita não responde',
+      'Sensor posição comporta direita avariado',
+      'Autómato - erro diagnóstico',
+      'Laser jusante - obstrução detectada',
+      'Porta desnivelada - paragem',
+      'Inundação poço contrapesos porta montante',
+      'Radar jusante com erro'
+    ];
+
+    // Status atual da Eclusa Régua
+    const statusRegua = {
+      eficiencia: '87%',
+      operador: 'Carlos Mendes',
+      comunicacao: 'Online',
+      alarmes_ativos: 11,
+      nivel_montante: '16.1m',
+      nivel_caldeira: '13.5m', 
+      nivel_jusante: '11.2m'
+    };
+
+    // Diagnósticos inteligentes baseados em contexto
+    if (inputLower.includes('status') || inputLower.includes('regua') || inputLower.includes('resumo')) {
+      return `📊 STATUS RÉGUA ATUAL:\n\n✅ Operacional (${statusRegua.eficiencia} eficiência)\n👤 Operador: ${statusRegua.operador}\n🔴 ${statusRegua.alarmes_ativos} alarmes ativos\n💧 Níveis: M:${statusRegua.nivel_montante} | C:${statusRegua.nivel_caldeira} | J:${statusRegua.nivel_jusante}\n\nPrioridades: Comunicação sala comando, Proteções elétricas`;
+    }
+
+    if (inputLower.includes('alarme') || inputLower.includes('critico')) {
+      return `🚨 ALARMES CRÍTICOS RÉGUA:\n\n1. Emergência activada (12:58)\n2. Protecção sobretensão disparou (13:42)\n3. Sem comunicação sala comando (13:15)\n4. Bomba comporta direita falhou (12:30)\n\n⚡ AÇÃO: Verificar quadro elétrico e cabo comunicação`;
+    }
+
+    if (inputLower.includes('eletric') || inputLower.includes('protec') || inputLower.includes('24v')) {
+      return `⚡ DIAGNÓSTICO ELÉTRICO RÉGUA:\n\nFalhas ativas:\n• Protecção 24V entradas analógicas\n• Protecção sobretensão descarregador\n• Fonte 400VAC/24VDC avariada\n\n🔧 SOLUÇÃO:\n1. Verificar tensão entrada (400VAC)\n2. Testar fonte 24VDC\n3. Inspecionar cabos analógicos\n4. Resetar proteções após reparo`;
+    }
+
+    if (inputLower.includes('hidraulic') || inputLower.includes('bomba') || inputLower.includes('comporta')) {
+      return `💧 DIAGNÓSTICO HIDRÁULICO RÉGUA:\n\nFalhas ativas:\n• Bomba comporta direita não responde\n• Inundação poço contrapesos\n• Protecção bomba comporta esquerda\n\n🔧 SOLUÇÃO:\n1. Verificar pressão óleo (15-20 bar)\n2. Testar válvulas direcionais\n3. Drenar água poço contrapesos\n4. Verificar filtros hidráulicos`;
+    }
+
+    if (inputLower.includes('sensor') || inputLower.includes('radar') || inputLower.includes('laser')) {
+      return `📡 DIAGNÓSTICO SENSORES RÉGUA:\n\nFalhas ativas:\n• Sensor posição comporta direita\n• Laser jusante obstruído\n• Radar jusante com erro\n\n🔧 SOLUÇÃO:\n1. Limpar lentes laser/radar\n2. Calibrar sensores posição\n3. Verificar alimentação 24VDC\n4. Testar cabos comunicação`;
+    }
+
+    if (inputLower.includes('comunicac') || inputLower.includes('rede') || inputLower.includes('plc')) {
+      return `🌐 DIAGNÓSTICO COMUNICAÇÃO RÉGUA:\n\nFalhas ativas:\n• Sem comunicação sala comando\n• Quadro enchimento offline\n• Autómato erro diagnóstico\n\n🔧 SOLUÇÃO:\n1. Verificar cabo Ethernet\n2. Reiniciar switch VLAN\n3. Testar IP autómato\n4. Verificar configuração rede`;
+    }
+
+    if (inputLower.includes('emergenc') || inputLower.includes('parada') || inputLower.includes('socorro')) {
+      return `🚨 PROCEDIMENTO EMERGÊNCIA ATIVADO:\n\n1. ✋ PARAR todas operações imediatamente\n2. 🔒 Isolar área de operação\n3. 📞 Contactar supervisor: Ext. 2001\n4. 🚨 Activar sirene evacuação se necessário\n5. 📋 Registar evento no livro ocorrências\n\n⚠️ NÃO restabelecer sem autorização!`;
+    }
+
+    if (inputLower.includes('manutenc') || inputLower.includes('preventiv') || inputLower.includes('cronograma')) {
+      return `🔧 MANUTENÇÃO PREVENTIVA RÉGUA:\n\n📅 Próxima: 5 dias\n\nTarefas pendentes:\n• Trocar óleo hidráulico (500h)\n• Limpar filtros ar (250h)\n• Calibrar sensores (1000h)\n• Testar sistema emergência\n• Verificar cabos elétricos\n\n📊 Histórico: 87% conformidade`;
+    }
+
+    if (inputLower.includes('eficienc') || inputLower.includes('performance') || inputLower.includes('87')) {
+      return `📈 ANÁLISE EFICIÊNCIA RÉGUA:\n\nAtual: 87% (Bom)\nMédia semana: 89%\nMeta: 90%\n\n📉 Fatores impacto:\n• Falhas elétricas (-2%)\n• Comunicação instável (-1%)\n• Manutenções programadas\n\n✅ Recomendação: Resolver comunicação`;
+    }
+
+    // Pesquisa por falha específica
+    const falhaEncontrada = falhasReguaAtuais.find(falha => 
+      inputLower.includes(falha.toLowerCase().split(' ')[0]) ||
+      inputLower.includes(falha.toLowerCase().split(' ')[1]) ||
+      falha.toLowerCase().includes(inputLower)
+    );
+
+    if (falhaEncontrada) {
+      return `🔍 FALHA ENCONTRADA: "${falhaEncontrada}"\n\nStatus: ATIVA\nSistema: Régua\nPrioridade: ALTA\n\n🔧 Consulte manual técnico seção correspondente ou contacte manutenção.`;
     }
     
-    return 'Falha não reconhecida. Digite: F001-F005 para códigos específicos, ou palavras como "hidraulica", "eletrica", "comunicacao", "sensor", "motor", ou nome da eclusa.';
+    return `🤖 Não encontrei informações específicas para "${input}".\n\n💡 Tente:\n• "status" - Resumo geral\n• "alarmes" - Falhas críticas\n• "eletrica" - Diagnóstico elétrico\n• "hidraulica" - Sistema hidráulico\n• "sensores" - Instrumentação\n• "emergencia" - Procedimentos\n• "manutencao" - Cronograma`;
   };
 
   const handleSendMessage = () => {

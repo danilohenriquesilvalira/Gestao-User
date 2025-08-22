@@ -202,29 +202,9 @@ func (h *Hub) sendCurrentPLCValues(client *Client) {
 	} else {
 		// ✅ VALORES PADRÃO só se PLC nunca foi lido
 		log.Printf("📡 PLC ainda não foi lido - enviando valores padrão")
-		defaultValues := map[string]interface{}{
-			"nivel":                        float32(0.0),
-			"porta_jusante":                float32(0.0),
-			"contrapeso_direito":           float32(0.0),
-			"contrapeso_esquerdo":          float32(0.0),
-			"porta_jusante_motor_direito":  int16(0),
-			"porta_jusante_motor_esquerdo": int16(0),
-			"semaforo_verde_0":             false,
-			"semaforo_vermelho_0":          false,
-			"semaforo_verde_1":             false,
-			"semaforo_vermelho_1":          false,
-			"semaforo_verde_2":             false,
-			"semaforo_vermelho_2":          false,
-			"semaforo_verde_3":             false,
-			"semaforo_vermelho_3":          false,
-		}
-
-		// ✅ NOVO: Adiciona valores padrão do PipeSystem [0..23]
-		for i := 0; i < 24; i++ {
-			tagName := fmt.Sprintf("pipe_system_%d", i)
-			defaultValues[tagName] = false
-		}
-		message = buildMessage(defaultValues)
+		// ✅ SEM VALORES PADRÃO - SÓ CONECTA AO PLC
+		log.Printf("📡 Aguardando dados do PLC...")
+		message = buildMessage(map[string]interface{}{})
 	}
 
 	if data, err := json.Marshal(message); err == nil {
@@ -376,17 +356,123 @@ func readBool(client gos7.Client, offset float64) (bool, error) {
 func buildMessage(values map[string]interface{}) map[string]interface{} {
 	data := make(map[string]interface{})
 
-	if nivel, ok := values["nivel"]; ok {
+	// ✅ NOVOS NÍVEIS DA ECLUSA
+	if nivelCaldeira, ok := values["Eclusa_Nivel_Caldeira"]; ok {
 		// Limita nível entre 0 e 100
-		if nivelFloat, isFloat := nivel.(float32); isFloat {
+		if nivelFloat, isFloat := nivelCaldeira.(float32); isFloat {
 			limitedNivel := math.Max(0, math.Min(100, float64(nivelFloat)))
-			data["nivelValue"] = float32(limitedNivel)
+			data["nivelCaldeiraValue"] = float32(limitedNivel)
 		} else {
-			data["nivelValue"] = float32(0)
+			data["nivelCaldeiraValue"] = float32(0)
 		}
 	}
 
-	if porta, ok := values["porta_jusante"]; ok {
+	if nivelMontante, ok := values["Eclusa_Nivel_Montante"]; ok {
+		// Limita nível entre 0 e 100
+		if nivelFloat, isFloat := nivelMontante.(float32); isFloat {
+			limitedNivel := math.Max(0, math.Min(100, float64(nivelFloat)))
+			data["nivelMontanteValue"] = float32(limitedNivel)
+		} else {
+			data["nivelMontanteValue"] = float32(0)
+		}
+	}
+
+	if nivelJusante, ok := values["Eclusa_Nivel_Jusante"]; ok {
+		// Limita nível entre 0 e 100
+		if nivelFloat, isFloat := nivelJusante.(float32); isFloat {
+			limitedNivel := math.Max(0, math.Min(100, float64(nivelFloat)))
+			data["nivelJusanteValue"] = float32(limitedNivel)
+		} else {
+			data["nivelJusanteValue"] = float32(0)
+		}
+	}
+
+	// ✅ RADARES DA ECLUSA
+	if radarCaldeiraDistancia, ok := values["Eclusa_Radar_Caldeira_Distancia"]; ok {
+		if radarFloat, isFloat := radarCaldeiraDistancia.(float32); isFloat {
+			data["radarCaldeiraDistanciaValue"] = radarFloat
+		} else {
+			data["radarCaldeiraDistanciaValue"] = float32(0)
+		}
+	}
+
+	if radarCaldeiraVelocidade, ok := values["Eclusa_Radar_Caldeira_Velocidade"]; ok {
+		if radarFloat, isFloat := radarCaldeiraVelocidade.(float32); isFloat {
+			data["radarCaldeiraVelocidadeValue"] = radarFloat
+		} else {
+			data["radarCaldeiraVelocidadeValue"] = float32(0)
+		}
+	}
+
+	if radarMontanteDistancia, ok := values["Eclusa_Radar_Montante_Distancia"]; ok {
+		if radarFloat, isFloat := radarMontanteDistancia.(float32); isFloat {
+			data["radarMontanteDistanciaValue"] = radarFloat
+		} else {
+			data["radarMontanteDistanciaValue"] = float32(0)
+		}
+	}
+
+	if radarMontanteVelocidade, ok := values["Eclusa_Radar_Montante_Velocidade"]; ok {
+		if radarFloat, isFloat := radarMontanteVelocidade.(float32); isFloat {
+			data["radarMontanteVelocidadeValue"] = radarFloat
+		} else {
+			data["radarMontanteVelocidadeValue"] = float32(0)
+		}
+	}
+
+	if radarJusanteDistancia, ok := values["Eclusa_Radar_Jusante_Distancia"]; ok {
+		if radarFloat, isFloat := radarJusanteDistancia.(float32); isFloat {
+			data["radarJusanteDistanciaValue"] = radarFloat
+		} else {
+			data["radarJusanteDistanciaValue"] = float32(0)
+		}
+	}
+
+	if radarJusanteVelocidade, ok := values["Eclusa_Radar_Jusante_Velocidade"]; ok {
+		if radarFloat, isFloat := radarJusanteVelocidade.(float32); isFloat {
+			data["radarJusanteVelocidadeValue"] = radarFloat
+		} else {
+			data["radarJusanteVelocidadeValue"] = float32(0)
+		}
+	}
+
+	// ✅ PORTAS DA ECLUSA (atualizados com novos offsets)
+	if eclusaPortaJusante, ok := values["Eclusa_Porta_Jusante"]; ok {
+		if portaFloat, isFloat := eclusaPortaJusante.(float32); isFloat {
+			limitedPorta := math.Max(0, math.Min(100, float64(portaFloat)))
+			data["eclusaPortaJusanteValue"] = float32(limitedPorta)
+		} else {
+			data["eclusaPortaJusanteValue"] = float32(0)
+		}
+	}
+
+	if eclusaPortaMontante, ok := values["Eclusa_Porta_Montante"]; ok {
+		if portaFloat, isFloat := eclusaPortaMontante.(float32); isFloat {
+			limitedPorta := math.Max(0, math.Min(100, float64(portaFloat)))
+			data["eclusaPortaMontanteValue"] = float32(limitedPorta)
+		} else {
+			data["eclusaPortaMontanteValue"] = float32(0)
+		}
+	}
+
+	// ✅ LASERS DA ECLUSA
+	if laserMontante, ok := values["Eclusa_Laser_Montante"]; ok {
+		if laserFloat, isFloat := laserMontante.(float32); isFloat {
+			data["laserMontanteValue"] = laserFloat
+		} else {
+			data["laserMontanteValue"] = float32(0)
+		}
+	}
+
+	if laserJusante, ok := values["Eclusa_Laser_Jusante"]; ok {
+		if laserFloat, isFloat := laserJusante.(float32); isFloat {
+			data["laserJusanteValue"] = laserFloat
+		} else {
+			data["laserJusanteValue"] = float32(0)
+		}
+	}
+
+	if porta, ok := values["Porta Jusante"]; ok {
 		// Limita porta entre 0 e 100
 		if portaFloat, isFloat := porta.(float32); isFloat {
 			limitedPorta := math.Max(0, math.Min(100, float64(portaFloat)))
@@ -396,7 +482,7 @@ func buildMessage(values map[string]interface{}) map[string]interface{} {
 		}
 	}
 
-	if contrapesoDireito, ok := values["contrapeso_direito"]; ok {
+	if contrapesoDireito, ok := values["PortaJusante_ContraPeso Direito"]; ok {
 		// Limita contrapeso direito entre 0 e 100
 		if contrapesoFloat, isFloat := contrapesoDireito.(float32); isFloat {
 			limitedContrapeso := math.Max(0, math.Min(100, float64(contrapesoFloat)))
@@ -406,7 +492,7 @@ func buildMessage(values map[string]interface{}) map[string]interface{} {
 		}
 	}
 
-	if contrapesoEsquerdo, ok := values["contrapeso_esquerdo"]; ok {
+	if contrapesoEsquerdo, ok := values["PortaJusante_ContraPeso Esquerdo"]; ok {
 		// Limita contrapeso esquerdo entre 0 e 100
 		if contrapesoFloat, isFloat := contrapesoEsquerdo.(float32); isFloat {
 			limitedContrapeso := math.Max(0, math.Min(100, float64(contrapesoFloat)))
@@ -416,7 +502,7 @@ func buildMessage(values map[string]interface{}) map[string]interface{} {
 		}
 	}
 
-	if motorDireito, ok := values["porta_jusante_motor_direito"]; ok {
+	if motorDireito, ok := values["PortaJusante_MotorDireita"]; ok {
 		// Motores são int16, mas limitamos entre 0 e 2 (status)
 		if motorInt, isInt := motorDireito.(int16); isInt {
 			limitedMotor := int16(math.Max(0, math.Min(2, float64(motorInt))))
@@ -426,7 +512,7 @@ func buildMessage(values map[string]interface{}) map[string]interface{} {
 		}
 	}
 
-	if motorEsquerdo, ok := values["porta_jusante_motor_esquerdo"]; ok {
+	if motorEsquerdo, ok := values["PortaJusante_MotorEsquerda"]; ok {
 		// Motores são int16, mas limitamos entre 0 e 2 (status)
 		if motorInt, isInt := motorEsquerdo.(int16); isInt {
 			limitedMotor := int16(math.Max(0, math.Min(2, float64(motorInt))))
@@ -437,7 +523,7 @@ func buildMessage(values map[string]interface{}) map[string]interface{} {
 	}
 
 	// Porta Montante tags
-	if portaMontante, ok := values["porta_montante"]; ok {
+	if portaMontante, ok := values["Porta Montante"]; ok {
 		// Limita porta montante entre 0 e 100
 		if portaFloat, isFloat := portaMontante.(float32); isFloat {
 			limitedPorta := math.Max(0, math.Min(100, float64(portaFloat)))
@@ -447,7 +533,7 @@ func buildMessage(values map[string]interface{}) map[string]interface{} {
 		}
 	}
 
-	if contrapesoDirectoMontante, ok := values["porta_montante_contrapeso_direito"]; ok {
+	if contrapesoDirectoMontante, ok := values["PortaMontante_ContraPesoDireito"]; ok {
 		// Limita contrapeso direito montante entre 0 e 100
 		if contrapesoFloat, isFloat := contrapesoDirectoMontante.(float32); isFloat {
 			limitedContrapeso := math.Max(0, math.Min(100, float64(contrapesoFloat)))
@@ -457,7 +543,7 @@ func buildMessage(values map[string]interface{}) map[string]interface{} {
 		}
 	}
 
-	if contrapesoEsquerdoMontante, ok := values["porta_montante_contrapeso_esquerdo"]; ok {
+	if contrapesoEsquerdoMontante, ok := values["PortaMontante_ContraPesoEsquerdo"]; ok {
 		// Limita contrapeso esquerdo montante entre 0 e 100
 		if contrapesoFloat, isFloat := contrapesoEsquerdoMontante.(float32); isFloat {
 			limitedContrapeso := math.Max(0, math.Min(100, float64(contrapesoFloat)))
@@ -467,7 +553,7 @@ func buildMessage(values map[string]interface{}) map[string]interface{} {
 		}
 	}
 
-	if motorDireitoMontante, ok := values["porta_montante_motor_direito"]; ok {
+	if motorDireitoMontante, ok := values["PortaMontante_MotorDireita"]; ok {
 		// Motores são int16, mas limitamos entre 0 e 2 (status)
 		if motorInt, isInt := motorDireitoMontante.(int16); isInt {
 			limitedMotor := int16(math.Max(0, math.Min(2, float64(motorInt))))
@@ -477,7 +563,7 @@ func buildMessage(values map[string]interface{}) map[string]interface{} {
 		}
 	}
 
-	if motorEsquerdoMontante, ok := values["porta_montante_motor_esquerdo"]; ok {
+	if motorEsquerdoMontante, ok := values["PortaMontante_MotorEsquerda"]; ok {
 		// Motores são int16, mas limitamos entre 0 e 2 (status)
 		if motorInt, isInt := motorEsquerdoMontante.(int16); isInt {
 			limitedMotor := int16(math.Max(0, math.Min(2, float64(motorInt))))
@@ -487,10 +573,11 @@ func buildMessage(values map[string]interface{}) map[string]interface{} {
 		}
 	}
 
+	// ✅ SEMÁFOROS DA ECLUSA (novos tags)
 	semaforos := make(map[string]bool)
 
 	for i := 0; i <= 3; i++ {
-		tagNameVerde := fmt.Sprintf("semaforo_verde_%d", i)
+		tagNameVerde := fmt.Sprintf("Eclusa_Semaforo_verde_%d", i)
 		if value, ok := values[tagNameVerde]; ok {
 			if boolVal, isBool := value.(bool); isBool {
 				semaforos[tagNameVerde] = boolVal
@@ -501,7 +588,7 @@ func buildMessage(values map[string]interface{}) map[string]interface{} {
 			semaforos[tagNameVerde] = false
 		}
 
-		tagNameVermelho := fmt.Sprintf("semaforo_vermelho_%d", i)
+		tagNameVermelho := fmt.Sprintf("Eclusa_Semaforo_vermelho_%d", i)
 		if value, ok := values[tagNameVermelho]; ok {
 			if boolVal, isBool := value.(bool); isBool {
 				semaforos[tagNameVermelho] = boolVal
@@ -515,17 +602,72 @@ func buildMessage(values map[string]interface{}) map[string]interface{} {
 
 	data["semaforos"] = semaforos
 
-	// ✅ NOVO: Processa PipeSystem array [0..23]
+	// ✅ STATUS DA ECLUSA
+	if comunicacaoPLC, ok := values["Eclusa_Comunicação_PLC"]; ok {
+		if boolVal, isBool := comunicacaoPLC.(bool); isBool {
+			data["comunicacaoPLCValue"] = boolVal
+		} else {
+			data["comunicacaoPLCValue"] = false
+		}
+	}
+
+	if operacao, ok := values["Eclusa_Operação"]; ok {
+		if boolVal, isBool := operacao.(bool); isBool {
+			data["operacaoValue"] = boolVal
+		} else {
+			data["operacaoValue"] = false
+		}
+	}
+
+	if alarmesAtivo, ok := values["Eclusa_Alarmes_Ativo"]; ok {
+		if boolVal, isBool := alarmesAtivo.(bool); isBool {
+			data["alarmesAtivoValue"] = boolVal
+		} else {
+			data["alarmesAtivoValue"] = false
+		}
+	}
+
+	if emergenciaAtiva, ok := values["Eclusa_Emergencia_Ativa"]; ok {
+		if boolVal, isBool := emergenciaAtiva.(bool); isBool {
+			data["emergenciaAtivaValue"] = boolVal
+		} else {
+			data["emergenciaAtivaValue"] = false
+		}
+	}
+
+	if inundacao, ok := values["Eclusa_Inundacao"]; ok {
+		if boolVal, isBool := inundacao.(bool); isBool {
+			data["inundacaoValue"] = boolVal
+		} else {
+			data["inundacaoValue"] = false
+		}
+	}
+
+	// ✅ PROCESSA PipeSystem array [0..23]
 	for i := 0; i < 24; i++ {
-		tagName := fmt.Sprintf("pipe_system_%d", i)
+		tagName := fmt.Sprintf("PipeSystem[%d]", i)
 		if value, ok := values[tagName]; ok {
 			if boolVal, isBool := value.(bool); isBool {
-				data[tagName] = boolVal
+				data[fmt.Sprintf("pipe_system_%d", i)] = boolVal
 			} else {
-				data[tagName] = false
+				data[fmt.Sprintf("pipe_system_%d", i)] = false
 			}
 		} else {
-			data[tagName] = false
+			data[fmt.Sprintf("pipe_system_%d", i)] = false
+		}
+	}
+
+	// ✅ PROCESSA ValvulasOnOFF array [0..5]
+	for i := 0; i < 6; i++ {
+		tagName := fmt.Sprintf("ValvulasOnOFF[%d]", i)
+		if value, ok := values[tagName]; ok {
+			if intVal, isInt := value.(int16); isInt {
+				data[fmt.Sprintf("valvulas_onoff_%d", i)] = intVal
+			} else {
+				data[fmt.Sprintf("valvulas_onoff_%d", i)] = int16(0)
+			}
+		} else {
+			data[fmt.Sprintf("valvulas_onoff_%d", i)] = int16(0)
 		}
 	}
 

@@ -1,31 +1,27 @@
-
 import { useState, useEffect } from 'react';
 import ResponsiveWrapper from '@/components/ResponsiveWrapper';
 
-interface NivelProps {
+interface NivelMontanteProps {
   nivel?: number;
   scale?: number;
   editMode?: boolean;
-  websocketValue?: number | null; // Novo prop para valor do WebSocket
-  // Props injetadas pelo ResponsiveWrapper
+  websocketValue?: number | null;
   width?: number;
   height?: number;
   componentWidth?: number;
   componentHeight?: number;
 }
 
-export default function Nivel({
+export default function NivelMontante({
   nivel = 50,
   editMode = false,
-  websocketValue = null, // Valor vindo do WebSocket
-  // Props injetadas pelo ResponsiveWrapper para dimensionamento
+  websocketValue = null,
   componentWidth,
   componentHeight
-}: NivelProps) {
+}: NivelMontanteProps) {
   const [nivelAtual, setNivelAtual] = useState(nivel);
-  const [isManualControl] = useState(false); // ✅ Removido setIsManualControl não usado
+  const [isManualControl] = useState(false);
 
-  // Atualiza o nível quando recebe dados do WebSocket
   useEffect(() => {
     if (websocketValue !== null && !isManualControl) {
       setNivelAtual(websocketValue);
@@ -34,7 +30,7 @@ export default function Nivel({
 
   return (
     <ResponsiveWrapper 
-      componentId="nivel"
+      componentId="nivel-montante"
       editMode={editMode}
       defaultConfig={{
         xs: { x: 50, y: 200, width: 150, height: 80, scale: 0.4, zIndex: 50, opacity: 1, rotation: 0 },
@@ -50,26 +46,25 @@ export default function Nivel({
       <div className="w-full h-full">        
         <svg
           className="w-full h-full object-contain"
-          width={componentWidth || 1167}
-          height={componentHeight || 165}
-          viewBox="0 0 1167 165"
+          width={componentWidth || 296}
+          height={componentHeight || 137}
+          viewBox="0 0 296 137"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           style={{
-            // Remove scale fixo e deixa o ResponsiveWrapper controlar
             transform: 'none',
             transformOrigin: 'top left'
           }}
         >
           <defs>
-            <clipPath id="nivelClip">
-              <rect x="0" y={165 - (nivelAtual / 100) * 165} width="1167" height={(nivelAtual / 100) * 165} />
+            <clipPath id="nivelMontanteClip">
+              <rect x="0" y={137 - (nivelAtual / 100) * 137} width="296" height={(nivelAtual / 100) * 137} />
             </clipPath>
           </defs>
           <path
-            d="M224.398 135.194V141.778H0V0.00125099L180.338 0H321.057H1048.01V84H1167V163.022L968.1 162.564H966.5L928.672 162.192H321.057V164.048H307.395L298.173 150.894V92.4101L295.099 86.8218V46.2036H252.405L231.912 135.198L224.398 135.194Z"
+            d="M223.559 136.5H0V0.5H180H184.689H296V44H252L231.5 131H224L223.559 136.5Z"
             fill={isManualControl ? "#FF6B00" : "#1E00FF"}
-            clipPath="url(#nivelClip)"
+            clipPath="url(#nivelMontanteClip)"
             style={{ transition: 'all 0.5s ease-in-out' }}
           />
         </svg>

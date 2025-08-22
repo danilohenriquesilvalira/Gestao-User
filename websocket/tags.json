@@ -6,220 +6,335 @@
     "db_number": 19
   },
   "tags": {
-    "nivel": {
+    "Eclusa_Nivel_Caldeira": {
       "type": "real",
-      "offset": 0,
-      "description": "Nível da água (Real)"
+      "offset": 0.0,
+      "description": "Eclusa Nível Caldeira (Real)"
     },
-    "porta_jusante": {
+    "Eclusa_Nivel_Montante": {
       "type": "real",
-      "offset": 16,
+      "offset": 4.0,
+      "description": "Eclusa Nível Montante (Real)"
+    },
+    "Eclusa_Nivel_Jusante": {
+      "type": "real",
+      "offset": 8.0,
+      "description": "Eclusa Nível Jusante (Real)"
+    },
+    "Eclusa_Radar_Caldeira_Distancia": {
+      "type": "real",
+      "offset": 12.0,
+      "description": "Eclusa Radar Caldeira Distância (Real)"
+    },
+    "Eclusa_Radar_Caldeira_Velocidade": {
+      "type": "real",
+      "offset": 16.0,
+      "description": "Eclusa Radar Caldeira Velocidade (Real)"
+    },
+    "Eclusa_Radar_Montante_Distancia": {
+      "type": "real",
+      "offset": 20.0,
+      "description": "Eclusa Radar Montante Distância (Real)"
+    },
+    "Eclusa_Radar_Montante_Velocidade": {
+      "type": "real",
+      "offset": 24.0,
+      "description": "Eclusa Radar Montante Velocidade (Real)"
+    },
+    "Eclusa_Radar_Jusante_Distancia": {
+      "type": "real",
+      "offset": 28.0,
+      "description": "Eclusa Radar Jusante Distância (Real)"
+    },
+    "Eclusa_Radar_Jusante_Velocidade": {
+      "type": "real",
+      "offset": 32.0,
+      "description": "Eclusa Radar Jusante Velocidade (Real)"
+    },
+    "Eclusa_Porta_Jusante": {
+      "type": "real",
+      "offset": 36.0,
+      "description": "Eclusa Porta Jusante (Real)"
+    },
+    "Eclusa_Porta_Montante": {
+      "type": "real",
+      "offset": 40.0,
+      "description": "Eclusa Porta Montante (Real)"
+    },
+    "Eclusa_Laser_Montante": {
+      "type": "real",
+      "offset": 44.0,
+      "description": "Eclusa Laser Montante (Real)"
+    },
+    "Eclusa_Laser_Jusante": {
+      "type": "real",
+      "offset": 48.0,
+      "description": "Eclusa Laser Jusante (Real)"
+    },
+    "Eclusa_Semaforo_verde_0": {
+      "type": "bool",
+      "offset": 52.0,
+      "description": "Eclusa Semáforo Verde 0"
+    },
+    "Eclusa_Semaforo_vermelho_0": {
+      "type": "bool",
+      "offset": 52.1,
+      "description": "Eclusa Semáforo Vermelho 0"
+    },
+    "Eclusa_Semaforo_verde_1": {
+      "type": "bool",
+      "offset": 52.2,
+      "description": "Eclusa Semáforo Verde 1"
+    },
+    "Eclusa_Semaforo_vermelho_1": {
+      "type": "bool",
+      "offset": 52.3,
+      "description": "Eclusa Semáforo Vermelho 1"
+    },
+    "Eclusa_Semaforo_verde_2": {
+      "type": "bool",
+      "offset": 52.4,
+      "description": "Eclusa Semáforo Verde 2"
+    },
+    "Eclusa_Semaforo_vermelho_2": {
+      "type": "bool",
+      "offset": 52.5,
+      "description": "Eclusa Semáforo Vermelho 2"
+    },
+    "Eclusa_Semaforo_verde_3": {
+      "type": "bool",
+      "offset": 52.6,
+      "description": "Eclusa Semáforo Verde 3"
+    },
+    "Eclusa_Semaforo_vermelho_3": {
+      "type": "bool",
+      "offset": 52.7,
+      "description": "Eclusa Semáforo Vermelho 3"
+    },
+    "Eclusa_Comunicação_PLC": {
+      "type": "bool",
+      "offset": 53.0,
+      "description": "Eclusa Comunicação PLC"
+    },
+    "Eclusa_Operação": {
+      "type": "bool",
+      "offset": 53.1,
+      "description": "Eclusa Operação"
+    },
+    "Eclusa_Alarmes_Ativo": {
+      "type": "bool",
+      "offset": 53.2,
+      "description": "Eclusa Alarmes Ativo"
+    },
+    "Eclusa_Emergencia_Ativa": {
+      "type": "bool",
+      "offset": 53.3,
+      "description": "Eclusa Emergência Ativa"
+    },
+    "Eclusa_Inundacao": {
+      "type": "bool",
+      "offset": 53.4,
+      "description": "Eclusa Inundação"
+    },
+    "PortaJusante_ContraPeso Direito": {
+      "type": "real",
+      "offset": 54.0,
+      "description": "Porta Jusante ContraPeso Direito (Real)"
+    },
+    "PortaJusante_ContraPeso Esquerdo": {
+      "type": "real",
+      "offset": 58.0,
+      "description": "Porta Jusante ContraPeso Esquerdo (Real)"
+    },
+    "Porta Jusante": {
+      "type": "real",
+      "offset": 62.0,
       "description": "Porta Jusante (Real)"
     },
-    "semaforo_verde_0": {
-      "type": "bool",
-      "offset": 6.0,
-      "description": "Semáforo 0 - LED Verde"
-    },
-    "semaforo_vermelho_0": {
-      "type": "bool",
-      "offset": 6.1,
-      "description": "Semáforo 0 - LED Vermelho"
-    },
-    "semaforo_verde_1": {
-      "type": "bool",
-      "offset": 6.2,
-      "description": "Semáforo 1 - LED Verde"
-    },
-    "semaforo_vermelho_1": {
-      "type": "bool",
-      "offset": 6.3,
-      "description": "Semáforo 1 - LED Vermelho"
-    },
-    "semaforo_verde_2": {
-      "type": "bool",
-      "offset": 6.4,
-      "description": "Semáforo 2 - LED Verde"
-    },
-    "semaforo_vermelho_2": {
-      "type": "bool",
-      "offset": 6.5,
-      "description": "Semáforo 2 - LED Vermelho"
-    },
-    "semaforo_verde_3": {
-      "type": "bool",
-      "offset": 6.6,
-      "description": "Semáforo 3 - LED Verde"
-    },
-    "semaforo_vermelho_3": {
-      "type": "bool",
-      "offset": 6.7,
-      "description": "Semáforo 3 - LED Vermelho"
-    },
-    "contrapeso_direito": {
-      "type": "real",
-      "offset": 8,
-      "description": "ContraPeso Direito (Real)"
-    },
-    "contrapeso_esquerdo": {
-      "type": "real",
-      "offset": 12,
-      "description": "ContraPeso Esquerdo (Real)"
-    },
-    "porta_jusante_motor_direito": {
+    "PortaJusante_MotorDireita": {
       "type": "int",
-      "offset": 20,
-      "description": "Motor Direito Porta Jusante (Int)"
+      "offset": 66.0,
+      "description": "Porta Jusante Motor Direito (Int)"
     },
-    "porta_jusante_motor_esquerdo": {
+    "PortaJusante_MotorEsquerda": {
       "type": "int",
-      "offset": 22,
-      "description": "Motor Esquerdo Porta Jusante (Int)"
+      "offset": 68.0,
+      "description": "Porta Jusante Motor Esquerdo (Int)"
     },
-    "porta_montante": {
+    "Porta Montante": {
       "type": "real",
-      "offset": 24,
+      "offset": 70.0,
       "description": "Porta Montante (Real)"
     },
-    "porta_montante_contrapeso_direito": {
+    "PortaMontante_ContraPesoDireito": {
       "type": "real",
-      "offset": 28,
-      "description": "ContraPeso Direito Porta Montante (Real)"
+      "offset": 74.0,
+      "description": "Porta Montante ContraPeso Direito (Real)"
     },
-    "porta_montante_contrapeso_esquerdo": {
+    "PortaMontante_ContraPesoEsquerdo": {
       "type": "real",
-      "offset": 32,
-      "description": "ContraPeso Esquerdo Porta Montante (Real)"
+      "offset": 78.0,
+      "description": "Porta Montante ContraPeso Esquerdo (Real)"
     },
-    "porta_montante_motor_direito": {
+    "PortaMontante_MotorDireita": {
       "type": "int",
-      "offset": 36,
-      "description": "Motor Direito Porta Montante (Int)"
+      "offset": 82.0,
+      "description": "Porta Montante Motor Direito (Int)"
     },
-    "porta_montante_motor_esquerdo": {
+    "PortaMontante_MotorEsquerda": {
       "type": "int",
-      "offset": 38,
-      "description": "Motor Esquerdo Porta Montante (Int)"
+      "offset": 84.0,
+      "description": "Porta Montante Motor Esquerdo (Int)"
     },
-    "pipe_system_0": {
+    "PipeSystem[0]": {
       "type": "bool",
-      "offset": 40.0,
+      "offset": 86.0,
       "description": "PipeSystem Array [0] - Pipe 1"
     },
-    "pipe_system_1": {
+    "PipeSystem[1]": {
       "type": "bool",
-      "offset": 40.1,
+      "offset": 86.1,
       "description": "PipeSystem Array [1] - Pipe 2"
     },
-    "pipe_system_2": {
+    "PipeSystem[2]": {
       "type": "bool",
-      "offset": 40.2,
+      "offset": 86.2,
       "description": "PipeSystem Array [2] - Pipe 3"
     },
-    "pipe_system_3": {
+    "PipeSystem[3]": {
       "type": "bool",
-      "offset": 40.3,
+      "offset": 86.3,
       "description": "PipeSystem Array [3] - Pipe 4"
     },
-    "pipe_system_4": {
+    "PipeSystem[4]": {
       "type": "bool",
-      "offset": 40.4,
+      "offset": 86.4,
       "description": "PipeSystem Array [4] - Pipe 5"
     },
-    "pipe_system_5": {
+    "PipeSystem[5]": {
       "type": "bool",
-      "offset": 40.5,
+      "offset": 86.5,
       "description": "PipeSystem Array [5] - Pipe 6"
     },
-    "pipe_system_6": {
+    "PipeSystem[6]": {
       "type": "bool",
-      "offset": 40.6,
+      "offset": 86.6,
       "description": "PipeSystem Array [6] - Pipe 7"
     },
-    "pipe_system_7": {
+    "PipeSystem[7]": {
       "type": "bool",
-      "offset": 40.7,
+      "offset": 86.7,
       "description": "PipeSystem Array [7] - Pipe 8"
     },
-    "pipe_system_8": {
+    "PipeSystem[8]": {
       "type": "bool",
-      "offset": 41.0,
+      "offset": 87.0,
       "description": "PipeSystem Array [8] - Pipe 9"
     },
-    "pipe_system_9": {
+    "PipeSystem[9]": {
       "type": "bool",
-      "offset": 41.1,
+      "offset": 87.1,
       "description": "PipeSystem Array [9] - Pipe 10"
     },
-    "pipe_system_10": {
+    "PipeSystem[10]": {
       "type": "bool",
-      "offset": 41.2,
+      "offset": 87.2,
       "description": "PipeSystem Array [10] - Pipe 11"
     },
-    "pipe_system_11": {
+    "PipeSystem[11]": {
       "type": "bool",
-      "offset": 41.3,
+      "offset": 87.3,
       "description": "PipeSystem Array [11] - Pipe 12"
     },
-    "pipe_system_12": {
+    "PipeSystem[12]": {
       "type": "bool",
-      "offset": 41.4,
+      "offset": 87.4,
       "description": "PipeSystem Array [12] - Pipe 13"
     },
-    "pipe_system_13": {
+    "PipeSystem[13]": {
       "type": "bool",
-      "offset": 41.5,
+      "offset": 87.5,
       "description": "PipeSystem Array [13] - Pipe 14"
     },
-    "pipe_system_14": {
+    "PipeSystem[14]": {
       "type": "bool",
-      "offset": 41.6,
+      "offset": 87.6,
       "description": "PipeSystem Array [14] - Pipe 15"
     },
-    "pipe_system_15": {
+    "PipeSystem[15]": {
       "type": "bool",
-      "offset": 41.7,
+      "offset": 87.7,
       "description": "PipeSystem Array [15] - Pipe 16"
     },
-    "pipe_system_16": {
+    "PipeSystem[16]": {
       "type": "bool",
-      "offset": 42.0,
+      "offset": 88.0,
       "description": "PipeSystem Array [16] - Pipe 17"
     },
-    "pipe_system_17": {
+    "PipeSystem[17]": {
       "type": "bool",
-      "offset": 42.1,
+      "offset": 88.1,
       "description": "PipeSystem Array [17] - Pipe 18"
     },
-    "pipe_system_18": {
+    "PipeSystem[18]": {
       "type": "bool",
-      "offset": 42.2,
+      "offset": 88.2,
       "description": "PipeSystem Array [18] - Pipe 19"
     },
-    "pipe_system_19": {
+    "PipeSystem[19]": {
       "type": "bool",
-      "offset": 42.3,
+      "offset": 88.3,
       "description": "PipeSystem Array [19] - Pipe 20"
     },
-    "pipe_system_20": {
+    "PipeSystem[20]": {
       "type": "bool",
-      "offset": 42.4,
+      "offset": 88.4,
       "description": "PipeSystem Array [20] - Pipe 21"
     },
-    "pipe_system_21": {
+    "PipeSystem[21]": {
       "type": "bool",
-      "offset": 42.5,
+      "offset": 88.5,
       "description": "PipeSystem Array [21] - Pipe 22"
     },
-    "pipe_system_22": {
+    "PipeSystem[22]": {
       "type": "bool",
-      "offset": 42.6,
+      "offset": 88.6,
       "description": "PipeSystem Array [22] - Pipe 23"
     },
-    "pipe_system_23": {
+    "PipeSystem[23]": {
       "type": "bool",
-      "offset": 42.7,
+      "offset": 88.7,
       "description": "PipeSystem Array [23] - Pipe 24"
+    },
+    "ValvulasOnOFF[0]": {
+      "type": "int",
+      "offset": 90.0,
+      "description": "Válvulas OnOff Array [0] - Válvula 1"
+    },
+    "ValvulasOnOFF[1]": {
+      "type": "int",
+      "offset": 92.0,
+      "description": "Válvulas OnOff Array [1] - Válvula 2"
+    },
+    "ValvulasOnOFF[2]": {
+      "type": "int",
+      "offset": 94.0,
+      "description": "Válvulas OnOff Array [2] - Válvula 3"
+    },
+    "ValvulasOnOFF[3]": {
+      "type": "int",
+      "offset": 96.0,
+      "description": "Válvulas OnOff Array [3] - Válvula 4"
+    },
+    "ValvulasOnOFF[4]": {
+      "type": "int",
+      "offset": 98.0,
+      "description": "Válvulas OnOff Array [4] - Válvula 5"
+    },
+    "ValvulasOnOFF[5]": {
+      "type": "int",
+      "offset": 100.0,
+      "description": "Válvulas OnOff Array [5] - Válvula 6"
     }
   }
 }

@@ -20,32 +20,36 @@ interface StatusSistemaProps {
 }
 
 export default function StatusSistema({ editMode = false }: StatusSistemaProps) {
-  const { isConnected, semaforos } = useWebSocket('ws://localhost:8080/ws');
+  const { 
+    isConnected, 
+    semaforos,
+    comunicacaoPLCValue,
+    operacaoValue,
+    alarmesAtivoValue,
+    emergenciaAtivaValue,
+    inundacaoValue
+  } = useWebSocket('ws://localhost:8080/ws');
   
-  // Simulação de dados do sistema (serão substituídos por WebSocket real)
-  const [sistemaDados, setSistemaDados] = useState({
-    comunicacao: 'Online',
-    operacao: 'Telecomando', // Telecomando, Local, Desligado
-    emergencia: false,
-    alarmes: 3,
-    inundacao: false,
-    autoOK: true
-  });
+  // ✅ DADOS REAIS DO PLC VIA WEBSOCKET
+  const sistemaDados = {
+    comunicacao: comunicacaoPLCValue ? 'Online' : (isConnected ? 'PLC Offline' : 'Desconectado'),
+    operacao: operacaoValue ? 'Telecomando' : 'Local', // true = Telecomando, false = Local
+    emergencia: emergenciaAtivaValue || false,
+    alarmes: alarmesAtivoValue ? 1 : 0, // Por enquanto 1 ou 0, pode ser expandido
+    inundacao: inundacaoValue || false,
+    autoOK: !alarmesAtivoValue && !emergenciaAtivaValue && !inundacaoValue
+  };
 
-  // Simula mudanças de status
+  // ✅ LOG PARA DEBUG DOS VALORES DO PLC
   useEffect(() => {
-    const interval = setInterval(() => {
-      setSistemaDados(prev => ({
-        ...prev,
-        comunicacao: isConnected ? 'Online' : 'Offline',
-        alarmes: Math.floor(Math.random() * 5),
-        emergencia: Math.random() > 0.9,
-        inundacao: Math.random() > 0.95
-      }));
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [isConnected]);
+    console.log('🔧 STATUS SISTEMA ATUALIZADO:', {
+      comunicacaoPLC: comunicacaoPLCValue,
+      operacao: operacaoValue,
+      alarmes: alarmesAtivoValue,
+      emergencia: emergenciaAtivaValue,
+      inundacao: inundacaoValue
+    });
+  }, [comunicacaoPLCValue, operacaoValue, alarmesAtivoValue, emergenciaAtivaValue, inundacaoValue]);
 
   const getOperacaoIcon = (modo: string) => {
     switch (modo) {

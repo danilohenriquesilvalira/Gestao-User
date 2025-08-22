@@ -23,9 +23,9 @@ const Semaforo: React.FC<SemaforoProps> = ({
     semaforoNumber = '0';
   }
   
-  // Tags individuais para LED verde e vermelho
-  const tagVerde = `semaforo_verde_${semaforoNumber}`;
-  const tagVermelho = `semaforo_vermelho_${semaforoNumber}`;
+  // Tags individuais para LED verde e vermelho (novos nomes)
+  const tagVerde = `Eclusa_Semaforo_verde_${semaforoNumber}`;
+  const tagVermelho = `Eclusa_Semaforo_vermelho_${semaforoNumber}`;
   
   // Estados individuais dos LEDs
   const ledVerde = semaforos[tagVerde] || false;

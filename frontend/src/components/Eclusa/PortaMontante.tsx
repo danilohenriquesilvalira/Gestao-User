@@ -11,17 +11,22 @@ export default function PortaMontante({
   editMode = false
 }: PortaMontanteProps) {
   const [abertura, setAbertura] = useState<number | null>(null); // ✅ ESTADO INICIAL: null (não renderiza até ter dados)
-  const { portaMontanteValue, isConnected } = useWebSocket('ws://localhost:8080/ws');
+  const { eclusaPortaMontanteValue, portaMontanteValue, isConnected } = useWebSocket('ws://localhost:8080/ws');
 
-  // Atualiza abertura via WebSocket - usando portaMontanteValue
+  // Atualiza abertura via WebSocket - usando eclusaPortaMontanteValue (novo)
   useEffect(() => {
-    if (portaMontanteValue !== null) {
+    if (eclusaPortaMontanteValue !== null) {
       // Converte valor da porta para porcentagem de abertura (0-100)
+      const aberturaPercentual = Math.max(0, Math.min(100, eclusaPortaMontanteValue));
+      setAbertura(aberturaPercentual);
+      console.log(`🚪 PORTA MONTANTE: ${eclusaPortaMontanteValue} -> ${aberturaPercentual}%`);
+    } else if (portaMontanteValue !== null) {
+      // Fallback para compatibilidade com sistema antigo
       const aberturaPercentual = Math.max(0, Math.min(100, portaMontanteValue));
       setAbertura(aberturaPercentual);
-      console.log(`🚪 PORTA MONTANTE: ${portaMontanteValue} -> ${aberturaPercentual}%`);
+      console.log(`🚪 PORTA MONTANTE (fallback): ${portaMontanteValue} -> ${aberturaPercentual}%`);
     }
-  }, [portaMontanteValue]);
+  }, [eclusaPortaMontanteValue, portaMontanteValue]);
 
   // ✅ SE NÃO TEM DADOS AINDA, NÃO RENDERIZA (evita flash)
   if (abertura === null && !editMode) {

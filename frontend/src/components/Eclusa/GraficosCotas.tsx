@@ -1,5 +1,5 @@
 // components/Eclusa/GraficosCotas.tsx - MONITOR SUTIL DE COTAS
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import ResponsiveWrapper from '@/components/ResponsiveWrapper';
 import { useWebSocket } from '@/hooks/useWebSocket';
@@ -9,38 +9,63 @@ interface GraficosCotasProps {
   editMode?: boolean;
 }
 
-export default function GraficosCotas({ editMode = false }: GraficosCotasProps) {
+// ✅ COMPONENTE ISOLADO QUE SÓ RENDERIZA QUANDO OS NÍVEIS MUDAM
+const GraficoPuro = React.memo(({ 
+  nivelCaldeiraValue, 
+  nivelMontanteValue, 
+  nivelJusanteValue, 
+  isConnected, 
+  editMode 
+}: {
+  nivelCaldeiraValue: number | null;
+  nivelMontanteValue: number | null;  
+  nivelJusanteValue: number | null;
+  isConnected: boolean;
+  editMode: boolean;
+}) => {
   const [cotasDados, setCotasDados] = useState<any[]>([]);
-  const { cotaMontanteValue, cotaCaldeiraValue, cotaJusanteValue, isConnected } = useWebSocket('ws://localhost:8080/ws');
-
-  // Dados atuais das cotas
+  const lastUpdateRef = useRef<number>(0);
+  
   const cotaAtual = {
-    montante: cotaMontanteValue ?? 16.1,
-    caldeira: cotaCaldeiraValue ?? 13.5,
-    jusante: cotaJusanteValue ?? 11.2
+    montante: nivelMontanteValue !== null ? (nivelMontanteValue / 100) * 25 : 16.1,
+    caldeira: nivelCaldeiraValue !== null ? (nivelCaldeiraValue / 100) * 25 : 13.5,
+    jusante: nivelJusanteValue !== null ? (nivelJusanteValue / 100) * 25 : 11.2
   };
 
-  // Verifica se níveis estão iguais (muito sutil)
   const niveisIguais = Math.abs(cotaAtual.montante - cotaAtual.caldeira) < 0.1 && 
                        Math.abs(cotaAtual.caldeira - cotaAtual.jusante) < 0.1;
 
-  // Atualiza dados do gráfico
+  // ✅ ATUALIZA DADOS APENAS SE MUDOU SIGNIFICATIVAMENTE E COM THROTTLE
   useEffect(() => {
-    const agora = new Date();
-    const novoRegistro = {
-      hora: agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-      montante: cotaAtual.montante,
-      caldeira: cotaAtual.caldeira,
-      jusante: cotaAtual.jusante
-    };
-
+    const now = Date.now();
+    if (now - lastUpdateRef.current < 2000) return; // Throttle de 2 segundos
+    
     setCotasDados(prev => {
-      const novo = [...prev, novoRegistro];
-      return novo.length > 8 ? novo.slice(-8) : novo;
-    });
-  }, [cotaMontanteValue, cotaCaldeiraValue, cotaJusanteValue]);
+      const ultimoRegistro = prev[prev.length - 1];
+      
+      const valoresMudaram = !ultimoRegistro || 
+        Math.abs(ultimoRegistro.montante - cotaAtual.montante) > 0.2 ||
+        Math.abs(ultimoRegistro.caldeira - cotaAtual.caldeira) > 0.2 ||
+        Math.abs(ultimoRegistro.jusante - cotaAtual.jusante) > 0.2;
 
-  // Dados iniciais
+      if (valoresMudaram) {
+        lastUpdateRef.current = now;
+        const agora = new Date();
+        const novoRegistro = {
+          hora: agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+          montante: cotaAtual.montante,
+          caldeira: cotaAtual.caldeira,
+          jusante: cotaAtual.jusante
+        };
+        
+        const novo = [...prev, novoRegistro];
+        return novo.length > 8 ? novo.slice(-8) : novo;
+      }
+      return prev;
+    });
+  }, [cotaAtual.montante, cotaAtual.caldeira, cotaAtual.jusante]);
+
+  // Dados iniciais apenas uma vez
   useEffect(() => {
     if (cotasDados.length === 0) {
       const dadosIniciais = [];
@@ -57,7 +82,7 @@ export default function GraficosCotas({ editMode = false }: GraficosCotasProps) 
     }
   }, []);
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = useCallback(({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-lg border border-gray-100">
@@ -72,7 +97,7 @@ export default function GraficosCotas({ editMode = false }: GraficosCotasProps) 
       );
     }
     return null;
-  };
+  }, []);
 
   return (
     <ResponsiveWrapper 
@@ -89,12 +114,10 @@ export default function GraficosCotas({ editMode = false }: GraficosCotasProps) 
         '4xl': { x: 350, y: 220, width: 620, height: 380, scale: 1, zIndex: 15, opacity: 1, rotation: 0 }
       }}
     >
-      {/* CARD PADRONIZADO COM DETALHE VERDE MAIS DELICADO */}
       <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden h-full">
         <div className="h-3 bg-green-500 rounded-t-xl"></div>
         
         <div className="p-4 h-full flex flex-col">
-          {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="w-6 h-6 bg-green-500 rounded-md flex items-center justify-center">
@@ -112,7 +135,6 @@ export default function GraficosCotas({ editMode = false }: GraficosCotasProps) 
             </div>
           </div>
 
-          {/* Valores das cotas - Centralizados e Modernos */}
           <div className="flex justify-center mb-4">
             <div className="flex items-center gap-4">
               <div className="bg-white rounded-xl p-3 border border-blue-200 hover:border-blue-300 transition-colors duration-200 shadow-sm hover:shadow-md">
@@ -139,7 +161,6 @@ export default function GraficosCotas({ editMode = false }: GraficosCotasProps) 
             </div>
           </div>
 
-          {/* GRÁFICO APRIMORADO */}
           <div className="flex-1 min-h-0">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={cotasDados} margin={{ top: 10, right: 15, left: 15, bottom: 20 }}>
@@ -173,7 +194,6 @@ export default function GraficosCotas({ editMode = false }: GraficosCotasProps) 
                 </defs>
                 <Tooltip content={<CustomTooltip />} />
                 
-                {/* Linhas melhoradas com gradiente sutil */}
                 <Line 
                   type="monotone" 
                   dataKey="montante" 
@@ -208,7 +228,6 @@ export default function GraficosCotas({ editMode = false }: GraficosCotasProps) 
             </ResponsiveContainer>
           </div>
 
-          {/* Footer com diferenças */}
           <div className="flex-shrink-0 mt-4 pt-3 border-t border-gray-200">
             {niveisIguais ? (
               <div className="text-center">
@@ -237,5 +256,30 @@ export default function GraficosCotas({ editMode = false }: GraficosCotasProps) 
         </div>
       </div>
     </ResponsiveWrapper>
+  );
+}, (prevProps, nextProps) => {
+  // ✅ COMPARAÇÃO MANUAL: Só re-renderiza se os níveis mudaram significativamente
+  return (
+    prevProps.editMode === nextProps.editMode &&
+    prevProps.isConnected === nextProps.isConnected &&
+    Math.abs((prevProps.nivelCaldeiraValue || 0) - (nextProps.nivelCaldeiraValue || 0)) < 0.5 &&
+    Math.abs((prevProps.nivelMontanteValue || 0) - (nextProps.nivelMontanteValue || 0)) < 0.5 &&
+    Math.abs((prevProps.nivelJusanteValue || 0) - (nextProps.nivelJusanteValue || 0)) < 0.5
+  );
+});
+
+export default function GraficosCotas({ editMode = false }: GraficosCotasProps) {
+  // ✅ SÓ PEGA OS 4 VALORES ESPECÍFICOS NECESSÁRIOS
+  const { nivelCaldeiraValue, nivelMontanteValue, nivelJusanteValue, isConnected } = useWebSocket('ws://localhost:8080/ws');
+
+  // ✅ USA O COMPONENTE ISOLADO COM React.memo
+  return (
+    <GraficoPuro
+      nivelCaldeiraValue={nivelCaldeiraValue}
+      nivelMontanteValue={nivelMontanteValue}
+      nivelJusanteValue={nivelJusanteValue}
+      isConnected={isConnected}
+      editMode={editMode}
+    />
   );
 }

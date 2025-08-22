@@ -1,6 +1,7 @@
-// AssistenteVirtual.tsx
+// AssistenteVirtual.tsx - ASSISTENTE INTELIGENTE DA ECLUSA
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Bot, User } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, User, AlertTriangle, CheckCircle, TrendingUp } from 'lucide-react';
+import { useWebSocket } from '@/hooks/useWebSocket';
 
 interface Message {
   id: number;
@@ -10,11 +11,28 @@ interface Message {
 }
 
 export const AssistenteVirtual: React.FC = () => {
+  // ✅ DADOS REAIS EM TEMPO REAL DA ECLUSA
+  const {
+    nivelCaldeiraValue,
+    nivelMontanteValue,
+    nivelJusanteValue,
+    eclusaPortaJusanteValue,
+    eclusaPortaMontanteValue,
+    comunicacaoPLCValue,
+    operacaoValue,
+    alarmesAtivoValue,
+    emergenciaAtivaValue,
+    inundacaoValue,
+    semaforos,
+    isConnected,
+    error
+  } = useWebSocket('ws://localhost:8080/ws');
+
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "🤖 Olá! Sou seu Assistente Inteligente da Eclusa Régua.\n\nPosso ajudar com:\n• Status em tempo real\n• Diagnóstico de falhas\n• Procedimentos emergência\n• Análise de eficiência\n• Cronogramas manutenção\n\nDigite 'status' para começar!",
+      text: "🤖 Olá! Sou seu Assistente IA da Eclusa de Navegação.\n\nPosso analisar dados reais em tempo real:\n• Status operacional atual\n• Diagnósticos inteligentes\n• Alertas automáticos\n• Otimizações sugeridas\n• Procedimentos emergência\n\nDigite 'status' para análise completa!",
       isBot: true,
       timestamp: new Date()
     }
@@ -22,6 +40,120 @@ export const AssistenteVirtual: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const lastStatusRef = useRef<any>(null);
+
+  // ✅ ALERTAS AUTOMÁTICOS INTELIGENTES
+  useEffect(() => {
+    if (!isConnected) return;
+    
+    const currentStatus = { 
+      emergencia: emergenciaAtivaValue, 
+      inundacao: inundacaoValue,
+      comunicacao: comunicacaoPLCValue 
+    };
+    
+    const lastStatus = lastStatusRef.current;
+    
+    if (lastStatus) {
+      // Detecta mudanças críticas e envia alertas automáticos
+      if (!lastStatus.emergencia && currentStatus.emergencia) {
+        const alertMessage: Message = {
+          id: Date.now(),
+          text: "🚨 ALERTA AUTOMÁTICO: EMERGÊNCIA ATIVADA!\n\nO sistema detectou ativação de emergência. Verifique imediatamente a área e tome ações de segurança necessárias.",
+          isBot: true,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, alertMessage]);
+      }
+      
+      if (!lastStatus.inundacao && currentStatus.inundacao) {
+        const alertMessage: Message = {
+          id: Date.now(),
+          text: "🌊 ALERTA AUTOMÁTICO: INUNDAÇÃO DETECTADA!\n\nSensor de inundação foi acionado. Verificar sistema de drenagem e tomar medidas preventivas imediatamente.",
+          isBot: true,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, alertMessage]);
+      }
+      
+      if (lastStatus.comunicacao && !currentStatus.comunicacao) {
+        const alertMessage: Message = {
+          id: Date.now(),
+          text: "📡 ALERTA AUTOMÁTICO: FALHA COMUNICAÇÃO PLC!\n\nPerda de comunicação com o PLC detectada. Verificar cabos de rede e reiniciar equipamentos se necessário.",
+          isBot: true,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, alertMessage]);
+      }
+    }
+    
+    lastStatusRef.current = currentStatus;
+  }, [emergenciaAtivaValue, inundacaoValue, comunicacaoPLCValue, isConnected]);
+
+  // ✅ ANÁLISES INTELIGENTES EM TEMPO REAL
+  const analisarStatusAtual = () => {
+    const niveis = {
+      montante: nivelMontanteValue || 0,
+      caldeira: nivelCaldeiraValue || 0, 
+      jusante: nivelJusanteValue || 0
+    };
+
+    const portas = {
+      montante: eclusaPortaMontanteValue || 0,
+      jusante: eclusaPortaJusanteValue || 0
+    };
+
+    const status = {
+      comunicacao: comunicacaoPLCValue,
+      operacao: operacaoValue,
+      alarmes: alarmesAtivoValue,
+      emergencia: emergenciaAtivaValue,
+      inundacao: inundacaoValue
+    };
+
+    return { niveis, portas, status };
+  };
+
+  const gerarAlertasInteligentes = () => {
+    const { niveis, portas, status } = analisarStatusAtual();
+    const alertas = [];
+
+    // Análise de níveis
+    const diffMontanteCaldeira = Math.abs(niveis.montante - niveis.caldeira);
+    const diffCaldeiraJusante = Math.abs(niveis.caldeira - niveis.jusante);
+
+    if (diffMontanteCaldeira > 5) {
+      alertas.push("⚠️ Grande diferença de nível Montante-Caldeira: " + diffMontanteCaldeira.toFixed(1) + "%");
+    }
+    
+    if (diffCaldeiraJusante > 5) {
+      alertas.push("⚠️ Grande diferença de nível Caldeira-Jusante: " + diffCaldeiraJusante.toFixed(1) + "%");
+    }
+
+    // Análise de portas
+    if (portas.montante > 90 && portas.jusante > 90) {
+      alertas.push("🚨 CRÍTICO: Ambas as portas abertas simultaneamente!");
+    }
+
+    // Status críticos
+    if (status.emergencia) {
+      alertas.push("🚨 EMERGÊNCIA ATIVA - Ação imediata necessária!");
+    }
+
+    if (status.inundacao) {
+      alertas.push("🌊 INUNDAÇÃO DETECTADA - Verificar drenagem!");
+    }
+
+    if (!status.comunicacao) {
+      alertas.push("📡 Falha comunicação PLC - Verificar rede!");
+    }
+
+    if (!isConnected) {
+      alertas.push("🔴 WebSocket desconectado - Dados podem estar desatualizados!");
+    }
+
+    return alertas;
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -33,44 +165,74 @@ export const AssistenteVirtual: React.FC = () => {
 
   const diagnosticarFalha = (input: string): string => {
     const inputLower = input.toLowerCase();
-    
-    // Falhas reais da Eclusa Régua integradas ao assistente
-    const falhasReguaAtuais = [
-      'Protecção 24V entradas analógicas disparou',
-      'Protecção sobretensão descarregador disparou', 
-      'Sem comunicação com sala comando',
-      'Emergência activada',
-      'Bomba comporta direita não responde',
-      'Sensor posição comporta direita avariado',
-      'Autómato - erro diagnóstico',
-      'Laser jusante - obstrução detectada',
-      'Porta desnivelada - paragem',
-      'Inundação poço contrapesos porta montante',
-      'Radar jusante com erro'
-    ];
+    const { niveis, portas, status } = analisarStatusAtual();
+    const alertas = gerarAlertasInteligentes();
 
-    // Status atual da Eclusa Régua
-    const statusRegua = {
-      eficiencia: '87%',
-      operador: 'Carlos Mendes',
-      comunicacao: 'Online',
-      alarmes_ativos: 11,
-      nivel_montante: '16.1m',
-      nivel_caldeira: '13.5m', 
-      nivel_jusante: '11.2m'
+    // ✅ DADOS REAIS EM TEMPO REAL
+    const statusAtual = {
+      conexao: isConnected ? '🟢 Online' : '🔴 Offline',
+      comunicacao_plc: comunicacaoPLCValue ? '🟢 OK' : '🔴 Falha',
+      operacao: operacaoValue ? '🟢 Operacional' : '🔴 Parada',
+      emergencia: emergenciaAtivaValue ? '🚨 ATIVA' : '🟢 Normal',
+      inundacao: inundacaoValue ? '🌊 DETECTADA' : '🟢 Normal',
+      nivel_montante: niveis.montante.toFixed(1) + '%',
+      nivel_caldeira: niveis.caldeira.toFixed(1) + '%',
+      nivel_jusante: niveis.jusante.toFixed(1) + '%',
+      porta_montante: portas.montante.toFixed(1) + '%',
+      porta_jusante: portas.jusante.toFixed(1) + '%'
     };
 
-    // Diagnósticos inteligentes baseados em contexto
-    if (inputLower.includes('status') || inputLower.includes('regua') || inputLower.includes('resumo')) {
-      return `📊 STATUS RÉGUA ATUAL:\n\n✅ Operacional (${statusRegua.eficiencia} eficiência)\n👤 Operador: ${statusRegua.operador}\n🔴 ${statusRegua.alarmes_ativos} alarmes ativos\n💧 Níveis: M:${statusRegua.nivel_montante} | C:${statusRegua.nivel_caldeira} | J:${statusRegua.nivel_jusante}\n\nPrioridades: Comunicação sala comando, Proteções elétricas`;
+    // ✅ CONTAGEM SEMÁFOROS ATIVOS
+    const semaforosVerdes = Object.keys(semaforos).filter(key => 
+      key.includes('verde') && semaforos[key]).length;
+    const semaforosVermelhos = Object.keys(semaforos).filter(key => 
+      key.includes('vermelho') && semaforos[key]).length;
+
+    // ✅ STATUS PRINCIPAL - DADOS REAIS
+    if (inputLower.includes('status') || inputLower.includes('eclusa') || inputLower.includes('resumo')) {
+      return `📊 STATUS ECLUSA - TEMPO REAL:\n\n🔗 CONEXÕES:\n• WebSocket: ${isConnected ? '🟢 Online' : '🔴 Offline'}\n• Comunicação PLC: ${comunicacaoPLCValue ? '🟢 OK' : '🔴 Falha'}\n• Sistema: ${operacaoValue ? '🟢 Operacional' : '🟴 Parado'}\n\n💧 NÍVEIS DE ÁGUA:\n• Montante: ${niveis.montante.toFixed(1)}%\n• Caldeira: ${niveis.caldeira.toFixed(1)}%\n• Jusante: ${niveis.jusante.toFixed(1)}%\n\n🚪 PORTAS:\n• Montante: ${portas.montante.toFixed(1)}% aberta\n• Jusante: ${portas.jusante.toFixed(1)}% aberta\n\n⚠️ STATUS CRÍTICO:\n• Emergência: ${emergenciaAtivaValue ? '🚨 ATIVA' : '🟢 Normal'}\n• Inundação: ${inundacaoValue ? '🌊 DETECTADA' : '🟢 Normal'}\n\n🚦 SEMÁFOROS: ${semaforosVerdes} verdes | ${semaforosVermelhos} vermelhos\n\n${alertas.length > 0 ? '🚨 ' + alertas.length + ' ALERTAS ATIVOS!' : '✅ Sistema operando normalmente'}`;
     }
 
-    if (inputLower.includes('alarme') || inputLower.includes('critico')) {
-      return `🚨 ALARMES CRÍTICOS RÉGUA:\n\n1. Emergência activada (12:58)\n2. Protecção sobretensão disparou (13:42)\n3. Sem comunicação sala comando (13:15)\n4. Bomba comporta direita falhou (12:30)\n\n⚡ AÇÃO: Verificar quadro elétrico e cabo comunicação`;
+    if (inputLower.includes('alarme') || inputLower.includes('critico') || inputLower.includes('alerta')) {
+      if (alertas.length === 0) {
+        return `✅ NENHUM ALERTA CRÍTICO DETECTADO\n\nSistema operando normalmente:\n• Todos os níveis dentro do esperado\n• Portas funcionando corretamente\n• Comunicação estável\n• Sem emergências ativas\n\nContinue monitorando. Digite 'status' para dados atuais.`;
+      }
+      
+      return `🚨 ALERTAS CRÍTICOS DETECTADOS (${alertas.length}):\n\n${alertas.map((alerta, i) => `${i + 1}. ${alerta}`).join('\n')}\n\n⚡ RECOMENDAÇÕES:\n• Verificar imediatamente os itens críticos\n• Contatar manutenção se necessário\n• Monitorar continuamente\n• Digite 'emergencia' se situação crítica`;
     }
 
-    if (inputLower.includes('eletric') || inputLower.includes('protec') || inputLower.includes('24v')) {
-      return `⚡ DIAGNÓSTICO ELÉTRICO RÉGUA:\n\nFalhas ativas:\n• Protecção 24V entradas analógicas\n• Protecção sobretensão descarregador\n• Fonte 400VAC/24VDC avariada\n\n🔧 SOLUÇÃO:\n1. Verificar tensão entrada (400VAC)\n2. Testar fonte 24VDC\n3. Inspecionar cabos analógicos\n4. Resetar proteções após reparo`;
+    if (inputLower.includes('nivel') || inputLower.includes('agua') || inputLower.includes('montante') || inputLower.includes('caldeira') || inputLower.includes('jusante')) {
+      const diffMC = Math.abs(niveis.montante - niveis.caldeira);
+      const diffCJ = Math.abs(niveis.caldeira - niveis.jusante);
+      
+      let analise = '📊 ANÁLISE INTELIGENTE DE NÍVEIS:\n\n';
+      analise += `💧 VALORES ATUAIS:\n• Montante: ${niveis.montante.toFixed(1)}%\n• Caldeira: ${niveis.caldeira.toFixed(1)}%\n• Jusante: ${niveis.jusante.toFixed(1)}%\n\n`;
+      analise += `📈 DIFERENÇAS:\n• Montante-Caldeira: ${diffMC.toFixed(1)}%\n• Caldeira-Jusante: ${diffCJ.toFixed(1)}%\n\n`;
+      
+      if (diffMC < 2 && diffCJ < 2) {
+        analise += '✅ EXCELENTE: Níveis bem equilibrados\n🎯 Sistema hidráulico operando perfeitamente';
+      } else if (diffMC < 5 && diffCJ < 5) {
+        analise += '⚠️ ATENÇÃO: Pequenos desequilíbrios detectados\n🔧 Monitorar mais de perto';
+      } else {
+        analise += '🚨 CRÍTICO: Grandes desequilíbrios!\n⚡ Ação imediata necessária - verificar bombas e válvulas';
+      }
+      
+      return analise;
+    }
+
+    if (inputLower.includes('porta') || inputLower.includes('abertura')) {
+      let analise = '🚪 ANÁLISE INTELIGENTE DE PORTAS:\n\n';
+      analise += `📊 STATUS ATUAL:\n• Porta Montante: ${portas.montante.toFixed(1)}% aberta\n• Porta Jusante: ${portas.jusante.toFixed(1)}% aberta\n\n`;
+      
+      if (portas.montante > 90 && portas.jusante > 90) {
+        analise += '🚨 CRÍTICO: Ambas as portas totalmente abertas!\n⚠️ RISCO de inundação - feche uma das portas imediatamente!';
+      } else if (portas.montante < 5 && portas.jusante < 5) {
+        analise += '🔒 SEGURO: Ambas as portas fechadas\n✅ Configuração segura para manutenção';
+      } else {
+        analise += `⚙️ OPERACIONAL: Configuração normal de operação\n${portas.montante > portas.jusante ? '⬆️ Fluxo predominante para jusante' : '⬇️ Fluxo predominante para montante'}`;
+      }
+      
+      return analise;
     }
 
     if (inputLower.includes('hidraulic') || inputLower.includes('bomba') || inputLower.includes('comporta')) {
@@ -86,29 +248,44 @@ export const AssistenteVirtual: React.FC = () => {
     }
 
     if (inputLower.includes('emergenc') || inputLower.includes('parada') || inputLower.includes('socorro')) {
-      return `🚨 PROCEDIMENTO EMERGÊNCIA ATIVADO:\n\n1. ✋ PARAR todas operações imediatamente\n2. 🔒 Isolar área de operação\n3. 📞 Contactar supervisor: Ext. 2001\n4. 🚨 Activar sirene evacuação se necessário\n5. 📋 Registar evento no livro ocorrências\n\n⚠️ NÃO restabelecer sem autorização!`;
+      return `🚨 PROCEDIMENTO EMERGÊNCIA:\n\n${emergenciaAtivaValue ? 'STATUS: EMERGÊNCIA ATIVA NO SISTEMA!' : 'STATUS: Sistema normal'}\n\n1. ✋ Parar operações imediatamente\n2. 🔒 Isolar área de operação\n3. 📞 Contactar supervisor\n4. 📋 Registrar ocorrência\n\n${emergenciaAtivaValue ? '⚠️ AÇÃO IMEDIATA NECESSÁRIA!' : '✅ Procedimento para referência'}`;
     }
 
-    if (inputLower.includes('manutenc') || inputLower.includes('preventiv') || inputLower.includes('cronograma')) {
-      return `🔧 MANUTENÇÃO PREVENTIVA RÉGUA:\n\n📅 Próxima: 5 dias\n\nTarefas pendentes:\n• Trocar óleo hidráulico (500h)\n• Limpar filtros ar (250h)\n• Calibrar sensores (1000h)\n• Testar sistema emergência\n• Verificar cabos elétricos\n\n📊 Histórico: 87% conformidade`;
-    }
-
-    if (inputLower.includes('eficienc') || inputLower.includes('performance') || inputLower.includes('87')) {
-      return `📈 ANÁLISE EFICIÊNCIA RÉGUA:\n\nAtual: 87% (Bom)\nMédia semana: 89%\nMeta: 90%\n\n📉 Fatores impacto:\n• Falhas elétricas (-2%)\n• Comunicação instável (-1%)\n• Manutenções programadas\n\n✅ Recomendação: Resolver comunicação`;
-    }
-
-    // Pesquisa por falha específica
-    const falhaEncontrada = falhasReguaAtuais.find(falha => 
-      inputLower.includes(falha.toLowerCase().split(' ')[0]) ||
-      inputLower.includes(falha.toLowerCase().split(' ')[1]) ||
-      falha.toLowerCase().includes(inputLower)
-    );
-
-    if (falhaEncontrada) {
-      return `🔍 FALHA ENCONTRADA: "${falhaEncontrada}"\n\nStatus: ATIVA\nSistema: Régua\nPrioridade: ALTA\n\n🔧 Consulte manual técnico seção correspondente ou contacte manutenção.`;
+    if (inputLower.includes('ajuda') || inputLower.includes('help') || inputLower.includes('comandos')) {
+      return `🤖 COMANDOS DISPONÍVEIS:\n\n• status - Análise completa do sistema\n• alertas - Verificar problemas detectados\n• niveis - Análise dos níveis de água\n• portas - Status das comportas\n• semaforos - Estado dos sinais\n• emergencia - Procedimentos de emergência\n\nTodos baseados em dados reais do PLC!`;
     }
     
-    return `🤖 Não encontrei informações específicas para "${input}".\n\n💡 Tente:\n• "status" - Resumo geral\n• "alarmes" - Falhas críticas\n• "eletrica" - Diagnóstico elétrico\n• "hidraulica" - Sistema hidráulico\n• "sensores" - Instrumentação\n• "emergencia" - Procedimentos\n• "manutencao" - Cronograma`;
+    if (inputLower.includes('semaforo') || inputLower.includes('sinal')) {
+      return `🚦 ANÁLISE SEMÁFOROS (TEMPO REAL):\n\n🟢 Sinais verdes ativos: ${semaforosVerdes}\n🔴 Sinais vermelhos ativos: ${semaforosVermelhos}\n\n${semaforosVerdes > semaforosVermelhos ? '✅ Predominância verde - trânsito liberado' : semaforosVermelhos > semaforosVerdes ? '🛑 Predominância vermelha - trânsito restrito' : '⚖️ Sinais equilibrados - transição de estado'}\n\nMonitoramento automático ativo.`;
+    }
+
+    if (inputLower.includes('otimizac') || inputLower.includes('melhoria') || inputLower.includes('eficiencia')) {
+      let sugestoes = '🎯 SUGESTÕES DE OTIMIZAÇÃO IA:\n\n';
+      
+      const diffMC = Math.abs(niveis.montante - niveis.caldeira);
+      const diffCJ = Math.abs(niveis.caldeira - niveis.jusante);
+      
+      if (diffMC > 3) {
+        sugestoes += '💧 Ajustar vazão entre Montante-Caldeira\n';
+      }
+      if (diffCJ > 3) {
+        sugestoes += '💧 Balancear níveis Caldeira-Jusante\n';
+      }
+      if (portas.montante > 50 && portas.jusante > 50) {
+        sugestoes += '🚪 Considerar fechamento sequencial das portas\n';
+      }
+      if (!comunicacaoPLCValue) {
+        sugestoes += '📡 URGENTE: Restabelecer comunicação PLC\n';
+      }
+      
+      if (sugestoes === '🎯 SUGESTÕES DE OTIMIZAÇÃO IA:\n\n') {
+        sugestoes += '✅ Sistema operando em condições ótimas!\n\nContinue o monitoramento preventivo.';
+      }
+      
+      return sugestoes;
+    }
+
+    return `🤖 IA não encontrou informações para "${input}".\n\n🧠 COMANDOS INTELIGENTES:\n• "status" - Análise completa tempo real\n• "alertas" - Detecção automática de riscos\n• "niveis" - Análise hidráulica inteligente\n• "portas" - Diagnóstico abertura/fechamento\n• "semaforos" - Status sinais de tráfego\n• "otimização" - Sugestões IA de melhorias\n• "emergencia" - Procedimentos críticos\n\n✨ Alimentado por dados reais do PLC!`;
   };
 
   const handleSendMessage = () => {
@@ -147,25 +324,33 @@ export const AssistenteVirtual: React.FC = () => {
 
   return (
     <>
-      {/* Botão Flutuante */}
-      <div className="fixed bottom-6 right-6 z-50">
+      {/* Botão Flutuante - LADO ESQUERDO */}
+      <div className="fixed bottom-6 left-6 z-50">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110"
+          className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 relative"
         >
+          {isConnected && (
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+          )}
           {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
         </button>
       </div>
 
-      {/* Chat Window */}
+      {/* Chat Window - LADO ESQUERDO */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 w-96 h-96 bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col z-50">
+        <div className="fixed bottom-24 left-6 w-96 h-[500px] bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col z-50">
           {/* Header */}
           <div className="bg-blue-600 text-white p-4 rounded-t-lg flex items-center gap-3">
-            <Bot className="w-6 h-6" />
-            <div>
-              <h3 className="font-semibold">Assistente de Diagnóstico</h3>
-              <p className="text-xs text-blue-100">Diagnóstico de falhas em tempo real</p>
+            <div className="relative">
+              <Bot className="w-6 h-6" />
+              <div className={`absolute -top-1 -right-1 w-3 h-3 ${isConnected ? 'bg-green-400' : 'bg-red-400'} rounded-full`}></div>
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold">IA Eclusa de Navegação</h3>
+              <p className="text-xs text-blue-100">
+                {isConnected ? '🟢 Conectado ao PLC' : '🔴 Desconectado'} • Dados em tempo real
+              </p>
             </div>
           </div>
 
@@ -226,18 +411,19 @@ export const AssistenteVirtual: React.FC = () => {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Digite código da falha ou descrição..."
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                placeholder="Digite: status, alertas, niveis, portas..."
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
               />
               <button
                 onClick={handleSendMessage}
-                className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white p-2 rounded-lg transition-colors"
               >
                 <Send className="w-4 h-4" />
               </button>
             </div>
-            <p className="text-xs text-gray-500 mt-2">
-              Exemplos: F001, hidraulica, regua, emergencia
+            <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+              <Bot className="w-3 h-3" />
+              🚀 Comandos: status • alertas • niveis • portas • otimização
             </p>
           </div>
         </div>

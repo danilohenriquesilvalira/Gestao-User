@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import ModernSidebar from '@/components/layout/ModernSidebar';
 import ModernHeader from '@/components/layout/ModernHeader';
 import GlobalAdvancedControls from '@/components/GlobalAdvancedControls';
-import Nivel from '@/components/industrial/Nivel';
+import NivelCaldeira from '@/components/Eclusa/Nivel_Caldeira';
+import NivelMontante from '@/components/Eclusa/Nivel_Montante';
+import NivelJusante from '@/components/Eclusa/Nivel_Jusante';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import Caldeira from '@/components/Eclusa/Caldeira';
 import Parede from '@/components/Eclusa/Parede';
@@ -16,6 +18,7 @@ import TubulacaoCaldeira from '@/components/Eclusa/TubulacaoCaldeira';
 import GraficosCotas from '@/components/Eclusa/GraficosCotas';
 import StatusSistema from '@/components/Eclusa/StatusSistema';
 import RadarMonitor from '@/components/Eclusa/RadarMonitor';
+import AssistenteVirtual from '@/components/dashboard/AssistenteVirtual';
 import { LayoutLoadingProvider, useLayoutLoading } from '@/contexts/LayoutLoadingContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import NotificationContainer from '@/components/ui/NotificationContainer';
@@ -74,15 +77,18 @@ export default function DashboardPage() {
 function DashboardContent() {
   const [editMode, setEditMode] = useState(false);
   const { isAllLoaded } = useLayoutLoading();
-  const { nivelValue, motorValue, isConnected, error, lastMessage } = useWebSocket('ws://localhost:8080/ws');
+  const { 
+    nivelCaldeiraValue, 
+    nivelMontanteValue, 
+    nivelJusanteValue,
+    motorValue, 
+    isConnected, 
+    error, 
+    lastMessage 
+  } = useWebSocket('ws://localhost:8080/ws');
 
-  // ✅ CONDIÇÃO MELHORADA: Layout carregado + WebSocket com dados iniciais
-  const isFullyReady = isAllLoaded && (
-    isConnected && ( 
-      motorValue !== null || // Dados da porta jusante chegaram
-      editMode // OU está em modo edição (sempre permite)
-    )
-  );
+  // ✅ CONDIÇÃO: Layout carregado E (WebSocket conectado OU modo edição)
+  const isFullyReady = isAllLoaded && (isConnected || editMode);
 
   const handleLogout = () => {
     window.location.replace('/');
@@ -150,11 +156,21 @@ function DashboardContent() {
               editMode ? 'bg-blue-50/30' : ''
             }`}
           >
-            {/* COMPONENTES ESTÁTICOS ORIGINAIS */}
-            <Nivel
+            {/* COMPONENTES DE NÍVEL */}
+            <NivelCaldeira
               nivel={75}
               editMode={editMode}
-              websocketValue={nivelValue}
+              websocketValue={nivelCaldeiraValue}
+            />
+            <NivelMontante
+              nivel={60}
+              editMode={editMode}
+              websocketValue={nivelMontanteValue}
+            />
+            <NivelJusante
+              nivel={80}
+              editMode={editMode}
+              websocketValue={nivelJusanteValue}
             />
 
             {/* ✅ COMPONENTES ECLUSA INDEPENDENTES - SEM CARD */}
@@ -176,6 +192,9 @@ function DashboardContent() {
             <Semaforo editMode={editMode} componentId="semaforo-2" />
             <Semaforo editMode={editMode} componentId="semaforo-3" />
           </div>
+
+          {/* ✅ ASSISTENTE VIRTUAL INTELIGENTE */}
+          <AssistenteVirtual />
 
         </>
       )}

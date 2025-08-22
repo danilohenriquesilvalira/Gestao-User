@@ -67,6 +67,7 @@ function EnchimentoContent() {
     nivelValue, 
     motorValue, 
     pipeSystem,
+    valvulasOnOff,
     isConnected, 
     error, 
     lastMessage 
@@ -96,10 +97,7 @@ function EnchimentoContent() {
   };
 
   const isFullyReady = isAllLoaded && (
-    isConnected && ( 
-      nivelValue !== null ||
-      editMode
-    )
+    isConnected || editMode // Conectado OU em modo edição
   );
 
   const handleLogout = () => {

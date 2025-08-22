@@ -18,77 +18,85 @@ interface RadarData {
 type RadarLocation = 'montante' | 'caldeira' | 'jusante';
 
 export default function RadarMonitor({ editMode = false }: RadarMonitorProps) {
-  const { isConnected } = useWebSocket('ws://localhost:8080/ws');
+  const { 
+    isConnected,
+    radarCaldeiraDistanciaValue,
+    radarCaldeiraVelocidadeValue,
+    radarMontanteDistanciaValue,
+    radarMontanteVelocidadeValue,
+    radarJusanteDistanciaValue,
+    radarJusanteVelocidadeValue
+  } = useWebSocket('ws://localhost:8080/ws');
   
   // Estado do radar selecionado
   const [selectedRadar, setSelectedRadar] = useState<RadarLocation>('caldeira');
   
-  // Estados para dados do radar
-  const [radarData, setRadarData] = useState<RadarData>({
-    positions: [],
-    velocities: [],
-    azimuths: [],
-    amplitudes: []
-  });
-  
-  // Dados específicos de cada radar - Valores corrigidos
+  // ✅ DADOS REAIS DO RADAR BASEADOS NO PLC
   const radarLocations = {
     montante: {
       label: 'Montante',
+      distancia: radarMontanteDistanciaValue || 0,
+      velocidade: radarMontanteVelocidadeValue || 0,
       objects: [
-        { id: 1, azimuth: 15, distance: 45, velocity: 12.5, amplitude: 78, type: 'embarcação' },
-        { id: 2, azimuth: 95, distance: 25, velocity: -8.3, amplitude: 82, type: 'objeto' }
+        { 
+          id: 1, 
+          azimuth: 15, 
+          distance: radarMontanteDistanciaValue || 45, 
+          velocity: radarMontanteVelocidadeValue || 12.5, 
+          amplitude: 78, 
+          type: 'embarcação' 
+        }
       ]
     },
     caldeira: {
       label: 'Caldeira',
+      distancia: radarCaldeiraDistanciaValue || 0,
+      velocidade: radarCaldeiraVelocidadeValue || 0,
       objects: [
-        { id: 1, azimuth: 45, distance: 25, velocity: 15.7, amplitude: 85, type: 'embarcação' },
-        { id: 2, azimuth: 120, distance: 67, velocity: -6.4, amplitude: 65, type: 'objeto' },
-        { id: 3, azimuth: 280, distance: 38, velocity: 9.2, amplitude: 70, type: 'embarcação' }
+        { 
+          id: 1, 
+          azimuth: 45, 
+          distance: radarCaldeiraDistanciaValue || 25, 
+          velocity: radarCaldeiraVelocidadeValue || 15.7, 
+          amplitude: 85, 
+          type: 'embarcação' 
+        }
       ]
     },
     jusante: {
       label: 'Jusante',
+      distancia: radarJusanteDistanciaValue || 0,
+      velocidade: radarJusanteVelocidadeValue || 0,
       objects: [
-        { id: 1, azimuth: 65, distance: 42, velocity: 11.8, amplitude: 75, type: 'embarcação' },
-        { id: 2, azimuth: 180, distance: 89, velocity: -14.2, amplitude: 58, type: 'objeto' },
-        { id: 3, azimuth: 320, distance: 23, velocity: 18.5, amplitude: 88, type: 'embarcação' },
-        { id: 4, azimuth: 220, distance: 56, velocity: -4.7, amplitude: 65, type: 'objeto' }
+        { 
+          id: 1, 
+          azimuth: 65, 
+          distance: radarJusanteDistanciaValue || 42, 
+          velocity: radarJusanteVelocidadeValue || 11.8, 
+          amplitude: 75, 
+          type: 'embarcação' 
+        }
       ]
     }
+  };
+  
+  // ✅ Estados para dados do radar - SÓ DO WEBSOCKET
+  const radarData = {
+    positions: [radarLocations[selectedRadar].distancia],
+    velocities: [radarLocations[selectedRadar].velocidade],
+    azimuths: [45], // Azimute fixo para demonstração
+    amplitudes: [80] // Amplitude fixa para demonstração
   };
   
   // Pontos detectados baseados no radar selecionado
   const [detectedObjects, setDetectedObjects] = useState(radarLocations[selectedRadar].objects);
 
-  // Atualiza objetos quando o radar muda
+  // Atualiza objetos quando o radar muda OU quando valores do PLC mudam
   useEffect(() => {
     setDetectedObjects(radarLocations[selectedRadar].objects);
-  }, [selectedRadar]);
+  }, [selectedRadar, radarCaldeiraDistanciaValue, radarCaldeiraVelocidadeValue, radarMontanteDistanciaValue, radarMontanteVelocidadeValue, radarJusanteDistanciaValue, radarJusanteVelocidadeValue]);
 
-  // Simula atualizações do radar
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // Simula dados realistas do radar
-      setRadarData({
-        positions: Array.from({length: 8}, (_, i) => 10 + i * 15 + Math.random() * 5),
-        velocities: Array.from({length: 8}, () => (Math.random() - 0.5) * 10),
-        azimuths: Array.from({length: 8}, () => Math.random() * 360),
-        amplitudes: Array.from({length: 8}, () => 40 + Math.random() * 40)
-      });
-
-      // Atualiza objetos detectados do radar atual
-      setDetectedObjects(prev => prev.map(obj => ({
-        ...obj,
-        distance: Math.max(5, Math.min(100, obj.distance + (Math.random() - 0.5) * 3)), // 5-100m
-        velocity: Math.max(-25, Math.min(25, obj.velocity + (Math.random() - 0.5) * 2)), // -25 a +25 m/s
-        amplitude: Math.max(30, Math.min(100, obj.amplitude + (Math.random() - 0.5) * 5))
-      })));
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [selectedRadar]);
+  // ✅ REMOVIDA A SIMULAÇÃO - SÓ USA VALORES DO WEBSOCKET
 
   // Converte coordenadas polares para cartesianas
   const polarToCartesian = (azimuth: number, distance: number, centerX: number, centerY: number, maxRadius: number) => {

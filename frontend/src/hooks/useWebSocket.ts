@@ -1,27 +1,65 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface UseWebSocketReturn {
+  // ✅ NOVOS NÍVEIS DA ECLUSA
+  nivelCaldeiraValue: number | null;
+  nivelMontanteValue: number | null;
+  nivelJusanteValue: number | null;
+  
+  // ✅ RADARES DA ECLUSA
+  radarCaldeiraDistanciaValue: number | null;
+  radarCaldeiraVelocidadeValue: number | null;
+  radarMontanteDistanciaValue: number | null;
+  radarMontanteVelocidadeValue: number | null;
+  radarJusanteDistanciaValue: number | null;
+  radarJusanteVelocidadeValue: number | null;
+  
+  // ✅ PORTAS DA ECLUSA
+  eclusaPortaJusanteValue: number | null;
+  eclusaPortaMontanteValue: number | null;
+  
+  // ✅ LASERS DA ECLUSA
+  laserMontanteValue: number | null;
+  laserJusanteValue: number | null;
+  
+  // ✅ STATUS DA ECLUSA
+  comunicacaoPLCValue: boolean | null;
+  operacaoValue: boolean | null;
+  alarmesAtivoValue: boolean | null;
+  emergenciaAtivaValue: boolean | null;
+  inundacaoValue: boolean | null;
+  
+  // Valores legados (mantidos para compatibilidade)
   nivelValue: number | null;
   motorValue: number | null;
   contrapesoDirectoValue: number | null;
   contrapesoEsquerdoValue: number | null;
   motorDireitoValue: number | null;
   motorEsquerdoValue: number | null;
+  
   // Novos valores para Porta Montante
   portaMontanteValue: number | null;
   portaMontanteContrapesoDirectoValue: number | null;
   portaMontanteContrapesoEsquerdoValue: number | null;
   portaMontanteMotorDireitoValue: number | null;
   portaMontanteMotorEsquerdoValue: number | null;
+  
   // Novo valor para Radar
   radarDistanciaValue: number | null;
+  
   // Valores das Cotas
   cotaMontanteValue: number | null;
   cotaCaldeiraValue: number | null;
   cotaJusanteValue: number | null;
+  
   semaforos: Record<string, boolean>;
-  // ✅ NOVO: Array PipeSystem [0..23]
+  
+  // ✅ Array PipeSystem [0..23]
   pipeSystem: boolean[];
+  
+  // ✅ Array ValvulasOnOFF [0..5]
+  valvulasOnOff: number[];
+  
   isConnected: boolean;
   error: string | null;
   lastMessage: string | null;
@@ -64,6 +102,11 @@ function connectGlobalWebSocket(url: string) {
       if (lastReceivedData) {
         console.log('📤 Enviando dados em cache para novos listeners');
         notifyGlobalListeners({ type: 'data', ...lastReceivedData });
+      } else {
+        // ✅ ENVIA DADOS PADRÃO PARA GARANTIR QUE A INTERFACE CARREGUE
+        console.log('📤 Enviando dados padrão iniciais');
+        // ✅ SEM DADOS PADRÃO - AGUARDA PLC
+        console.log('📡 Aguardando dados do PLC...');
       }
     };
 
@@ -133,6 +176,13 @@ function addGlobalListener(callback: (data: any) => void) {
     setTimeout(() => {
       callback({ type: 'data', ...lastReceivedData });
     }, 100); // Pequeno delay para garantir que o component está montado
+  } else {
+    // ✅ ENVIA DADOS PADRÃO PARA GARANTIR QUE COMPONENTE FUNCIONE
+    console.log('📤 Enviando dados padrão para novo listener');
+    setTimeout(() => {
+      // ✅ SEM DADOS PADRÃO - AGUARDA PLC
+      console.log('📡 Novo listener aguardando dados do PLC...');
+    }, 100);
   }
 }
 
@@ -161,6 +211,35 @@ function removeGlobalListener(callback: (data: any) => void) {
 }
 
 export function useWebSocket(url: string): UseWebSocketReturn {
+  // ✅ NOVOS ESTADOS DOS NÍVEIS DA ECLUSA
+  const [nivelCaldeiraValue, setNivelCaldeiraValue] = useState<number | null>(null);
+  const [nivelMontanteValue, setNivelMontanteValue] = useState<number | null>(null);
+  const [nivelJusanteValue, setNivelJusanteValue] = useState<number | null>(null);
+  
+  // ✅ NOVOS ESTADOS DOS RADARES DA ECLUSA
+  const [radarCaldeiraDistanciaValue, setRadarCaldeiraDistanciaValue] = useState<number | null>(null);
+  const [radarCaldeiraVelocidadeValue, setRadarCaldeiraVelocidadeValue] = useState<number | null>(null);
+  const [radarMontanteDistanciaValue, setRadarMontanteDistanciaValue] = useState<number | null>(null);
+  const [radarMontanteVelocidadeValue, setRadarMontanteVelocidadeValue] = useState<number | null>(null);
+  const [radarJusanteDistanciaValue, setRadarJusanteDistanciaValue] = useState<number | null>(null);
+  const [radarJusanteVelocidadeValue, setRadarJusanteVelocidadeValue] = useState<number | null>(null);
+  
+  // ✅ NOVOS ESTADOS DAS PORTAS DA ECLUSA
+  const [eclusaPortaJusanteValue, setEclusaPortaJusanteValue] = useState<number | null>(null);
+  const [eclusaPortaMontanteValue, setEclusaPortaMontanteValue] = useState<number | null>(null);
+  
+  // ✅ NOVOS ESTADOS DOS LASERS DA ECLUSA
+  const [laserMontanteValue, setLaserMontanteValue] = useState<number | null>(null);
+  const [laserJusanteValue, setLaserJusanteValue] = useState<number | null>(null);
+  
+  // ✅ NOVOS ESTADOS DO STATUS DA ECLUSA
+  const [comunicacaoPLCValue, setComunicacaoPLCValue] = useState<boolean | null>(null);
+  const [operacaoValue, setOperacaoValue] = useState<boolean | null>(null);
+  const [alarmesAtivoValue, setAlarmesAtivoValue] = useState<boolean | null>(null);
+  const [emergenciaAtivaValue, setEmergenciaAtivaValue] = useState<boolean | null>(null);
+  const [inundacaoValue, setInundacaoValue] = useState<boolean | null>(null);
+  
+  // Estados legados (mantidos para compatibilidade)
   const [nivelValue, setNivelValue] = useState<number | null>(null);
   const [motorValue, setMotorValue] = useState<number | null>(null);
   const [contrapesoDirectoValue, setContrapesoDirectoValue] = useState<number | null>(null);
@@ -180,8 +259,13 @@ export function useWebSocket(url: string): UseWebSocketReturn {
   const [cotaJusanteValue, setCotaJusanteValue] = useState<number | null>(null);
   
   const [semaforos, setSemaforos] = useState<Record<string, boolean>>({});
-  // ✅ NOVO: Array PipeSystem [0..23] - inicializado com 24 elementos false
+  
+  // ✅ Array PipeSystem [0..23] - inicializado com 24 elementos false
   const [pipeSystem, setPipeSystem] = useState<boolean[]>(new Array(24).fill(false));
+  
+  // ✅ Array ValvulasOnOFF [0..5] - inicializado com 6 elementos 0
+  const [valvulasOnOff, setValvulasOnOff] = useState<number[]>(new Array(6).fill(0));
+  
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastMessage, setLastMessage] = useState<string | null>(null);
@@ -208,10 +292,110 @@ export function useWebSocket(url: string): UseWebSocketReturn {
       
       console.log('📊 Processando dados do PLC no hook:', data);
       
-      // Processa dados do PLC com validação de ranges
+      // ✅ PROCESSA NOVOS NÍVEIS DA ECLUSA
+      if (data.nivelCaldeiraValue !== undefined) {
+        const limitedNivel = Math.max(0, Math.min(100, data.nivelCaldeiraValue));
+        console.log(`💧 Atualizando nível caldeira: ${data.nivelCaldeiraValue} -> ${limitedNivel}`);
+        setNivelCaldeiraValue(limitedNivel);
+      }
+      
+      if (data.nivelMontanteValue !== undefined) {
+        const limitedNivel = Math.max(0, Math.min(100, data.nivelMontanteValue));
+        console.log(`💧 Atualizando nível montante: ${data.nivelMontanteValue} -> ${limitedNivel}`);
+        setNivelMontanteValue(limitedNivel);
+      }
+      
+      if (data.nivelJusanteValue !== undefined) {
+        const limitedNivel = Math.max(0, Math.min(100, data.nivelJusanteValue));
+        console.log(`💧 Atualizando nível jusante: ${data.nivelJusanteValue} -> ${limitedNivel}`);
+        setNivelJusanteValue(limitedNivel);
+      }
+      
+      // ✅ PROCESSA RADARES DA ECLUSA
+      if (data.radarCaldeiraDistanciaValue !== undefined) {
+        console.log(`📡 Atualizando radar caldeira distância: ${data.radarCaldeiraDistanciaValue}`);
+        setRadarCaldeiraDistanciaValue(data.radarCaldeiraDistanciaValue);
+      }
+      
+      if (data.radarCaldeiraVelocidadeValue !== undefined) {
+        console.log(`📡 Atualizando radar caldeira velocidade: ${data.radarCaldeiraVelocidadeValue}`);
+        setRadarCaldeiraVelocidadeValue(data.radarCaldeiraVelocidadeValue);
+      }
+      
+      if (data.radarMontanteDistanciaValue !== undefined) {
+        console.log(`📡 Atualizando radar montante distância: ${data.radarMontanteDistanciaValue}`);
+        setRadarMontanteDistanciaValue(data.radarMontanteDistanciaValue);
+      }
+      
+      if (data.radarMontanteVelocidadeValue !== undefined) {
+        console.log(`📡 Atualizando radar montante velocidade: ${data.radarMontanteVelocidadeValue}`);
+        setRadarMontanteVelocidadeValue(data.radarMontanteVelocidadeValue);
+      }
+      
+      if (data.radarJusanteDistanciaValue !== undefined) {
+        console.log(`📡 Atualizando radar jusante distância: ${data.radarJusanteDistanciaValue}`);
+        setRadarJusanteDistanciaValue(data.radarJusanteDistanciaValue);
+      }
+      
+      if (data.radarJusanteVelocidadeValue !== undefined) {
+        console.log(`📡 Atualizando radar jusante velocidade: ${data.radarJusanteVelocidadeValue}`);
+        setRadarJusanteVelocidadeValue(data.radarJusanteVelocidadeValue);
+      }
+      
+      // ✅ PROCESSA PORTAS DA ECLUSA
+      if (data.eclusaPortaJusanteValue !== undefined) {
+        const limitedPorta = Math.max(0, Math.min(100, data.eclusaPortaJusanteValue));
+        console.log(`🚪 Atualizando eclusa porta jusante: ${data.eclusaPortaJusanteValue} -> ${limitedPorta}`);
+        setEclusaPortaJusanteValue(limitedPorta);
+      }
+      
+      if (data.eclusaPortaMontanteValue !== undefined) {
+        const limitedPorta = Math.max(0, Math.min(100, data.eclusaPortaMontanteValue));
+        console.log(`🚪 Atualizando eclusa porta montante: ${data.eclusaPortaMontanteValue} -> ${limitedPorta}`);
+        setEclusaPortaMontanteValue(limitedPorta);
+      }
+      
+      // ✅ PROCESSA LASERS DA ECLUSA
+      if (data.laserMontanteValue !== undefined) {
+        console.log(`🔬 Atualizando laser montante: ${data.laserMontanteValue}`);
+        setLaserMontanteValue(data.laserMontanteValue);
+      }
+      
+      if (data.laserJusanteValue !== undefined) {
+        console.log(`🔬 Atualizando laser jusante: ${data.laserJusanteValue}`);
+        setLaserJusanteValue(data.laserJusanteValue);
+      }
+      
+      // ✅ PROCESSA STATUS DA ECLUSA
+      if (data.comunicacaoPLCValue !== undefined) {
+        console.log(`📡 Atualizando comunicação PLC: ${data.comunicacaoPLCValue}`);
+        setComunicacaoPLCValue(data.comunicacaoPLCValue);
+      }
+      
+      if (data.operacaoValue !== undefined) {
+        console.log(`⚙️ Atualizando operação: ${data.operacaoValue}`);
+        setOperacaoValue(data.operacaoValue);
+      }
+      
+      if (data.alarmesAtivoValue !== undefined) {
+        console.log(`🚨 Atualizando alarmes ativo: ${data.alarmesAtivoValue}`);
+        setAlarmesAtivoValue(data.alarmesAtivoValue);
+      }
+      
+      if (data.emergenciaAtivaValue !== undefined) {
+        console.log(`🆘 Atualizando emergência ativa: ${data.emergenciaAtivaValue}`);
+        setEmergenciaAtivaValue(data.emergenciaAtivaValue);
+      }
+      
+      if (data.inundacaoValue !== undefined) {
+        console.log(`🌊 Atualizando inundação: ${data.inundacaoValue}`);
+        setInundacaoValue(data.inundacaoValue);
+      }
+      
+      // Processa dados legados do PLC com validação de ranges
       if (data.nivelValue !== undefined) {
         const limitedNivel = Math.max(0, Math.min(100, data.nivelValue));
-        console.log(`💧 Atualizando nível: ${data.nivelValue} -> ${limitedNivel}`);
+        console.log(`💧 Atualizando nível legado: ${data.nivelValue} -> ${limitedNivel}`);
         setNivelValue(limitedNivel);
       }
       
@@ -319,6 +503,23 @@ export function useWebSocket(url: string): UseWebSocketReturn {
         setPipeSystem(newPipeSystem);
       }
       
+      // ✅ PROCESSA ARRAY VALVULASONOFF [0..5]
+      const newValvulasOnOff = new Array(6).fill(0);
+      let hasValvulasData = false;
+      
+      for (let i = 0; i < 6; i++) {
+        const key = `valvulas_onoff_${i}`;
+        if (data[key] !== undefined) {
+          newValvulasOnOff[i] = Number(data[key]);
+          hasValvulasData = true;
+        }
+      }
+      
+      if (hasValvulasData) {
+        console.log('⚡ Atualizando ValvulasOnOff array:', newValvulasOnOff);
+        setValvulasOnOff(newValvulasOnOff);
+      }
+      
       // ✅ PROCESSA SEMÁFOROS COM LOG DETALHADO
       if (data.semaforos) {
         console.log('🚦 Processando semáforos:', data.semaforos);
@@ -368,25 +569,59 @@ export function useWebSocket(url: string): UseWebSocketReturn {
   }, [isConnected, nivelValue, motorValue, contrapesoDirectoValue, contrapesoEsquerdoValue, motorDireitoValue, motorEsquerdoValue, semaforos]);
 
   return {
+    // ✅ NOVOS VALORES DOS NÍVEIS DA ECLUSA
+    nivelCaldeiraValue,
+    nivelMontanteValue,
+    nivelJusanteValue,
+    
+    // ✅ NOVOS VALORES DOS RADARES DA ECLUSA
+    radarCaldeiraDistanciaValue,
+    radarCaldeiraVelocidadeValue,
+    radarMontanteDistanciaValue,
+    radarMontanteVelocidadeValue,
+    radarJusanteDistanciaValue,
+    radarJusanteVelocidadeValue,
+    
+    // ✅ NOVOS VALORES DAS PORTAS DA ECLUSA
+    eclusaPortaJusanteValue,
+    eclusaPortaMontanteValue,
+    
+    // ✅ NOVOS VALORES DOS LASERS DA ECLUSA
+    laserMontanteValue,
+    laserJusanteValue,
+    
+    // ✅ NOVOS VALORES DO STATUS DA ECLUSA
+    comunicacaoPLCValue,
+    operacaoValue,
+    alarmesAtivoValue,
+    emergenciaAtivaValue,
+    inundacaoValue,
+    
+    // Valores legados (mantidos para compatibilidade)
     nivelValue,
     motorValue,
     contrapesoDirectoValue,
     contrapesoEsquerdoValue,
     motorDireitoValue,
     motorEsquerdoValue,
-    // Novos valores da Porta Montante
+    
+    // Valores da Porta Montante
     portaMontanteValue,
     portaMontanteContrapesoDirectoValue,
     portaMontanteContrapesoEsquerdoValue,
     portaMontanteMotorDireitoValue,
     portaMontanteMotorEsquerdoValue,
+    
     radarDistanciaValue,
     cotaMontanteValue,
     cotaCaldeiraValue,
     cotaJusanteValue,
     semaforos,
-    // ✅ NOVO: Array PipeSystem [0..23]
+    
+    // ✅ Arrays de dados
     pipeSystem,
+    valvulasOnOff,
+    
     isConnected,
     error,
     lastMessage

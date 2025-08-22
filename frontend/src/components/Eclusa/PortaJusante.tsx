@@ -11,16 +11,22 @@ export default function PortaJusante({
   editMode = false
 }: PortaJusanteProps) {
   const [abertura, setAbertura] = useState<number | null>(null); // ✅ ESTADO INICIAL: null (não renderiza até ter dados)
-  const { nivelValue, motorValue, isConnected } = useWebSocket('ws://localhost:8080/ws');
+  const { eclusaPortaJusanteValue, motorValue, isConnected } = useWebSocket('ws://localhost:8080/ws');
 
-  // Atualiza abertura via WebSocket - usando motorValue como exemplo
+  // Atualiza abertura via WebSocket - usando eclusaPortaJusanteValue (novo)
   useEffect(() => {
-    if (motorValue !== null) {
-      // Converte valor do motor para porcentagem de abertura
+    if (eclusaPortaJusanteValue !== null) {
+      // Converte valor da porta para porcentagem de abertura
+      const aberturaPercentual = Math.max(0, Math.min(100, eclusaPortaJusanteValue));
+      setAbertura(aberturaPercentual);
+      console.log(`🚪 PORTA JUSANTE: ${eclusaPortaJusanteValue} -> ${aberturaPercentual}%`);
+    } else if (motorValue !== null) {
+      // Fallback para compatibilidade com sistema antigo
       const aberturaPercentual = Math.max(0, Math.min(100, motorValue));
       setAbertura(aberturaPercentual);
+      console.log(`🚪 PORTA JUSANTE (fallback): ${motorValue} -> ${aberturaPercentual}%`);
     }
-  }, [motorValue]);
+  }, [eclusaPortaJusanteValue, motorValue]);
 
   // ✅ SE NÃO TEM DADOS AINDA, NÃO RENDERIZA (evita flash)
   if (abertura === null && !editMode) {

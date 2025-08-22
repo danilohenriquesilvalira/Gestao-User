@@ -76,7 +76,8 @@ const PAGE_COMPONENTS = {
     'semaforo-1',
     'semaforo-2',
     'semaforo-3',
-    'graficos-cotas'
+    'graficos-cotas',
+    'status-sistema'
   ]
 };
 

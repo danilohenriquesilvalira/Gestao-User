@@ -14,6 +14,8 @@ import RadarEclusa from '@/components/Eclusa/RadarEclusa';
 import Semaforo from '@/components/Eclusa/Semaforo';
 import TubulacaoCaldeira from '@/components/Eclusa/TubulacaoCaldeira';
 import GraficosCotas from '@/components/Eclusa/GraficosCotas';
+import StatusSistema from '@/components/Eclusa/StatusSistema';
+import RadarMonitor from '@/components/Eclusa/RadarMonitor';
 import { LayoutLoadingProvider, useLayoutLoading } from '@/contexts/LayoutLoadingContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import NotificationContainer from '@/components/ui/NotificationContainer';
@@ -87,7 +89,7 @@ function DashboardContent() {
   };
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-white">
+    <div className="h-screen w-screen overflow-hidden bg-gray-100">
       {/* TELA DE LOADING GLOBAL - Com EdpLoading Personalizado */}
       {!isFullyReady && (
         <EdpLoading
@@ -111,36 +113,6 @@ function DashboardContent() {
             onLogout={handleLogout}
           />
 
-          <ScreenDebug />
-
-          <div className="fixed top-20 left-4 bg-black text-white p-3 rounded text-xs z-40 max-w-[350px]">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <span>PLC: {isConnected ? 'Conectado' : 'Desconectado'}</span>
-              </div>
-              
-              {nivelValue !== null && (
-                <div className="text-blue-400">📊 Nível: {nivelValue}%</div>
-              )}
-              
-              {motorValue !== null && (
-                <div className="text-green-400">
-                  ⚙️ Motor: {motorValue === 0 ? 'INATIVO' : motorValue === 1 ? 'OPERANDO' : 'FALHA'}
-                </div>
-              )}
-              
-              {error && (
-                <div className="text-red-400">❌ Erro: {error}</div>
-              )}
-
-              {lastMessage && (
-                <div className="text-gray-400 text-xs">
-                  📡 Última msg: {lastMessage.substring(0, 25)}...
-                </div>
-              )}
-            </div>
-          </div>
 
           {/* BOTÃO DE EDIT MODE DIRETO */}
           {!editMode && (
@@ -196,6 +168,8 @@ function DashboardContent() {
             <RadarEclusa editMode={editMode} />
             <Semaforo editMode={editMode} />
             <GraficosCotas editMode={editMode} />
+            <StatusSistema editMode={editMode} />
+            <RadarMonitor editMode={editMode} />
             
             {/* ✅ SEMÁFOROS CORRIGIDOS - APENAS OS QUE EXISTEM NO GO BACKEND */}
             <Semaforo editMode={editMode} componentId="semaforo-1" />

@@ -84,7 +84,7 @@ function PortaMontanteContent() {
   };
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-white">
+    <div className="h-screen w-screen overflow-hidden bg-gray-100">
       {!isAllLoaded && (
         <EdpLoading
           title="Porta Montante"
@@ -102,48 +102,6 @@ function PortaMontanteContent() {
             onLogout={handleLogout}
           />
 
-          <ScreenDebug />
-
-          <div className="fixed top-20 left-4 bg-black text-white p-3 rounded text-xs z-40 max-w-[350px]">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <span>PLC: {isConnected ? 'Conectado' : 'Desconectado'}</span>
-              </div>
-              
-              {nivelValue !== null && (
-                <div className="text-blue-400">📊 Nível: {formatPercentage(nivelValue)}</div>
-              )}
-              
-              {portaMontanteValue !== null && (
-                <div className="text-green-400">
-                  ⚙️ Porta Montante: {formatPercentage(portaMontanteValue)}
-                </div>
-              )}
-              
-              {portaMontanteMotorDireitoValue !== null && (
-                <div className="text-cyan-400">
-                  🔧 Motor Direito: {formatMotorStatus(portaMontanteMotorDireitoValue)}
-                </div>
-              )}
-              
-              {portaMontanteMotorEsquerdoValue !== null && (
-                <div className="text-yellow-400">
-                  🔧 Motor Esquerdo: {formatMotorStatus(portaMontanteMotorEsquerdoValue)}
-                </div>
-              )}
-              
-              {error && (
-                <div className="text-red-400">❌ Erro: {error}</div>
-              )}
-
-              {lastMessage && (
-                <div className="text-gray-400 text-xs">
-                  📡 Última msg: {lastMessage.substring(0, 25)}...
-                </div>
-              )}
-            </div>
-          </div>
 
           {!editMode && (
             <button

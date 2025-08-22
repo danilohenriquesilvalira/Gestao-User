@@ -88,7 +88,6 @@ export const EdpLoading: React.FC<EdpLoadingProps> = ({
           animation: edp-glow 2s ease-in-out infinite;
           border-radius: 50%;
           padding: 20px;
-          background: radial-gradient(circle, rgba(0, 150, 136, 0.1) 0%, transparent 70%);
         }
         
         .edp-dots {

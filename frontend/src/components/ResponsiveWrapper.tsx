@@ -117,8 +117,14 @@ export default function ResponsiveWrapper({
         ? 'http://localhost:1337' 
         : import.meta.env?.VITE_STRAPI_URL || 'http://localhost:1337';
       
+      const loadToken = localStorage.getItem('auth_token');
       const response = await fetch(
-        `${baseURL}/api/component-layouts?filters[componentId][$eq]=${componentId}`
+        `${baseURL}/api/component-layouts?componentId=${componentId}`,
+        {
+          headers: {
+            ...(loadToken ? { 'Authorization': `Bearer ${loadToken}` } : {})
+          }
+        }
       );
       
       if (response.ok) {
@@ -147,7 +153,7 @@ export default function ResponsiveWrapper({
           
           const mergedConfigs = { ...getSmartDefaultConfig, ...postgresConfigs };
           setConfigs(mergedConfigs);
-          localStorage.setItem(`component-${componentId}`, JSON.stringify(mergedConfigs));
+          console.log(`✅ ${componentId}: Carregado do banco PostgreSQL`, Object.keys(postgresConfigs));
           
           return true;
         }
@@ -165,27 +171,13 @@ export default function ResponsiveWrapper({
     registerComponent(componentId);
     
     const initializeComponent = async () => {
+      // SEMPRE CARREGAR DO BANCO - NUNCA DO LOCALSTORAGE
       const loadedFromPostgres = await loadFromStrapi();
       
       if (!loadedFromPostgres) {
-        const saved = localStorage.getItem(`component-${componentId}`);
-        if (saved) {
-          try {
-            const loadedConfigs = JSON.parse(saved);
-            setConfigs(loadedConfigs);
-          } catch (e) {
-            console.error('Erro ao carregar cache local:', e);
-            setConfigs(getSmartDefaultConfig);
-            localStorage.setItem(`component-${componentId}`, JSON.stringify(getSmartDefaultConfig));
-          }
-        } else {
-          setConfigs(getSmartDefaultConfig);
-          localStorage.setItem(`component-${componentId}`, JSON.stringify(getSmartDefaultConfig));
-          
-          window.dispatchEvent(new CustomEvent('component-config-changed', { 
-            detail: { componentId, config: getSmartDefaultConfig } 
-          }));
-        }
+        // Se não tem no banco, usar configuração padrão MAS NÃO SALVAR NO LOCALSTORAGE
+        setConfigs(getSmartDefaultConfig);
+        console.log(`⚠️ ${componentId}: Usando configuração padrão (não encontrado no banco)`);
       }
       
       setIsLoaded(true);
@@ -228,9 +220,8 @@ export default function ResponsiveWrapper({
     const updated = { ...configs, [breakpoint]: newConfig };
     setConfigs(updated);
     
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(`component-${componentId}`, JSON.stringify(updated));
-    }
+    // REMOVIDO LOCALSTORAGE - TUDO NO BANCO AGORA
+    console.log(`🔄 ${componentId}: Configuração atualizada temporariamente (será salva no banco ao clicar 💾)`);
     
     window.dispatchEvent(new CustomEvent('component-config-changed', { 
       detail: { componentId, config: newConfig } 
@@ -252,8 +243,13 @@ export default function ResponsiveWrapper({
         ? 'http://localhost:1337' 
         : import.meta.env?.VITE_STRAPI_URL || 'http://localhost:1337';
       
-      const checkURL = `${baseURL}/api/component-layouts?filters[componentId][$eq]=${componentId}&filters[breakpoint][$eq]=${strapiBreakpoint}`;
-      const checkResponse = await fetch(checkURL);
+      const checkURL = `${baseURL}/api/component-layouts?componentId=${componentId}&breakpoint=${strapiBreakpoint}`;
+      const checkToken = localStorage.getItem('auth_token');
+      const checkResponse = await fetch(checkURL, {
+        headers: {
+          ...(checkToken ? { 'Authorization': `Bearer ${checkToken}` } : {})
+        }
+      });
       
       if (!checkResponse.ok) {
         throw new Error(`Erro ao verificar configuração existente: ${checkResponse.status}`);
@@ -261,7 +257,7 @@ export default function ResponsiveWrapper({
       
       const checkData = await checkResponse.json();
       const existingEntry = checkData?.data && checkData.data.length > 0 ? checkData.data[0] : null;
-      const existingDocumentId = existingEntry?.documentId;
+      const existingDocumentId = existingEntry?.id; // USAR ID NUMÉRICO EM VEZ DE DOCUMENT_ID
 
       const configData = {
         componentId,
@@ -278,22 +274,33 @@ export default function ResponsiveWrapper({
 
       let saveResponse;
       
+      const saveToken = localStorage.getItem('auth_token');
+      const authHeaders = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...(saveToken ? { 'Authorization': `Bearer ${saveToken}` } : {})
+      };
+
+      console.log('🔍 DEBUG SALVAMENTO:');
+      console.log('   baseURL:', baseURL);
+      console.log('   token:', saveToken ? 'Presente' : 'AUSENTE');
+      console.log('   existingDocumentId:', existingDocumentId);
+      console.log('   configData:', configData);
+
       if (existingDocumentId) {
-        saveResponse = await fetch(`${baseURL}/api/component-layouts/${existingDocumentId}`, {
+        const url = `${baseURL}/api/component-layouts/${existingDocumentId}`;
+        console.log('   PUT URL:', url);
+        saveResponse = await fetch(url, {
           method: 'PUT',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
+          headers: authHeaders,
           body: JSON.stringify({ data: configData })
         });
       } else {
-        saveResponse = await fetch(`${baseURL}/api/component-layouts`, {
+        const url = `${baseURL}/api/component-layouts`;
+        console.log('   POST URL:', url);
+        saveResponse = await fetch(url, {
           method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
+          headers: authHeaders,
           body: JSON.stringify({ data: configData })
         });
       }
@@ -303,10 +310,8 @@ export default function ResponsiveWrapper({
         throw new Error(`Erro HTTP ${saveResponse.status}: ${errorText}`);
       }
 
-      const allConfigsUpdated = { ...configs, [breakpoint]: currentConfig };
-      localStorage.setItem(`component-${componentId}`, JSON.stringify(allConfigsUpdated));
-      
-      alert(`✅ Configuração salva com sucesso!`);
+      console.log(`✅ ${componentId}: Salvo no banco PostgreSQL com sucesso!`);
+      alert(`✅ Configuração salva no banco PostgreSQL!`);
       
     } catch (error) {
       console.error('❌ Erro ao salvar:', error);

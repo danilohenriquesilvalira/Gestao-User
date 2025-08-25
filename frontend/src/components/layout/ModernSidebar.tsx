@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 // 1. Definir os tipos de item de navegação
-type NavItem = 'dashboard' | 'eclusa' | 'enchimento' | 'porta_jusante' | 'porta_montante' | 'configuracoes' | 'usuarios';
+type NavItem = 'dashboard' | 'eclusa' | 'enchimento' | 'porta_jusante' | 'porta_montante' | 'configuracoes' | 'usuarios' | 'tags_admin';
 
 export default function ModernSidebar() {
+  const { isAdmin } = useAuth();
   const [isHovered, setIsHovered] = useState(false);
   // 2. Usar o tipo 'NavItem' para o estado 'activeItem'
   const [activeItem, setActiveItem] = useState<NavItem>('dashboard');
@@ -27,6 +29,8 @@ export default function ModernSidebar() {
         setActiveItem('configuracoes');
       } else if (pathname === '/usuarios') {
         setActiveItem('usuarios');
+      } else if (pathname === '/tags-admin') {
+        setActiveItem('tags_admin');
       } else {
         // Para outras páginas, considerar como 'dashboard'
         setActiveItem('dashboard');
@@ -63,6 +67,9 @@ export default function ModernSidebar() {
         case 'usuarios':
           window.location.href = '/usuarios';
           break;
+        case 'tags_admin':
+          window.location.href = '/tags-admin';
+          break;
         default:
           console.log(`Navegação não implementada para: ${itemId}`);
       }
@@ -96,13 +103,13 @@ export default function ModernSidebar() {
 
         {/* SVG Container */}
         <div className={`transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'} drop-shadow-lg`}>
-          <svg width="88" height="540" viewBox="0 0 88 540" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M43.175 52C15.543 44 2.878 14 0 0V270H88V94C88 67 70.867 59.6 43.175 52Z" fill="#131827"/>
-            <path d="M43.175 488C15.543 496 2.878 526 0 540V270H88V446C88 473 70.867 480.4 43.175 488Z" fill="#131827"/>
+          <svg width="88" height="620" viewBox="0 0 88 620" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M43.175 52C15.543 44 2.878 14 0 0V310H88V94C88 67 70.867 59.6 43.175 52Z" fill="#131827"/>
+            <path d="M43.175 568C15.543 576 2.878 606 0 620V310H88V526C88 553 70.867 560.4 43.175 568Z" fill="#131827"/>
           </svg>
 
           {/* Navigation Icons */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-8 py-16">
+          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-6 py-12">
             
             {/* Dashboard Principal */}
             <button 
@@ -199,6 +206,25 @@ export default function ModernSidebar() {
                 </svg>
               </button>
             </div>
+
+            {/* Tags Admin - PLC Tags (Apenas Admin) */}
+            {isAdmin() && (
+              <div className="flex justify-center mb-4" title="Tags Admin - PLC">
+                <button 
+                  className="p-2 hover:scale-110 transition-all duration-200"
+                  onClick={() => handleItemClick('tags_admin')}
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="4" width="18" height="16" rx="2" stroke={getIconColor('tags_admin')} strokeWidth="1.5"/>
+                    <path d="M7 8h10M7 12h8M7 16h6" stroke={getIconColor('tags_admin')} strokeWidth="1.5" strokeLinecap="round"/>
+                    <circle cx="18" cy="8" r="1.5" fill={getIconColor('tags_admin')} opacity="0.6"/>
+                    <circle cx="18" cy="12" r="1.5" fill={getIconColor('tags_admin')} opacity="0.8"/>
+                    <circle cx="18" cy="16" r="1.5" fill={getIconColor('tags_admin')}/>
+                    <path d="M3 4L21 20" stroke={getIconColor('tags_admin')} strokeWidth="0.5" opacity="0.3"/>
+                  </svg>
+                </button>
+              </div>
+            )}
 
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import ModernSidebar from '@/components/layout/ModernSidebar';
 import ModernHeader from '@/components/layout/ModernHeader';
+import { useAuth } from '@/contexts/AuthContext';
 import GlobalAdvancedControls from '@/components/GlobalAdvancedControls';
 import NivelCaldeira from '@/components/Eclusa/Nivel_Caldeira';
 import NivelMontante from '@/components/Eclusa/Nivel_Montante';
@@ -77,6 +78,7 @@ export default function DashboardPage() {
 function DashboardContent() {
   const [editMode, setEditMode] = useState(false);
   const { isAllLoaded } = useLayoutLoading();
+  const { canEditLayout } = useAuth();
   const { 
     nivelCaldeiraValue, 
     nivelMontanteValue, 
@@ -120,12 +122,12 @@ function DashboardContent() {
           />
 
 
-          {/* BOTÃO DE EDIT MODE DIRETO */}
-          {!editMode && (
+          {/* BOTÃO DE EDIT MODE DIRETO - SOMENTE ADMIN */}
+          {!editMode && canEditLayout() && (
             <button
               onClick={() => setEditMode(!editMode)}
               className="fixed bottom-8 right-8 w-14 h-14 bg-gray-800 hover:bg-gray-700 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 z-50 flex items-center justify-center"
-              title="Ativar Modo Edição"
+              title="Ativar Modo Edição (Somente Admin)"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>

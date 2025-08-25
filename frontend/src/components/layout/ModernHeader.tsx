@@ -1,24 +1,28 @@
 
 
 import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface ModernHeaderProps {
   title?: string;
-  user?: string;
-  onLogout?: () => void;
 }
 
 export default function ModernHeader({ 
-  title = "Dashboard", 
-  user = "Operador",
-  onLogout = () => {
-    // Logout funcional
-    if (typeof window !== 'undefined') {
-      window.location.replace('/');
-    }
-  }
+  title = "Dashboard"
 }: ModernHeaderProps) {
-  const [notificationCount] = useState(3); // ✅ Removido setNotificationCount não utilizado
+  const { getUserInfo, logout } = useAuth();
+  const navigate = useNavigate();
+  const [notificationCount] = useState(3);
+
+  const userInfo = getUserInfo();
+  const userName = userInfo?.name || 'Usuário';
+  const userRole = userInfo?.role || 'Visitante';
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <header className="h-16 bg-[#131827] border-b border-slate-700 px-4 md:px-6 flex items-center justify-between shadow-lg">
@@ -68,8 +72,8 @@ export default function ModernHeader({
         {/* Usuário */}
         <div className="flex items-center gap-2 md:gap-3">
           <div className="hidden md:block text-right">
-            <div className="text-sm font-medium text-white">{user}</div>
-            <div className="text-xs text-slate-400">Operador</div>
+            <div className="text-sm font-medium text-white">{userName}</div>
+            <div className="text-xs text-slate-400">{userRole}</div>
           </div>
           
           {/* Avatar e Logout */}
@@ -83,11 +87,11 @@ export default function ModernHeader({
             {/* Dropdown Menu */}
             <div className="absolute right-0 top-10 w-32 bg-slate-800 border border-slate-700 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
               <div className="md:hidden px-4 py-2 border-b border-slate-700">
-                <div className="text-sm font-medium text-white">{user}</div>
-                <div className="text-xs text-slate-400">Operador</div>
+                <div className="text-sm font-medium text-white">{userName}</div>
+                <div className="text-xs text-slate-400">{userRole}</div>
               </div>
               <button 
-                onClick={onLogout}
+                onClick={handleLogout}
                 className="w-full px-4 py-2 text-left text-sm text-white hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

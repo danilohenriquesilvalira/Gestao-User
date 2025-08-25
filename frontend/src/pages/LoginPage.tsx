@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useAuth } from '@/contexts/AuthContext';
 import { EyeIcon, EyeSlashIcon, LockClosedIcon, UserIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -109,6 +110,7 @@ const TypingEffect = ({ startTyping }: { startTyping: boolean }) => {
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [startTyping, setStartTyping] = useState(false);
@@ -128,16 +130,22 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('http://localhost:1337/api/auth/local', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
       
-      if (response.ok) {
+      const result = await response.json();
+      console.log('Login response:', result);
+      
+      if (response.ok && result.jwt) {
+        // Usar o contexto de autenticação
+        login(result.jwt, result.user);
         navigate('/dashboard');
       } else {
-        showNotification('Credenciais inválidas', 'error');
+        const errorMsg = result.error?.message || 'Credenciais inválidas';
+        showNotification(errorMsg, 'error');
       }
     } catch (error) {
       console.error('Erro no login:', error);

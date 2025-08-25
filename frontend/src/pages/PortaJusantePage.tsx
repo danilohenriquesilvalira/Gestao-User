@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import ModernSidebar from '@/components/layout/ModernSidebar';
 import ModernHeader from '@/components/layout/ModernHeader';
+import { useAuth } from '@/contexts/AuthContext';
 import GlobalAdvancedControls from '@/components/GlobalAdvancedControls';
 import PortaJusante from '@/components/Eclusa/PortaJusante';
 import { BasePorta, PortaJusanteRegua, ContraPesoDireito, ContraPesoEsquerdo } from '@/components/Eclusa/PortaJusante/index';
@@ -64,6 +65,7 @@ export default function PortaJusantePage() {
 
 function PortaJusanteContent() {
   const [editMode, setEditMode] = useState(false);
+  const { canEditLayout } = useAuth();
   const { isAllLoaded } = useLayoutLoading();
   const { nivelValue, motorValue, contrapesoDirectoValue, contrapesoEsquerdoValue, motorDireitoValue, motorEsquerdoValue, isConnected, error, lastMessage } = useWebSocket('ws://localhost:8080/ws');
 
@@ -91,7 +93,7 @@ function PortaJusanteContent() {
           />
 
 
-          {!editMode && (
+          {!editMode && canEditLayout() && (
             <button
               onClick={() => setEditMode(!editMode)}
               className="fixed bottom-8 right-8 w-14 h-14 bg-gray-800 hover:bg-gray-700 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 z-50 flex items-center justify-center"

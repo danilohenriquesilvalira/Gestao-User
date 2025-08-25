@@ -153,33 +153,66 @@ export default function GlobalAdvancedControls({ editMode, pageFilter }: GlobalA
     return activeComponents;
   };
 
-  const loadComponents = () => {
+  const loadComponents = async () => {
     const found: ComponentData[] = [];
     const activeComponents = detectActiveComponents();
 
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key?.startsWith('component-')) {
-        const componentId = key.replace('component-', '');
-        const configData = localStorage.getItem(key);
-        
-        if (configData) {
-          try {
-            const configs = JSON.parse(configData);
-            const isVisible = activeComponents.has(componentId);
-            const lastUsed = parseInt(localStorage.getItem(`${key}-lastused`) || '0');
-            
-            found.push({ 
-              id: componentId, 
-              configs,
-              isVisible,
-              lastUsed
-            });
-          } catch (error) {
-            console.warn(`Erro ao carregar configuração de ${componentId}:`, error);
-          }
+    try {
+      // CARREGAR DO BANCO POSTGRESQL - NÃO LOCALSTORAGE
+      const baseURL = window.location.origin.includes('localhost') 
+        ? 'http://localhost:1337' 
+        : import.meta.env?.VITE_STRAPI_URL || 'http://localhost:1337';
+
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`${baseURL}/api/component-layouts`, {
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const componentConfigs: Record<string, Record<string, any>> = {};
+
+        // Agrupar configurações por componentId
+        data.data?.forEach((item: any) => {
+          const attrs = item.attributes || item;
+          const componentId = attrs.componentId;
+          const dbBreakpoint = attrs.breakpoint === 'xxl' ? '2xl' : 
+                              attrs.breakpoint === 'xxxl' ? '3xl' : 
+                              attrs.breakpoint === 'xxxxl' ? '4xl' : attrs.breakpoint;
+
+          if (!componentConfigs[componentId]) {
+            componentConfigs[componentId] = {};
+          }
+
+          componentConfigs[componentId][dbBreakpoint] = {
+            x: Number(attrs.x) || 74,
+            y: Number(attrs.y) || 70,
+            width: Number(attrs.width) || 400,
+            height: Number(attrs.height) || 200,
+            scale: Number(attrs.scale) || 1,
+            zIndex: Number(attrs.zIndex) || 10,
+            opacity: Number(attrs.opacity) || 1,
+            rotation: Number(attrs.rotation) || 0
+          };
+        });
+
+        // Criar componentes apenas dos que estão no banco E são visíveis na página
+        Object.keys(componentConfigs).forEach(componentId => {
+          const isVisible = activeComponents.has(componentId);
+          found.push({
+            id: componentId,
+            configs: componentConfigs[componentId],
+            isVisible,
+            lastUsed: Date.now()
+          });
+        });
+
+        console.log(`✅ GlobalAdvancedControls: ${found.length} componentes carregados do banco PostgreSQL`);
       }
+    } catch (error) {
+      console.error('❌ Erro ao carregar componentes do banco:', error);
     }
 
     // Detectar sobreposições
@@ -207,7 +240,7 @@ export default function GlobalAdvancedControls({ editMode, pageFilter }: GlobalA
   };
 
   // Auto-organizar Z-Index
-  const autoOrganizeZIndex = () => {
+  const autoOrganizeZIndex = async () => {
     const visibleComps = filteredComponents.filter(c => c.isVisible);
     
     const categories = {
@@ -238,19 +271,20 @@ export default function GlobalAdvancedControls({ editMode, pageFilter }: GlobalA
       
       zIndex += 2;
 
-      localStorage.setItem(`component-${comp.id}`, JSON.stringify(newConfigs));
+      // REMOVIDO LOCALSTORAGE - TUDO NO BANCO AGORA
+      console.log(`🔄 Auto-organize: ${comp.id} Z-Index atualizado para ${zIndex}`);
       
       window.dispatchEvent(new CustomEvent('component-config-changed', {
         detail: { componentId: comp.id, config: newConfigs[breakpoint] }
       }));
     });
 
-    loadComponents();
+    await loadComponents();
     alert('Z-Index reorganizado automaticamente!');
   };
 
   // Reset de Z-Index
-  const resetAllZIndex = () => {
+  const resetAllZIndex = async () => {
     filteredComponents.forEach((comp, index) => {
       const newConfigs = { ...comp.configs };
       Object.keys(newConfigs).forEach(bp => {
@@ -259,14 +293,15 @@ export default function GlobalAdvancedControls({ editMode, pageFilter }: GlobalA
         }
       });
       
-      localStorage.setItem(`component-${comp.id}`, JSON.stringify(newConfigs));
+      // REMOVIDO LOCALSTORAGE - TUDO NO BANCO AGORA
+      console.log(`🔄 Reset Z-Index: ${comp.id} resetado para ${index + 1}`);
       
       window.dispatchEvent(new CustomEvent('component-config-changed', {
         detail: { componentId: comp.id, config: newConfigs[breakpoint] }
       }));
     });
 
-    loadComponents();
+    await loadComponents();
     alert('Todos os Z-Index foram resetados!');
   };
 
@@ -299,8 +334,14 @@ export default function GlobalAdvancedControls({ editMode, pageFilter }: GlobalA
         ? 'http://localhost:1337' 
         : import.meta.env?.VITE_STRAPI_URL || 'http://localhost:1337';
 
+      const token = localStorage.getItem('auth_token');
       const checkResponse = await fetch(
-        `${baseURL}/api/component-layouts?filters[componentId][$eq]=${selectedComponent}&filters[breakpoint][$eq]=${strapiBreakpoint}`
+        `${baseURL}/api/component-layouts?componentId=${selectedComponent}&breakpoint=${strapiBreakpoint}`,
+        {
+          headers: {
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          }
+        }
       );
       
       if (!checkResponse.ok) {
@@ -309,7 +350,7 @@ export default function GlobalAdvancedControls({ editMode, pageFilter }: GlobalA
 
       const checkData = await checkResponse.json();
       const existingEntry = checkData?.data?.[0];
-      const existingDocumentId = existingEntry?.documentId;
+      const existingDocumentId = existingEntry?.id; // USAR ID NUMÉRICO EM VEZ DE DOCUMENT_ID
 
       const configData = {
         componentId: selectedComponent,
@@ -324,21 +365,29 @@ export default function GlobalAdvancedControls({ editMode, pageFilter }: GlobalA
         rotation: Math.round(Number(currentConfig.rotation)) || 0
       };
 
+      const saveToken = localStorage.getItem('auth_token');
+      const authHeaders = {
+        'Content-Type': 'application/json',
+        ...(saveToken ? { 'Authorization': `Bearer ${saveToken}` } : {})
+      };
+
       const saveResponse = existingDocumentId 
         ? await fetch(`${baseURL}/api/component-layouts/${existingDocumentId}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders,
             body: JSON.stringify({ data: configData })
           })
         : await fetch(`${baseURL}/api/component-layouts`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders,
             body: JSON.stringify({ data: configData })
           });
 
       if (saveResponse.ok) {
-        console.log(`✅ [STRAPI] ${selectedComponent} salvo com sucesso`);
-        localStorage.setItem(`component-${selectedComponent}-lastused`, Date.now().toString());
+        console.log(`✅ ${selectedComponent}: Salvo no banco PostgreSQL com sucesso`);
+        // Recarregar componentes após salvamento bem-sucedido
+        setTimeout(() => loadComponents(), 500);
+        alert('✅ Salvo no banco com sucesso!');
       } else {
         throw new Error(`Erro HTTP ${saveResponse.status}`);
       }
@@ -359,7 +408,8 @@ export default function GlobalAdvancedControls({ editMode, pageFilter }: GlobalA
     
     newConfigs[breakpoint] = { ...currentConfig, [property]: value };
     
-    localStorage.setItem(`component-${selectedComponent}`, JSON.stringify(newConfigs));
+    // REMOVIDO LOCALSTORAGE - TUDO NO BANCO AGORA
+    console.log(`🔄 ${selectedComponent}: ${property} = ${value} (temporário - salvar no banco com botão Salvar)`);
     
     window.dispatchEvent(new CustomEvent('component-config-changed', {
       detail: { componentId: selectedComponent, config: newConfigs[breakpoint] }
@@ -369,9 +419,7 @@ export default function GlobalAdvancedControls({ editMode, pageFilter }: GlobalA
       c.id === selectedComponent ? { ...c, configs: newConfigs } : c
     ));
 
-    // CORREÇÃO: Remover o setTimeout que causava perda do componente selecionado
-    // e atualizar apenas o estado local das sobreposições
-    setComponents(prev => detectOverlaps(prev));
+    // NÃO recarregar do banco automaticamente - manter controle local
   };
 
   // CORREÇÃO: Atualizar ref quando componente é selecionado
@@ -424,12 +472,8 @@ export default function GlobalAdvancedControls({ editMode, pageFilter }: GlobalA
     if (editMode) {
       loadComponents();
       
-      const handleComponentChange = () => {
-        setTimeout(loadComponents, 100);
-      };
-
-      window.addEventListener('component-config-changed', handleComponentChange);
-      return () => window.removeEventListener('component-config-changed', handleComponentChange);
+      // REMOVIDO: Auto-reload do banco que sobrescreve valores editados
+      // Agora só recarrega na inicialização ou quando salvamos explicitamente
     }
   }, [editMode, pageFilter]);
 

@@ -33,8 +33,8 @@ export default function PortaJusante({
     return null;
   }
 
-  // ✅ EM EDIT MODE, SEMPRE MOSTRA (para posicionamento)
-  const displayAbertura = editMode ? 50 : (abertura ?? 0);
+  // Usa a abertura real do WebSocket, mesmo em edit mode
+  const displayAbertura = (abertura ?? 0);
 
   return (
     <ResponsiveWrapper 

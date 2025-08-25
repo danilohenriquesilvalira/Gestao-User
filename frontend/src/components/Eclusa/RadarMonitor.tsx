@@ -124,6 +124,7 @@ export default function RadarMonitor({ editMode = false }: RadarMonitorProps) {
     <ResponsiveWrapper 
       componentId="radar-monitor"
       editMode={editMode}
+      allowOverflow={true}
       defaultConfig={{
         xs: { x: 50, y: 300, width: 320, height: 240, scale: 1, zIndex: 17, opacity: 1, rotation: 0 },
         sm: { x: 80, y: 350, width: 380, height: 280, scale: 1, zIndex: 17, opacity: 1, rotation: 0 },
@@ -136,28 +137,26 @@ export default function RadarMonitor({ editMode = false }: RadarMonitorProps) {
       }}
     >
       {/* CARD PADRONIZADO COM DETALHE VERDE MAIS DELICADO */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden h-full">
+      <div className="bg-white rounded-xl shadow-lg border border-gray-200 h-full w-full" style={{ overflow: 'visible' }}>
         <div className="h-3 bg-green-500 rounded-t-xl"></div>
         
-        <div className="p-4 h-full flex flex-col">
+        <div className="p-3 flex flex-col" style={{ height: 'calc(100% - 12px)', overflow: 'visible' }}>
           {/* Header */}
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <div className="w-6 h-6 bg-green-500 rounded-md flex items-center justify-center">
-                <Radar className="w-3 h-3 text-white" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-gray-900">Monitor de Radar</h3>
-                <div className="flex items-center gap-2">
-                  <div className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
-                  <span className="text-xs text-gray-500">{detectedObjects.length} objetos detectados</span>
-                </div>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-5 h-5 bg-green-500 rounded-md flex items-center justify-center">
+              <Radar className="w-2.5 h-2.5 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-bold text-gray-900">Monitor de Radar</h3>
+              <div className="flex items-center gap-1">
+                <div className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
+                <span className="text-xs text-gray-500">{detectedObjects.length} objetos detectados</span>
               </div>
             </div>
           </div>
 
           {/* Radio Buttons Modernos - Mais Juntos */}
-          <div className="mb-4">
+          <div className="mb-3">
             <div className="flex items-center justify-center gap-6">
               {(Object.keys(radarLocations) as RadarLocation[]).map((location) => (
                 <label
@@ -228,7 +227,6 @@ export default function RadarMonitor({ editMode = false }: RadarMonitorProps) {
                 <path d="M183.859 222.099C183.442 222.099 183.067 222.017 182.733 221.851C182.399 221.685 182.132 221.458 181.93 221.169C181.729 220.88 181.619 220.551 181.6 220.182H182.452C182.485 220.511 182.635 220.783 182.9 220.999C183.167 221.212 183.487 221.318 183.859 221.318C184.157 221.318 184.422 221.248 184.654 221.109C184.888 220.969 185.072 220.777 185.204 220.533C185.339 220.287 185.407 220.009 185.407 219.699C185.407 219.382 185.337 219.099 185.197 218.85C185.06 218.599 184.871 218.402 184.629 218.257C184.388 218.113 184.112 218.039 183.802 218.037C183.579 218.035 183.351 218.069 183.116 218.14C182.882 218.209 182.689 218.297 182.538 218.406L181.714 218.307L182.154 214.727H185.932V215.509H182.893L182.637 217.653H182.68C182.829 217.535 183.016 217.437 183.241 217.359C183.466 217.281 183.7 217.241 183.944 217.241C184.389 217.241 184.785 217.348 185.133 217.561C185.484 217.772 185.758 218.061 185.957 218.428C186.159 218.795 186.259 219.214 186.259 219.685C186.259 220.149 186.155 220.563 185.947 220.928C185.741 221.29 185.457 221.576 185.094 221.787C184.732 221.995 184.32 222.099 183.859 222.099ZM190.042 222.099C189.507 222.099 189.051 221.954 188.675 221.663C188.298 221.369 188.011 220.944 187.812 220.388C187.613 219.829 187.514 219.154 187.514 218.364C187.514 217.578 187.613 216.906 187.812 216.35C188.013 215.791 188.302 215.365 188.678 215.072C189.057 214.776 189.512 214.628 190.042 214.628C190.572 214.628 191.026 214.776 191.402 215.072C191.781 215.365 192.07 215.791 192.269 216.35C192.47 216.906 192.57 217.578 192.57 218.364C192.57 219.154 192.471 219.829 192.272 220.388C192.073 220.944 191.786 221.369 191.409 221.663C191.033 221.954 190.577 222.099 190.042 222.099ZM190.042 221.318C190.572 221.318 190.984 221.062 191.278 220.551C191.571 220.04 191.718 219.311 191.718 218.364C191.718 217.734 191.651 217.198 191.516 216.755C191.383 216.312 191.191 215.975 190.94 215.743C190.692 215.511 190.392 215.395 190.042 215.395C189.516 215.395 189.106 215.654 188.81 216.173C188.514 216.689 188.366 217.419 188.366 218.364C188.366 218.993 188.432 219.528 188.565 219.969C188.697 220.409 188.888 220.744 189.136 220.974C189.387 221.203 189.689 221.318 190.042 221.318Z" fill="#6B7280"/>
                 <path d="M271.684 222V221.361L274.084 218.733C274.366 218.425 274.598 218.158 274.78 217.93C274.962 217.701 275.097 217.485 275.185 217.284C275.275 217.08 275.32 216.867 275.32 216.645C275.32 216.389 275.258 216.168 275.135 215.981C275.014 215.794 274.849 215.649 274.638 215.548C274.427 215.446 274.191 215.395 273.928 215.395C273.648 215.395 273.405 215.453 273.196 215.569C272.99 215.683 272.831 215.842 272.717 216.048C272.606 216.254 272.55 216.496 272.55 216.773H271.712C271.712 216.347 271.81 215.973 272.007 215.651C272.203 215.329 272.471 215.078 272.809 214.898C273.15 214.718 273.532 214.628 273.956 214.628C274.382 214.628 274.76 214.718 275.089 214.898C275.418 215.078 275.676 215.32 275.863 215.626C276.05 215.931 276.144 216.271 276.144 216.645C276.144 216.912 276.095 217.174 275.998 217.43C275.903 217.683 275.738 217.966 275.501 218.278C275.267 218.589 274.941 218.967 274.524 219.415L272.891 221.162V221.219H276.272V222H271.684ZM280.011 222.099C279.594 222.099 279.219 222.017 278.885 221.851C278.551 221.685 278.284 221.458 278.083 221.169C277.881 220.88 277.771 220.551 277.752 220.182H278.605C278.638 220.511 278.787 220.783 279.052 220.999C279.32 221.212 279.639 221.318 280.011 221.318C280.309 221.318 280.574 221.248 280.806 221.109C281.041 220.969 281.224 220.777 281.357 220.533C281.492 220.287 281.559 220.009 281.559 219.699C281.559 219.382 281.489 219.099 281.35 218.85C281.212 218.599 281.023 218.402 280.782 218.257C280.54 218.113 280.264 218.039 279.954 218.037C279.732 218.035 279.503 218.069 279.269 218.14C279.034 218.209 278.841 218.297 278.69 218.406L277.866 218.307L278.306 214.727H282.085V215.509H279.045L278.789 217.653H278.832C278.981 217.535 279.168 217.437 279.393 217.359C279.618 217.281 279.852 217.241 280.096 217.241C280.541 217.241 280.938 217.348 281.286 217.561C281.636 217.772 281.911 218.061 282.11 218.428C282.311 218.795 282.411 219.214 282.411 219.685C282.411 220.149 282.307 220.563 282.099 220.928C281.893 221.29 281.609 221.576 281.247 221.787C280.884 221.995 280.473 222.099 280.011 222.099Z" fill="#6B7280"/>
                 <path d="M365.742 222.099C365.207 222.099 364.752 221.954 364.375 221.663C363.999 221.369 363.711 220.944 363.512 220.388C363.313 219.829 363.214 219.154 363.214 218.364C363.214 217.578 363.313 216.906 363.512 216.35C363.714 215.791 364.002 215.365 364.379 215.072C364.758 214.776 365.212 214.628 365.742 214.628C366.273 214.628 366.726 214.776 367.103 215.072C367.481 215.365 367.77 215.791 367.969 216.35C368.17 216.906 368.271 217.578 368.271 218.364C368.271 219.154 368.171 219.829 367.973 220.388C367.774 220.944 367.486 221.369 367.11 221.663C366.733 221.954 366.278 222.099 365.742 222.099ZM365.742 221.318C366.273 221.318 366.685 221.062 366.978 220.551C367.272 220.04 367.419 219.311 367.419 218.364C367.419 217.734 367.351 217.198 367.216 216.755C367.084 216.312 366.892 215.975 366.641 215.743C366.392 215.511 366.093 215.395 365.742 215.395C365.217 215.395 364.806 215.654 364.51 216.173C364.214 216.689 364.066 217.419 364.066 218.364C364.066 218.993 364.133 219.528 364.265 219.969C364.398 220.409 364.588 220.744 364.837 220.974C365.088 221.203 365.39 221.318 365.742 221.318Z" fill="#6B7280"/>
-                <path d="M8.90234 205.617H366.097" stroke="#C5C9CB"/>
                 <g filter="url(#filter0_d_3493_709)">
                   <circle cx="215" cy="27" r="6" fill="#FFFF00"/>
                 </g>
@@ -291,20 +289,20 @@ export default function RadarMonitor({ editMode = false }: RadarMonitorProps) {
           </div>
 
           {/* Informações dos Objetos */}
-          <div className="flex-shrink-0 mt-4 pt-3 border-t border-gray-200">
-            <div className="space-y-2 max-h-20 overflow-y-auto">
+          <div className="mt-2 pt-2 border-t border-gray-200">
+            <div className="space-y-1.5 max-h-20 overflow-y-auto">
               {detectedObjects.slice(0, 2).map((obj) => (
-                <div key={obj.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-2">
+                <div key={obj.id} className="flex items-center justify-between p-1.5 bg-gray-50 rounded text-xs">
+                  <div className="flex items-center gap-1.5">
                     <div 
                       className="w-2 h-2 rounded-full" 
                       style={{ backgroundColor: getObjectColor(obj.type) }}
                     ></div>
-                    <span className="text-xs text-gray-600 uppercase tracking-wide">
+                    <span className="text-gray-600 uppercase tracking-wide font-medium">
                       {obj.azimuth.toFixed(0)}° - {obj.distance.toFixed(0)}m
                     </span>
                   </div>
-                  <span className={`text-xs font-semibold ${obj.velocity > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <span className={`font-semibold ${obj.velocity > 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {formatVelocity(obj.velocity)}m/s
                   </span>
                 </div>

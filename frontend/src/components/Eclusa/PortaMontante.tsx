@@ -33,46 +33,49 @@ export default function PortaMontante({
     return null;
   }
 
-  // ✅ EM EDIT MODE, SEMPRE MOSTRA (para posicionamento)
-  const displayAbertura = editMode ? 50 : (abertura ?? 0);
+  // Usa a abertura real do WebSocket, mesmo em edit mode
+  const displayAbertura = (abertura ?? 0);
 
-  // Calcula movimento vertical: 0% = topo, 100% = embaixo
-  const movimentoVertical = (displayAbertura / 100) * 100; // 120px de movimento máximo (4x mais)
+  // Calcula movimento vertical proporcionalmente ao container: 0% = topo, 100% = 50% da altura do container
+  const movimentoVertical = (displayAbertura / 100) * 50; // Movimento máximo de 50px (mais controlado)
 
   return (
     <ResponsiveWrapper 
-      componentId="porta-montante"
+      componentId="porta-montante-movimento"
       editMode={editMode}
       allowOverflow={true} // Permite overflow para o movimento
       defaultConfig={{
-        xs: { x: 100, y: 150, width: 20, height: 120, scale: 1, zIndex: 9, opacity: 1, rotation: 0 },
-        sm: { x: 120, y: 180, width: 24, height: 140, scale: 1, zIndex: 9, opacity: 1, rotation: 0 },
-        md: { x: 150, y: 200, width: 28, height: 160, scale: 1, zIndex: 9, opacity: 1, rotation: 0 },
-        lg: { x: 180, y: 230, width: 32, height: 180, scale: 1, zIndex: 9, opacity: 1, rotation: 0 },
-        xl: { x: 200, y: 260, width: 36, height: 200, scale: 1, zIndex: 9, opacity: 1, rotation: 0 },
-        '2xl': { x: 230, y: 300, width: 40, height: 220, scale: 1, zIndex: 9, opacity: 1, rotation: 0 },
-        '3xl': { x: 260, y: 330, width: 44, height: 240, scale: 1, zIndex: 9, opacity: 1, rotation: 0 },
-        '4xl': { x: 300, y: 360, width: 48, height: 260, scale: 1, zIndex: 9, opacity: 1, rotation: 0 }
+        xs: { x: 100, y: 150, width: 60, height: 220, scale: 1, zIndex: 9, opacity: 1, rotation: 0 },
+        sm: { x: 120, y: 180, width: 70, height: 250, scale: 1, zIndex: 9, opacity: 1, rotation: 0 },
+        md: { x: 150, y: 200, width: 80, height: 280, scale: 1, zIndex: 9, opacity: 1, rotation: 0 },
+        lg: { x: 180, y: 230, width: 90, height: 320, scale: 1, zIndex: 9, opacity: 1, rotation: 0 },
+        xl: { x: 200, y: 260, width: 100, height: 360, scale: 1, zIndex: 9, opacity: 1, rotation: 0 },
+        '2xl': { x: 230, y: 300, width: 110, height: 400, scale: 1, zIndex: 9, opacity: 1, rotation: 0 },
+        '3xl': { x: 260, y: 330, width: 120, height: 440, scale: 1, zIndex: 9, opacity: 1, rotation: 0 },
+        '4xl': { x: 300, y: 360, width: 130, height: 480, scale: 1, zIndex: 9, opacity: 1, rotation: 0 }
       }}
     >
-      <div className="w-full h-full flex flex-col items-center justify-center">
+      <div className="w-full h-full relative" style={{ overflow: 'visible' }}>
         {/* Container da Porta com movimento vertical */}
-        <div className="relative flex-1 flex items-start justify-center w-full h-full">
+        <div className="absolute top-0 left-0 w-full h-full flex items-start justify-center">
           <div
+            className="relative"
             style={{
-              width: '100%',
-              height: '100%',
+              width: '80%', // Largura fixa para manter proporção do SVG
+              height: 'auto',
+              maxHeight: '100%',
               transform: `translateY(${movimentoVertical}px)`, // Movimento vertical
               transition: 'transform 0.8s ease-in-out', // Animação suave
             }}
           >
             <svg
               width="100%"
-              height="100%"
+              height="auto"
               viewBox="0 0 16 102"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="object-contain"
+              className="w-full h-auto"
+              style={{ maxHeight: '100%' }}
             >
               <path
                 fillRule="evenodd"
@@ -210,7 +213,6 @@ export default function PortaMontante({
             </svg>
           </div>
         </div>
-
       </div>
     </ResponsiveWrapper>
   );

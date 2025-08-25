@@ -101,78 +101,82 @@ const GraficoPuro = React.memo(({
 
   return (
     <ResponsiveWrapper 
-      componentId="graficos-cotas"
+      componentId="graficos-cotas-movimento"
       editMode={editMode}
+      allowOverflow={true}
       defaultConfig={{
-        xs: { x: 50, y: 50, width: 320, height: 220, scale: 1, zIndex: 15, opacity: 1, rotation: 0 },
-        sm: { x: 80, y: 80, width: 380, height: 250, scale: 1, zIndex: 15, opacity: 1, rotation: 0 },
-        md: { x: 120, y: 100, width: 420, height: 280, scale: 1, zIndex: 15, opacity: 1, rotation: 0 },
-        lg: { x: 150, y: 120, width: 460, height: 300, scale: 1, zIndex: 15, opacity: 1, rotation: 0 },
-        xl: { x: 200, y: 150, width: 500, height: 320, scale: 1, zIndex: 15, opacity: 1, rotation: 0 },
-        '2xl': { x: 250, y: 180, width: 540, height: 340, scale: 1, zIndex: 15, opacity: 1, rotation: 0 },
-        '3xl': { x: 300, y: 200, width: 580, height: 360, scale: 1, zIndex: 15, opacity: 1, rotation: 0 },
-        '4xl': { x: 350, y: 220, width: 620, height: 380, scale: 1, zIndex: 15, opacity: 1, rotation: 0 }
+        xs: { x: 50, y: 50, width: 320, height: 240, scale: 1, zIndex: 15, opacity: 1, rotation: 0 },
+        sm: { x: 80, y: 80, width: 380, height: 270, scale: 1, zIndex: 15, opacity: 1, rotation: 0 },
+        md: { x: 120, y: 100, width: 420, height: 300, scale: 1, zIndex: 15, opacity: 1, rotation: 0 },
+        lg: { x: 150, y: 120, width: 460, height: 330, scale: 1, zIndex: 15, opacity: 1, rotation: 0 },
+        xl: { x: 200, y: 150, width: 500, height: 350, scale: 1, zIndex: 15, opacity: 1, rotation: 0 },
+        '2xl': { x: 250, y: 180, width: 540, height: 370, scale: 1, zIndex: 15, opacity: 1, rotation: 0 },
+        '3xl': { x: 300, y: 200, width: 580, height: 390, scale: 1, zIndex: 15, opacity: 1, rotation: 0 },
+        '4xl': { x: 350, y: 220, width: 620, height: 410, scale: 1, zIndex: 15, opacity: 1, rotation: 0 }
       }}
     >
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden h-full">
+      <div className="bg-white rounded-xl shadow-lg border border-gray-200 h-full w-full" style={{ overflow: 'visible' }}>
         <div className="h-3 bg-green-500 rounded-t-xl"></div>
         
-        <div className="p-4 h-full flex flex-col">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-6 h-6 bg-green-500 rounded-md flex items-center justify-center">
-                <BarChart3 className="w-3 h-3 text-white" />
+        <div className="p-3 flex flex-col" style={{ height: 'calc(100% - 12px)', overflow: 'visible' }}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 bg-green-500 rounded-md flex items-center justify-center">
+                <BarChart3 className="w-2.5 h-2.5 text-white" />
               </div>
               <div>
                 <h3 className="text-sm font-bold text-gray-900">Gráficos das Cotas</h3>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   <div className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
                   <span className="text-xs text-gray-500">
-                    {niveisIguais ? 'Níveis sincronizados' : 'Monitoramento ativo'}
+                    {niveisIguais ? 'Sincronizado' : 'Monitorando'}
                   </span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="flex justify-center mb-4">
-            <div className="flex items-center gap-4">
-              <div className="bg-white rounded-xl p-3 border border-blue-200 hover:border-blue-300 transition-colors duration-200 shadow-sm hover:shadow-md">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+          <div className="flex justify-center mb-3">
+            <div className="flex items-center gap-2">
+              <div className="bg-white rounded-lg p-2 border border-blue-200 hover:border-blue-300 transition-colors duration-200 shadow-sm">
+                <div className="flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
                   <div className="text-xs text-blue-600 uppercase tracking-wide font-medium">Montante</div>
                 </div>
-                <div className="text-lg font-bold text-blue-700 mt-1">{cotaAtual.montante.toFixed(1)}m</div>
+                <div className="text-sm font-bold text-blue-700">{cotaAtual.montante.toFixed(1)}m</div>
               </div>
-              <div className="bg-white rounded-xl p-3 border border-purple-200 hover:border-purple-300 transition-colors duration-200 shadow-sm hover:shadow-md">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+              <div className="bg-white rounded-lg p-2 border border-purple-200 hover:border-purple-300 transition-colors duration-200 shadow-sm">
+                <div className="flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-purple-500"></div>
                   <div className="text-xs text-purple-600 uppercase tracking-wide font-medium">Caldeira</div>
                 </div>
-                <div className="text-lg font-bold text-purple-700 mt-1">{cotaAtual.caldeira.toFixed(1)}m</div>
+                <div className="text-sm font-bold text-purple-700">{cotaAtual.caldeira.toFixed(1)}m</div>
               </div>
-              <div className="bg-white rounded-xl p-3 border border-green-200 hover:border-green-300 transition-colors duration-200 shadow-sm hover:shadow-md">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+              <div className="bg-white rounded-lg p-2 border border-green-200 hover:border-green-300 transition-colors duration-200 shadow-sm">
+                <div className="flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
                   <div className="text-xs text-green-600 uppercase tracking-wide font-medium">Jusante</div>
                 </div>
-                <div className="text-lg font-bold text-green-700 mt-1">{cotaAtual.jusante.toFixed(1)}m</div>
+                <div className="text-sm font-bold text-green-700">{cotaAtual.jusante.toFixed(1)}m</div>
               </div>
             </div>
           </div>
 
-          <div className="flex-1 min-h-0">
+          <div className="relative" style={{ height: 'calc(100% - 140px)', minHeight: '120px' }}>
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={cotasDados} margin={{ top: 10, right: 15, left: 15, bottom: 20 }}>
+              <LineChart 
+                data={cotasDados} 
+                margin={{ top: 5, right: 10, left: 10, bottom: 15 }}
+              >
                 <XAxis 
                   dataKey="hora" 
-                  tick={{ fontSize: 9, fill: '#6b7280' }} 
+                  tick={{ fontSize: 8, fill: '#6b7280' }} 
                   axisLine={{ stroke: '#e5e7eb', strokeWidth: 1 }}
                   tickLine={{ stroke: '#e5e7eb', strokeWidth: 1 }}
                   interval="preserveStartEnd"
                 />
                 <YAxis 
-                  tick={{ fontSize: 9, fill: '#6b7280' }} 
+                  tick={{ fontSize: 8, fill: '#6b7280' }} 
                   axisLine={{ stroke: '#e5e7eb', strokeWidth: 1 }}
                   tickLine={{ stroke: '#e5e7eb', strokeWidth: 1 }}
                   domain={['dataMin - 0.5', 'dataMax + 0.5']}
@@ -198,9 +202,9 @@ const GraficoPuro = React.memo(({
                   type="monotone" 
                   dataKey="montante" 
                   stroke="#3B82F6" 
-                  strokeWidth={2.5} 
+                  strokeWidth={2} 
                   dot={{ r: 0 }}
-                  activeDot={{ r: 4, fill: '#3B82F6', strokeWidth: 2, stroke: '#ffffff' }}
+                  activeDot={{ r: 3, fill: '#3B82F6', strokeWidth: 2, stroke: '#ffffff' }}
                   strokeOpacity={0.9}
                   fill="url(#montanteGradient)"
                 />
@@ -208,9 +212,9 @@ const GraficoPuro = React.memo(({
                   type="monotone" 
                   dataKey="caldeira" 
                   stroke="#8B5CF6" 
-                  strokeWidth={2.5} 
+                  strokeWidth={2} 
                   dot={{ r: 0 }}
-                  activeDot={{ r: 4, fill: '#8B5CF6', strokeWidth: 2, stroke: '#ffffff' }}
+                  activeDot={{ r: 3, fill: '#8B5CF6', strokeWidth: 2, stroke: '#ffffff' }}
                   strokeOpacity={0.9}
                   fill="url(#caldeiraGradient)"
                 />
@@ -218,9 +222,9 @@ const GraficoPuro = React.memo(({
                   type="monotone" 
                   dataKey="jusante" 
                   stroke="#10B981" 
-                  strokeWidth={2.5} 
+                  strokeWidth={2} 
                   dot={{ r: 0 }}
-                  activeDot={{ r: 4, fill: '#10B981', strokeWidth: 2, stroke: '#ffffff' }}
+                  activeDot={{ r: 3, fill: '#10B981', strokeWidth: 2, stroke: '#ffffff' }}
                   strokeOpacity={0.9}
                   fill="url(#jusanteGradient)"
                 />
@@ -228,24 +232,24 @@ const GraficoPuro = React.memo(({
             </ResponsiveContainer>
           </div>
 
-          <div className="flex-shrink-0 mt-4 pt-3 border-t border-gray-200">
+          <div className="flex-shrink-0 mt-2 pt-2 border-t border-gray-200">
             {niveisIguais ? (
               <div className="text-center">
-                <span className="inline-flex items-center gap-2 text-xs text-green-600 font-medium">
+                <span className="inline-flex items-center gap-1 text-xs text-green-600 font-medium">
                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
                   Níveis sincronizados
                 </span>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-4 text-xs">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-500 uppercase tracking-wide">Diff M-C:</span>
+              <div className="flex justify-center gap-4 text-xs">
+                <div className="flex items-center gap-1">
+                  <span className="text-gray-500">M-C:</span>
                   <span className={`font-semibold ${Math.abs(cotaAtual.montante - cotaAtual.caldeira) > 1 ? 'text-orange-600' : 'text-gray-700'}`}>
                     {Math.abs(cotaAtual.montante - cotaAtual.caldeira).toFixed(1)}m
                   </span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-500 uppercase tracking-wide">Diff C-J:</span>
+                <div className="flex items-center gap-1">
+                  <span className="text-gray-500">C-J:</span>
                   <span className={`font-semibold ${Math.abs(cotaAtual.caldeira - cotaAtual.jusante) > 1 ? 'text-orange-600' : 'text-gray-700'}`}>
                     {Math.abs(cotaAtual.caldeira - cotaAtual.jusante).toFixed(1)}m
                   </span>

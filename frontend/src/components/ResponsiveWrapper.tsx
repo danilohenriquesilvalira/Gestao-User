@@ -199,6 +199,13 @@ export default function ResponsiveWrapper({
     const handleComponentSelect = (e: Event) => {
       const customEvent = e as CustomEvent;
       setSelectedComponent(customEvent.detail.componentId);
+      
+      // ✅ Se este componente foi selecionado, foca automaticamente para controle por teclado
+      if (customEvent.detail.componentId === componentId && editMode) {
+        setTimeout(() => {
+          elementRef.current?.focus();
+        }, 100);
+      }
     };
 
     const handleDeselectAll = () => {
@@ -212,7 +219,7 @@ export default function ResponsiveWrapper({
       window.removeEventListener('select-component', handleComponentSelect);
       window.removeEventListener('deselect-all-components', handleDeselectAll);
     };
-  }, []);
+  }, [componentId, editMode]);
 
   const isSelected = selectedComponent === componentId;
   const shouldShowControls = editMode && isSelected;
@@ -326,7 +333,11 @@ export default function ResponsiveWrapper({
       x: e.clientX - (currentConfig.x || 0),
       y: e.clientY - (currentConfig.y || 0)
     });
-    elementRef.current?.focus();
+    
+    // ✅ Foca automaticamente para ativar controle por teclado
+    setTimeout(() => {
+      elementRef.current?.focus();
+    }, 50);
   };
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
@@ -424,6 +435,65 @@ export default function ResponsiveWrapper({
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging, handleMouseMove]);
+
+  // ✅ CONTROLE POR TECLADO - MOVIMENTO COM SETAS
+  useEffect(() => {
+    if (!editMode || !isSelected) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Verifica se o foco está no elemento do componente
+      const focusedElement = document.activeElement as HTMLElement;
+      if (!elementRef.current?.contains(focusedElement) && focusedElement !== elementRef.current) {
+        return;
+      }
+
+      let deltaX = 0;
+      let deltaY = 0;
+
+      // Define a velocidade de movimento
+      let moveSpeed = 1; // Movimento fino padrão
+      if (e.shiftKey) moveSpeed = 10; // Movimento rápido com Shift
+      if (e.ctrlKey || e.metaKey) moveSpeed = 5; // Movimento médio com Ctrl/Cmd
+
+      switch (e.key) {
+        case 'ArrowUp':
+          deltaY = -moveSpeed;
+          e.preventDefault();
+          break;
+        case 'ArrowDown':
+          deltaY = moveSpeed;
+          e.preventDefault();
+          break;
+        case 'ArrowLeft':
+          deltaX = -moveSpeed;
+          e.preventDefault();
+          break;
+        case 'ArrowRight':
+          deltaX = moveSpeed;
+          e.preventDefault();
+          break;
+        default:
+          return; // Se não for uma seta, não faz nada
+      }
+
+      if (deltaX !== 0 || deltaY !== 0) {
+        const newX = Math.max(0, Math.min((currentConfig.x || 0) + deltaX, window.innerWidth - (currentConfig.width || 100) - 20));
+        const newY = Math.max(0, Math.min((currentConfig.y || 0) + deltaY, window.innerHeight - (currentConfig.height || 100) - 20));
+
+        saveConfig({
+          ...currentConfig,
+          x: Math.round(newX),
+          y: Math.round(newY)
+        });
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [editMode, isSelected, currentConfig, saveConfig]);
 
   // Detectar automaticamente componentes que precisam de overflow visível
   const needsOverflow = allowOverflow || 
@@ -551,25 +621,32 @@ export default function ResponsiveWrapper({
                 <div 
                   className="absolute bg-blue-500 text-white px-2 py-1 rounded text-xs font-mono flex items-center gap-2 whitespace-nowrap"
                   style={{
-                    top: '-28px',
+                    top: '-44px',
                     left: 0,
                     zIndex: 999
                   }}
                 >
-                  <span className="bg-blue-600 px-1 rounded">
-                    {componentType === 'background' ? '🖼️' : componentType === 'foreground' ? '🎯' : '⚙️'}
-                  </span>
-                  <span>{componentId} | Z:{currentConfig.zIndex}</span>
-                  {needsOverflow && <span className="bg-purple-600 px-1 rounded" title="Overflow visível">📐</span>}
-                  
-                  <button
-                    onClick={saveToStrapi}
-                    disabled={isSaving}
-                    className="bg-green-600 px-2 py-1 rounded text-xs hover:bg-green-700 disabled:opacity-50"
-                    title="Salvar"
-                  >
-                    {isSaving ? '⏳' : '💾'}
-                  </button>
+                  <div className="flex flex-col items-start gap-1">
+                    <div className="flex items-center gap-2">
+                      <span className="bg-blue-600 px-1 rounded">
+                        {componentType === 'background' ? '🖼️' : componentType === 'foreground' ? '🎯' : '⚙️'}
+                      </span>
+                      <span>{componentId} | Z:{currentConfig.zIndex}</span>
+                      {needsOverflow && <span className="bg-purple-600 px-1 rounded" title="Overflow visível">📐</span>}
+                      
+                      <button
+                        onClick={saveToStrapi}
+                        disabled={isSaving}
+                        className="bg-green-600 px-2 py-1 rounded text-xs hover:bg-green-700 disabled:opacity-50"
+                        title="Salvar"
+                      >
+                        {isSaving ? '⏳' : '💾'}
+                      </button>
+                    </div>
+                    <div className="text-xs bg-blue-600 px-1 rounded text-white/90">
+                      ⌨️ Setas: move | Shift+Setas: rápido | Ctrl+Setas: médio
+                    </div>
+                  </div>
                 </div>
               </>
             )}

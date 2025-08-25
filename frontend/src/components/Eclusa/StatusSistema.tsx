@@ -54,13 +54,13 @@ export default function StatusSistema({ editMode = false }: StatusSistemaProps) 
   const getOperacaoIcon = (modo: string) => {
     switch (modo) {
       case 'Telecomando':
-        return <Radio className="w-3 h-3" />;
+        return <Radio className="w-2.5 h-2.5" />;
       case 'Local':
-        return <Settings className="w-3 h-3" />;
+        return <Settings className="w-2.5 h-2.5" />;
       case 'Desligado':
-        return <Power className="w-3 h-3" />;
+        return <Power className="w-2.5 h-2.5" />;
       default:
-        return <Activity className="w-3 h-3" />;
+        return <Activity className="w-2.5 h-2.5" />;
     }
   };
 
@@ -87,96 +87,95 @@ export default function StatusSistema({ editMode = false }: StatusSistemaProps) 
 
   return (
     <ResponsiveWrapper 
-      componentId="status-sistema"
+      componentId="status-sistema-movimento"
       editMode={editMode}
+      allowOverflow={true}
       defaultConfig={{
-        xs: { x: 400, y: 50, width: 260, height: 180, scale: 1, zIndex: 16, opacity: 1, rotation: 0 },
-        sm: { x: 480, y: 80, width: 280, height: 200, scale: 1, zIndex: 16, opacity: 1, rotation: 0 },
-        md: { x: 540, y: 100, width: 300, height: 220, scale: 1, zIndex: 16, opacity: 1, rotation: 0 },
-        lg: { x: 610, y: 120, width: 320, height: 240, scale: 1, zIndex: 16, opacity: 1, rotation: 0 },
-        xl: { x: 700, y: 150, width: 340, height: 260, scale: 1, zIndex: 16, opacity: 1, rotation: 0 },
-        '2xl': { x: 790, y: 180, width: 360, height: 280, scale: 1, zIndex: 16, opacity: 1, rotation: 0 },
-        '3xl': { x: 880, y: 200, width: 380, height: 300, scale: 1, zIndex: 16, opacity: 1, rotation: 0 },
-        '4xl': { x: 970, y: 220, width: 400, height: 320, scale: 1, zIndex: 16, opacity: 1, rotation: 0 }
+        xs: { x: 400, y: 50, width: 260, height: 220, scale: 1, zIndex: 16, opacity: 1, rotation: 0 },
+        sm: { x: 480, y: 80, width: 280, height: 240, scale: 1, zIndex: 16, opacity: 1, rotation: 0 },
+        md: { x: 540, y: 100, width: 300, height: 260, scale: 1, zIndex: 16, opacity: 1, rotation: 0 },
+        lg: { x: 610, y: 120, width: 320, height: 280, scale: 1, zIndex: 16, opacity: 1, rotation: 0 },
+        xl: { x: 700, y: 150, width: 340, height: 300, scale: 1, zIndex: 16, opacity: 1, rotation: 0 },
+        '2xl': { x: 790, y: 180, width: 360, height: 320, scale: 1, zIndex: 16, opacity: 1, rotation: 0 },
+        '3xl': { x: 880, y: 200, width: 380, height: 340, scale: 1, zIndex: 16, opacity: 1, rotation: 0 },
+        '4xl': { x: 970, y: 220, width: 400, height: 360, scale: 1, zIndex: 16, opacity: 1, rotation: 0 }
       }}
     >
       {/* CARD PADRONIZADO COM DETALHE VERDE MAIS DELICADO */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden h-full">
+      <div className="bg-white rounded-xl shadow-lg border border-gray-200 h-full w-full" style={{ overflow: 'visible' }}>
         <div className="h-3 bg-green-500 rounded-t-xl"></div>
         
-        <div className="p-4 h-full flex flex-col">
+        <div className="p-3 flex flex-col" style={{ height: 'calc(100% - 12px)', overflow: 'visible' }}>
           {/* Header */}
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <div className="w-6 h-6 bg-green-500 rounded-md flex items-center justify-center">
-                <Shield className="w-3 h-3 text-white" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-gray-900">Status do Sistema</h3>
-                <div className="flex items-center gap-2">
-                  <div className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                  <span className="text-xs text-gray-500">Monitoramento em tempo real</span>
-                </div>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-5 h-5 bg-green-500 rounded-md flex items-center justify-center">
+              <Shield className="w-2.5 h-2.5 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-bold text-gray-900">Status do Sistema</h3>
+              <div className="flex items-center gap-1">
+                <div className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <span className="text-xs text-gray-500">Tempo real</span>
               </div>
             </div>
           </div>
 
-          {/* Status Grid - Mais centralizado */}
-          <div className="flex-1 flex flex-col justify-center space-y-2">
+          {/* Status Grid - Altura calculada */}
+          <div className="space-y-1.5" style={{ height: 'calc(100% - 80px)' }}>
             
             {/* Comunicação */}
-            <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <Wifi className="w-3 h-3 text-gray-500" />
-                <span className="text-xs text-gray-600 uppercase tracking-wide">Comunicação</span>
+            <div className="flex items-center justify-between p-1.5 bg-gray-50 rounded text-xs">
+              <div className="flex items-center gap-1.5">
+                <Wifi className="w-2.5 h-2.5 text-gray-500" />
+                <span className="text-gray-600 uppercase tracking-wide font-medium">Comunicação</span>
               </div>
-              <span className={`text-sm font-semibold ${getStatusColor('comunicacao', sistemaDados.comunicacao)}`}>
+              <span className={`font-semibold ${getStatusColor('comunicacao', sistemaDados.comunicacao)}`}>
                 {sistemaDados.comunicacao}
               </span>
             </div>
 
             {/* Modo de Operação */}
-            <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between p-1.5 bg-gray-50 rounded text-xs">
+              <div className="flex items-center gap-1.5">
                 <div className={getStatusColor('operacao', sistemaDados.operacao)}>
                   {getOperacaoIcon(sistemaDados.operacao)}
                 </div>
-                <span className="text-xs text-gray-600 uppercase tracking-wide">Operação</span>
+                <span className="text-gray-600 uppercase tracking-wide font-medium">Operação</span>
               </div>
-              <span className={`text-sm font-semibold ${getStatusColor('operacao', sistemaDados.operacao)}`}>
+              <span className={`font-semibold ${getStatusColor('operacao', sistemaDados.operacao)}`}>
                 {sistemaDados.operacao}
               </span>
             </div>
 
             {/* Alarmes */}
-            <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <Bell className="w-3 h-3 text-gray-500" />
-                <span className="text-xs text-gray-600 uppercase tracking-wide">Alarmes</span>
+            <div className="flex items-center justify-between p-1.5 bg-gray-50 rounded text-xs">
+              <div className="flex items-center gap-1.5">
+                <Bell className="w-2.5 h-2.5 text-gray-500" />
+                <span className="text-gray-600 uppercase tracking-wide font-medium">Alarmes</span>
               </div>
-              <span className={`text-sm font-semibold ${getStatusColor('alarmes', sistemaDados.alarmes)}`}>
+              <span className={`font-semibold ${getStatusColor('alarmes', sistemaDados.alarmes)}`}>
                 {sistemaDados.alarmes === 0 ? 'OK' : `${sistemaDados.alarmes} ativo${sistemaDados.alarmes > 1 ? 's' : ''}`}
               </span>
             </div>
 
             {/* Emergência */}
-            <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <AlertOctagon className="w-3 h-3 text-gray-500" />
-                <span className="text-xs text-gray-600 uppercase tracking-wide">Emergência</span>
+            <div className="flex items-center justify-between p-1.5 bg-gray-50 rounded text-xs">
+              <div className="flex items-center gap-1.5">
+                <AlertOctagon className="w-2.5 h-2.5 text-gray-500" />
+                <span className="text-gray-600 uppercase tracking-wide font-medium">Emergência</span>
               </div>
-              <span className={`text-sm font-semibold ${getStatusColor('emergencia', sistemaDados.emergencia)}`}>
+              <span className={`font-semibold ${getStatusColor('emergencia', sistemaDados.emergencia)}`}>
                 {sistemaDados.emergencia ? 'ATIVO' : 'OK'}
               </span>
             </div>
 
             {/* Inundação */}
-            <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <Droplets className="w-3 h-3 text-gray-500" />
-                <span className="text-xs text-gray-600 uppercase tracking-wide">Inundação</span>
+            <div className="flex items-center justify-between p-1.5 bg-gray-50 rounded text-xs">
+              <div className="flex items-center gap-1.5">
+                <Droplets className="w-2.5 h-2.5 text-gray-500" />
+                <span className="text-gray-600 uppercase tracking-wide font-medium">Inundação</span>
               </div>
-              <span className={`text-sm font-semibold ${getStatusColor('inundacao', sistemaDados.inundacao)}`}>
+              <span className={`font-semibold ${getStatusColor('inundacao', sistemaDados.inundacao)}`}>
                 {sistemaDados.inundacao ? 'DETECTADA' : 'Normal'}
               </span>
             </div>
@@ -184,9 +183,9 @@ export default function StatusSistema({ editMode = false }: StatusSistemaProps) 
           </div>
 
           {/* Footer com timestamp */}
-          <div className="flex-shrink-0 mt-4 pt-3 border-t border-gray-200">
+          <div className="mt-2 pt-2 border-t border-gray-200">
             <div className="text-center text-xs text-gray-500">
-              Última atualização: {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+              {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
             </div>
           </div>
         </div>

@@ -19,11 +19,13 @@ func main() {
 	// Initialize database
 	database.Initialize()
 
-	// Initialize WebSocket Hub and Tag Cache
-	log.Printf("🚀 Inicializando sistema de tags...")
-	services.GetTagCache() // Inicializar cache
+	// Initialize WebSocket Hub
+	log.Printf("🚀 Inicializando sistema WebSocket...")
 	services.GetWebSocketHub() // Inicializar WebSocket hub
-	services.InitializeDefaultTags() // Carregar tags padrão
+	
+	// Initialize S7 PLC Connection
+	log.Printf("🔌 Inicializando conexão S7 PLC...")
+	services.GetS7PLCConnector() // Inicializar conexão S7 PLC
 
 	// Setup routes
 	r := routes.SetupRoutes()

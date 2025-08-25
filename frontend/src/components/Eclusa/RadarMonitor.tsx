@@ -26,7 +26,7 @@ export default function RadarMonitor({ editMode = false }: RadarMonitorProps) {
     radarMontanteVelocidadeValue,
     radarJusanteDistanciaValue,
     radarJusanteVelocidadeValue
-  } = useWebSocket('ws://localhost:8080/ws');
+  } = useWebSocket('ws://localhost:1337/ws');
   
   // Estado do radar selecionado
   const [selectedRadar, setSelectedRadar] = useState<RadarLocation>('caldeira');

@@ -12,7 +12,7 @@ export default function RadarEclusa({
 }: RadarEclusaProps) {
   const [distancia, setDistancia] = useState<number | null>(null);
   const [isDetecting, setIsDetecting] = useState(false);
-  const { radarDistanciaValue, isConnected } = useWebSocket('ws://localhost:8080/ws');
+  const { radarDistanciaValue, isConnected } = useWebSocket('ws://localhost:1337/ws');
 
   // Atualiza distância via WebSocket
   useEffect(() => {

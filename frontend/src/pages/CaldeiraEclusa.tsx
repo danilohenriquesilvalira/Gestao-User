@@ -87,10 +87,10 @@ function DashboardContent() {
     isConnected, 
     error, 
     lastMessage 
-  } = useWebSocket('ws://localhost:8080/ws');
+  } = useWebSocket('ws://localhost:1337/ws');
 
-  // ✅ CONDIÇÃO: Layout carregado E (WebSocket conectado OU modo edição)
-  const isFullyReady = isAllLoaded && (isConnected || editMode);
+  // ✅ CONDIÇÃO CORRIGIDA: Layout carregado (WebSocket é iniciado como conectado)
+  const isFullyReady = isAllLoaded;
 
   const handleLogout = () => {
     window.location.replace('/');
@@ -104,9 +104,8 @@ function DashboardContent() {
           title="Eclusa de Navegação"
           subtitle="Sistema de Gestão Industrial EDP"
           status={
-            !isAllLoaded ? 'Inicializando interface...' : 
-            !isConnected ? 'Conectando ao PLC...' : 
-            'Sincronizando dados do sistema...'
+            !isAllLoaded ? 'Carregando componentes...' : 
+            'Sistema pronto'
           }
           size="lg"
         />

@@ -28,7 +28,7 @@ export default function StatusSistema({ editMode = false }: StatusSistemaProps) 
     alarmesAtivoValue,
     emergenciaAtivaValue,
     inundacaoValue
-  } = useWebSocket('ws://localhost:8080/ws');
+  } = useWebSocket('ws://localhost:1337/ws');
   
   // ✅ DADOS REAIS DO PLC VIA WEBSOCKET
   const sistemaDados = {

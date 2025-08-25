@@ -79,7 +79,7 @@ function PortaMontanteContent() {
     isConnected, 
     error, 
     lastMessage 
-  } = useWebSocket('ws://localhost:8080/ws');
+  } = useWebSocket('ws://localhost:1337/ws');
 
   const handleLogout = () => {
     window.location.replace('/');
@@ -91,7 +91,7 @@ function PortaMontanteContent() {
         <EdpLoading
           title="Porta Montante"
           subtitle="Sistema de Controle Industrial EDP"
-          status="Inicializando componentes da porta montante..."
+          status="Carregando componentes..."
           size="lg"
         />
       )}

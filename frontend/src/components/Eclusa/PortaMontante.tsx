@@ -11,7 +11,7 @@ export default function PortaMontante({
   editMode = false
 }: PortaMontanteProps) {
   const [abertura, setAbertura] = useState<number | null>(null); // ✅ ESTADO INICIAL: null (não renderiza até ter dados)
-  const { eclusaPortaMontanteValue, portaMontanteValue, isConnected } = useWebSocket('ws://localhost:8080/ws');
+  const { eclusaPortaMontanteValue, portaMontanteValue, isConnected } = useWebSocket('ws://localhost:1337/ws');
 
   // Atualiza abertura via WebSocket - usando eclusaPortaMontanteValue (novo)
   useEffect(() => {

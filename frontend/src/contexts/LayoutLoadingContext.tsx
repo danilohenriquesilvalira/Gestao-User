@@ -16,12 +16,12 @@ export function LayoutLoadingProvider({ children }: { children: React.ReactNode 
   const [loadedComponents, setLoadedComponents] = useState<Set<string>>(new Set());
   const [isForceLoaded, setIsForceLoaded] = useState(false);
   
-  // Timeout de segurança - força carregamento após 1 segundo
+  // Timeout de segurança - força carregamento após 500ms para evitar loading infinito
   useEffect(() => {
     const timeout = setTimeout(() => {
-      console.log('⏰ TIMEOUT: Forçando carregamento após 1 segundo!');
+      console.log('⏰ TIMEOUT: Forçando carregamento após 500ms - evitando loading infinito!');
       setIsForceLoaded(true);
-    }, 1000);
+    }, 500);
     
     return () => clearTimeout(timeout);
   }, []);

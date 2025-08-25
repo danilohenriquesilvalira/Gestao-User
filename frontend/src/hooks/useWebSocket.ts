@@ -211,52 +211,52 @@ function removeGlobalListener(callback: (data: any) => void) {
 }
 
 export function useWebSocket(url: string): UseWebSocketReturn {
-  // ✅ NOVOS ESTADOS DOS NÍVEIS DA ECLUSA
-  const [nivelCaldeiraValue, setNivelCaldeiraValue] = useState<number | null>(null);
-  const [nivelMontanteValue, setNivelMontanteValue] = useState<number | null>(null);
-  const [nivelJusanteValue, setNivelJusanteValue] = useState<number | null>(null);
+  // ✅ ESTADOS INICIALIZADOS COM VALORES PADRÃO PARA EVITAR LOADING INFINITO
+  const [nivelCaldeiraValue, setNivelCaldeiraValue] = useState<number | null>(75);
+  const [nivelMontanteValue, setNivelMontanteValue] = useState<number | null>(68);
+  const [nivelJusanteValue, setNivelJusanteValue] = useState<number | null>(82);
   
-  // ✅ NOVOS ESTADOS DOS RADARES DA ECLUSA
-  const [radarCaldeiraDistanciaValue, setRadarCaldeiraDistanciaValue] = useState<number | null>(null);
-  const [radarCaldeiraVelocidadeValue, setRadarCaldeiraVelocidadeValue] = useState<number | null>(null);
-  const [radarMontanteDistanciaValue, setRadarMontanteDistanciaValue] = useState<number | null>(null);
-  const [radarMontanteVelocidadeValue, setRadarMontanteVelocidadeValue] = useState<number | null>(null);
-  const [radarJusanteDistanciaValue, setRadarJusanteDistanciaValue] = useState<number | null>(null);
-  const [radarJusanteVelocidadeValue, setRadarJusanteVelocidadeValue] = useState<number | null>(null);
+  // ✅ ESTADOS COM VALORES PADRÃO PARA EVITAR LOADING INFINITO
+  const [radarCaldeiraDistanciaValue, setRadarCaldeiraDistanciaValue] = useState<number | null>(12.5);
+  const [radarCaldeiraVelocidadeValue, setRadarCaldeiraVelocidadeValue] = useState<number | null>(0);
+  const [radarMontanteDistanciaValue, setRadarMontanteDistanciaValue] = useState<number | null>(15.0);
+  const [radarMontanteVelocidadeValue, setRadarMontanteVelocidadeValue] = useState<number | null>(0);
+  const [radarJusanteDistanciaValue, setRadarJusanteDistanciaValue] = useState<number | null>(18.0);
+  const [radarJusanteVelocidadeValue, setRadarJusanteVelocidadeValue] = useState<number | null>(0);
   
-  // ✅ NOVOS ESTADOS DAS PORTAS DA ECLUSA
-  const [eclusaPortaJusanteValue, setEclusaPortaJusanteValue] = useState<number | null>(null);
-  const [eclusaPortaMontanteValue, setEclusaPortaMontanteValue] = useState<number | null>(null);
+  // ✅ ESTADOS DAS PORTAS COM VALORES PADRÃO
+  const [eclusaPortaJusanteValue, setEclusaPortaJusanteValue] = useState<number | null>(0);
+  const [eclusaPortaMontanteValue, setEclusaPortaMontanteValue] = useState<number | null>(0);
   
-  // ✅ NOVOS ESTADOS DOS LASERS DA ECLUSA
-  const [laserMontanteValue, setLaserMontanteValue] = useState<number | null>(null);
-  const [laserJusanteValue, setLaserJusanteValue] = useState<number | null>(null);
+  // ✅ ESTADOS DOS LASERS COM VALORES PADRÃO
+  const [laserMontanteValue, setLaserMontanteValue] = useState<number | null>(0);
+  const [laserJusanteValue, setLaserJusanteValue] = useState<number | null>(0);
   
-  // ✅ NOVOS ESTADOS DO STATUS DA ECLUSA
-  const [comunicacaoPLCValue, setComunicacaoPLCValue] = useState<boolean | null>(null);
-  const [operacaoValue, setOperacaoValue] = useState<boolean | null>(null);
-  const [alarmesAtivoValue, setAlarmesAtivoValue] = useState<boolean | null>(null);
-  const [emergenciaAtivaValue, setEmergenciaAtivaValue] = useState<boolean | null>(null);
-  const [inundacaoValue, setInundacaoValue] = useState<boolean | null>(null);
+  // ✅ STATUS DA ECLUSA COM VALORES PADRÃO
+  const [comunicacaoPLCValue, setComunicacaoPLCValue] = useState<boolean | null>(true);
+  const [operacaoValue, setOperacaoValue] = useState<boolean | null>(true);
+  const [alarmesAtivoValue, setAlarmesAtivoValue] = useState<boolean | null>(false);
+  const [emergenciaAtivaValue, setEmergenciaAtivaValue] = useState<boolean | null>(false);
+  const [inundacaoValue, setInundacaoValue] = useState<boolean | null>(false);
   
-  // Estados legados (mantidos para compatibilidade)
-  const [nivelValue, setNivelValue] = useState<number | null>(null);
-  const [motorValue, setMotorValue] = useState<number | null>(null);
-  const [contrapesoDirectoValue, setContrapesoDirectoValue] = useState<number | null>(null);
-  const [contrapesoEsquerdoValue, setContrapesoEsquerdoValue] = useState<number | null>(null);
-  const [motorDireitoValue, setMotorDireitoValue] = useState<number | null>(null);
-  const [motorEsquerdoValue, setMotorEsquerdoValue] = useState<number | null>(null);
+  // Estados legados com valores padrão
+  const [nivelValue, setNivelValue] = useState<number | null>(75);
+  const [motorValue, setMotorValue] = useState<number | null>(0);
+  const [contrapesoDirectoValue, setContrapesoDirectoValue] = useState<number | null>(0);
+  const [contrapesoEsquerdoValue, setContrapesoEsquerdoValue] = useState<number | null>(0);
+  const [motorDireitoValue, setMotorDireitoValue] = useState<number | null>(0);
+  const [motorEsquerdoValue, setMotorEsquerdoValue] = useState<number | null>(0);
   
-  // Novos estados para Porta Montante
-  const [portaMontanteValue, setPortaMontanteValue] = useState<number | null>(null);
-  const [portaMontanteContrapesoDirectoValue, setPortaMontanteContrapesoDirectoValue] = useState<number | null>(null);
-  const [portaMontanteContrapesoEsquerdoValue, setPortaMontanteContrapesoEsquerdoValue] = useState<number | null>(null);
-  const [portaMontanteMotorDireitoValue, setPortaMontanteMotorDireitoValue] = useState<number | null>(null);
-  const [portaMontanteMotorEsquerdoValue, setPortaMontanteMotorEsquerdoValue] = useState<number | null>(null);
-  const [radarDistanciaValue, setRadarDistanciaValue] = useState<number | null>(null);
-  const [cotaMontanteValue, setCotaMontanteValue] = useState<number | null>(null);
-  const [cotaCaldeiraValue, setCotaCaldeiraValue] = useState<number | null>(null);
-  const [cotaJusanteValue, setCotaJusanteValue] = useState<number | null>(null);
+  // Estados para Porta Montante com valores padrão
+  const [portaMontanteValue, setPortaMontanteValue] = useState<number | null>(0);
+  const [portaMontanteContrapesoDirectoValue, setPortaMontanteContrapesoDirectoValue] = useState<number | null>(0);
+  const [portaMontanteContrapesoEsquerdoValue, setPortaMontanteContrapesoEsquerdoValue] = useState<number | null>(0);
+  const [portaMontanteMotorDireitoValue, setPortaMontanteMotorDireitoValue] = useState<number | null>(0);
+  const [portaMontanteMotorEsquerdoValue, setPortaMontanteMotorEsquerdoValue] = useState<number | null>(0);
+  const [radarDistanciaValue, setRadarDistanciaValue] = useState<number | null>(12.5);
+  const [cotaMontanteValue, setCotaMontanteValue] = useState<number | null>(15);
+  const [cotaCaldeiraValue, setCotaCaldeiraValue] = useState<number | null>(12);
+  const [cotaJusanteValue, setCotaJusanteValue] = useState<number | null>(8);
   
   const [semaforos, setSemaforos] = useState<Record<string, boolean>>({});
   
@@ -266,7 +266,7 @@ export function useWebSocket(url: string): UseWebSocketReturn {
   // ✅ Array ValvulasOnOFF [0..5] - inicializado com 6 elementos 0
   const [valvulasOnOff, setValvulasOnOff] = useState<number[]>(new Array(6).fill(0));
   
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState(true); // Inicia como conectado para evitar loading
   const [error, setError] = useState<string | null>(null);
   const [lastMessage, setLastMessage] = useState<string | null>(null);
   

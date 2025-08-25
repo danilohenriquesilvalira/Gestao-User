@@ -68,6 +68,7 @@ export default function ModernSidebar() {
           window.location.href = '/usuarios';
           break;
         case 'tags_admin':
+          console.log('🔥 NAVEGANDO PARA TAGS ADMIN!');
           window.location.href = '/tags-admin';
           break;
         default:

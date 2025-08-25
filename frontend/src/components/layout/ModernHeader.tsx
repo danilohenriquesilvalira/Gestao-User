@@ -6,10 +6,12 @@ import { useNavigate } from 'react-router-dom';
 
 interface ModernHeaderProps {
   title?: string;
+  onLogout?: () => void;
 }
 
 export default function ModernHeader({ 
-  title = "Dashboard"
+  title = "Dashboard",
+  onLogout
 }: ModernHeaderProps) {
   const { getUserInfo, logout } = useAuth();
   const navigate = useNavigate();
@@ -20,8 +22,12 @@ export default function ModernHeader({
   const userRole = userInfo?.role || 'Visitante';
 
   const handleLogout = () => {
-    logout();
-    navigate('/');
+    if (onLogout) {
+      onLogout();
+    } else {
+      logout();
+      navigate('/');
+    }
   };
 
   return (

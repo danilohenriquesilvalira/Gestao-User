@@ -11,7 +11,7 @@ export default function PortaJusante({
   editMode = false
 }: PortaJusanteProps) {
   const [abertura, setAbertura] = useState<number | null>(null); // ✅ ESTADO INICIAL: null (não renderiza até ter dados)
-  const { eclusaPortaJusanteValue, motorValue, isConnected } = useWebSocket('ws://localhost:8080/ws');
+  const { eclusaPortaJusanteValue, motorValue, isConnected } = useWebSocket('ws://localhost:1337/ws');
 
   // Atualiza abertura via WebSocket - usando eclusaPortaJusanteValue (novo)
   useEffect(() => {

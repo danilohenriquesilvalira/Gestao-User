@@ -274,7 +274,7 @@ const GraficoPuro = React.memo(({
 
 export default function GraficosCotas({ editMode = false }: GraficosCotasProps) {
   // ✅ SÓ PEGA OS 4 VALORES ESPECÍFICOS NECESSÁRIOS
-  const { nivelCaldeiraValue, nivelMontanteValue, nivelJusanteValue, isConnected } = useWebSocket('ws://localhost:8080/ws');
+  const { nivelCaldeiraValue, nivelMontanteValue, nivelJusanteValue, isConnected } = useWebSocket('ws://localhost:1337/ws');
 
   // ✅ USA O COMPONENTE ISOLADO COM React.memo
   return (

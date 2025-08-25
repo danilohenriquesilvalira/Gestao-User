@@ -72,32 +72,6 @@ func SetupRoutes() *gin.Engine {
 	api.PUT("/component-layouts/:id", componentLayoutController.UpdateComponentLayout)
 	api.DELETE("/component-layouts/:id", componentLayoutController.DeleteComponentLayout)
 
-	// Tag Management routes (Sistema de Tags em Tempo Real)
-	tagController := &controllers.TagController{}
-	tags := api.Group("/tags")
-	{
-		// Rotas públicas (leitura)
-		tags.GET("/", tagController.GetTags)
-		tags.GET("/:name", tagController.GetTag)
-		tags.GET("/stats", tagController.GetTagStats)
-		
-		// Rotas protegidas (administração)
-		protected := tags.Group("/", middleware.AuthMiddleware())
-		{
-			// Gerenciamento de tags - requer admin
-			protected.POST("/", middleware.RequireLevel(100), tagController.CreateTag)
-			protected.PUT("/:name", middleware.RequireLevel(100), tagController.UpdateTag)
-			protected.DELETE("/:name", middleware.RequireLevel(100), tagController.DeleteTag)
-			
-			// Atualização de valores - admin e gerente
-			protected.POST("/:name/value", middleware.RequireLevel(80), tagController.UpdateTagValue)
-			protected.POST("/bulk-update", middleware.RequireLevel(80), tagController.BulkUpdateValues)
-			
-			// Import/Export - apenas admin
-			protected.GET("/export", middleware.RequireLevel(100), tagController.ExportTags)
-			protected.POST("/import", middleware.RequireLevel(100), tagController.ImportTags)
-		}
-	}
 
 	// Authentication routes (Strapi compatible)
 	authController := &controllers.AuthController{}
@@ -130,10 +104,17 @@ func SetupRoutes() *gin.Engine {
 		}
 	}
 
-	// WebSocket route (porta 8080 compatível)
+	// WebSocket route
 	hub := services.GetWebSocketHub()
 	r.GET("/ws", func(c *gin.Context) {
 		hub.HandleWebSocket(c.Writer, c.Request)
+	})
+
+	// S7 PLC Status route
+	r.GET("/api/plc/status", func(c *gin.Context) {
+		s7plc := services.GetS7PLCConnector()
+		status := s7plc.GetStatus()
+		c.JSON(200, status)
 	})
 
 	return r

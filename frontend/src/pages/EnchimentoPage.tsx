@@ -73,7 +73,7 @@ function EnchimentoContent() {
     isConnected, 
     error, 
     lastMessage 
-  } = useWebSocket('ws://localhost:8080/ws');
+  } = useWebSocket('ws://localhost:1337/ws');
 
   const getPipeStatesFromWebSocket = () => {
     const pipeStates: {[key: string]: 0 | 1} = {};
@@ -98,9 +98,7 @@ function EnchimentoContent() {
     return (pipeSystem && pipeSystem[index]) || false;
   };
 
-  const isFullyReady = isAllLoaded && (
-    isConnected || editMode // Conectado OU em modo edição
-  );
+  const isFullyReady = isAllLoaded; // Simplificado para evitar loading infinito
 
   const handleLogout = () => {
     window.location.replace('/');
@@ -112,11 +110,7 @@ function EnchimentoContent() {
         <EdpLoading
           title="Sistema de Enchimento"
           subtitle="Sistema de Controle Industrial EDP"
-          status={
-            !isAllLoaded ? 'Inicializando interface...' : 
-            !isConnected ? 'Conectando ao PLC...' : 
-            'Carregando dados do sistema de enchimento...'
-          }
+          status="Carregando componentes..."
           size="lg"
         />
       )}

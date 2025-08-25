@@ -76,93 +76,206 @@ function UsuariosContent() {
           
           <main className="flex-1 overflow-hidden">
             <div className="w-full h-full pl-4 pr-4 py-4 md:pl-24">
-              <div className="w-full h-full rounded-2xl bg-white shadow-lg p-8">
-                
-                {/* HEADER DO PERFIL */}
-                <div className="mb-8 text-center">
-                  <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-2xl text-white font-bold">
-                      {userInfo?.name?.charAt(0)?.toUpperCase() || '?'}
-                    </span>
-                  </div>
-                  <h1 className="text-3xl font-bold text-gray-900">{userInfo?.name || 'Usuário'}</h1>
-                  <p className="text-lg text-gray-600 mt-2 capitalize">{userInfo?.role || 'Função não definida'}</p>
-                </div>
-
-                {/* INFORMAÇÕES DO PERFIL */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                  <div className="bg-gray-50 p-6 rounded-xl">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">📧 Informações de Contato</h3>
-                    <div className="space-y-2">
-                      <p><span className="font-medium">Nome:</span> {userInfo?.name || 'N/A'}</p>
-                      <p><span className="font-medium">Email:</span> {currentUser?.email || 'N/A'}</p>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-50 p-6 rounded-xl">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">🛡️ Informações do Sistema</h3>
-                    <div className="space-y-2">
-                      <p><span className="font-medium">Função:</span> {userInfo?.role || 'N/A'}</p>
-                      <p><span className="font-medium">Status:</span> <span className="text-green-600">✅ Ativo</span></p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* SEÇÃO DE PERMISSÕES */}
-                <div className="bg-blue-50 p-6 rounded-xl">
-                  <h3 className="text-lg font-semibold text-blue-900 mb-4">🔑 Suas Permissões</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {currentUser?.role?.name === 'tecnico' && (
-                      <>
-                        <div className="flex items-center gap-2 text-blue-800">
-                          <span>🔧</span> Manutenção Completa
-                        </div>
-                        <div className="flex items-center gap-2 text-blue-800">
-                          <span>🔍</span> Diagnósticos
-                        </div>
-                        <div className="flex items-center gap-2 text-blue-800">
-                          <span>⚙️</span> Debug do Sistema
-                        </div>
-                        <div className="flex items-center gap-2 text-blue-800">
-                          <span>🚢</span> Manutenção de Eclusa
-                        </div>
-                      </>
-                    )}
+              <div className="w-full h-full border-2 border-dashed border-gray-300 rounded-2xl bg-gray-50/50 p-3 lg:p-4">
+                <div className="w-full h-full bg-white rounded-xl shadow-sm overflow-hidden">
+                  <div className="p-4 sm:p-6 lg:p-8">
                     
-                    {currentUser?.role?.name === 'operador' && (
-                      <>
-                        <div className="flex items-center gap-2 text-blue-800">
-                          <span>🎮</span> Operação de Eclusa
-                        </div>
-                        <div className="flex items-center gap-2 text-blue-800">
-                          <span>📊</span> Relatórios Básicos
-                        </div>
-                        <div className="flex items-center gap-2 text-blue-800">
-                          <span>📡</span> Monitoramento
-                        </div>
-                      </>
-                    )}
+                    {/* HEADER DO PERFIL */}
+                    <div className="mb-6 sm:mb-8 text-center">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <span className="text-xl sm:text-2xl text-white font-bold">
+                          {userInfo?.name?.charAt(0)?.toUpperCase() || '?'}
+                        </span>
+                      </div>
+                      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{userInfo?.name || 'Usuário'}</h1>
+                      <p className="text-base sm:text-lg text-gray-600 mt-2 capitalize">{userInfo?.role || 'Função não definida'}</p>
+                    </div>
 
-                    {currentUser?.role?.name === 'visitante' && (
-                      <>
-                        <div className="flex items-center gap-2 text-blue-800">
-                          <span>👁️</span> Visualização do Dashboard
+                    {/* INFORMAÇÕES DO PERFIL */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                      {/* Card de Informações Pessoais */}
+                      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-200">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                            <span className="text-white font-bold text-sm">👤</span>
+                          </div>
+                          <h3 className="text-lg font-semibold text-gray-900">Informações Pessoais</h3>
                         </div>
-                        <div className="flex items-center gap-2 text-blue-800">
-                          <span>📊</span> Relatórios Básicos
+                        <div className="space-y-3">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                            <span className="font-medium text-gray-700 min-w-0 sm:min-w-[80px]">Nome:</span>
+                            <span className="text-gray-900 font-medium break-all">{userInfo?.name || 'N/A'}</span>
+                          </div>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                            <span className="font-medium text-gray-700 min-w-0 sm:min-w-[80px]">Email:</span>
+                            <span className="text-gray-900 font-medium break-all">{currentUser?.email || 'N/A'}</span>
+                          </div>
                         </div>
-                      </>
-                    )}
+                      </div>
+
+                      {/* Card de Informações do Sistema */}
+                      <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-200">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                            <span className="text-white font-bold text-sm">🛡️</span>
+                          </div>
+                          <h3 className="text-lg font-semibold text-gray-900">Sistema</h3>
+                        </div>
+                        <div className="space-y-3">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                            <span className="font-medium text-gray-700 min-w-0 sm:min-w-[80px]">Função:</span>
+                            <span className="text-gray-900 font-medium">{userInfo?.role || 'N/A'}</span>
+                          </div>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                            <span className="font-medium text-gray-700 min-w-0 sm:min-w-[80px]">Status:</span>
+                            <span className="inline-flex items-center gap-1 text-green-600 font-medium">
+                              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                              Ativo
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* SEÇÃO DE PERMISSÕES */}
+                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-200">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">🔑</span>
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900">Suas Permissões</h3>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {currentUser?.role?.name === 'tecnico' && (
+                          <>
+                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
+                              <span className="text-xl">🔧</span>
+                              <span className="text-gray-800 font-medium">Manutenção Completa</span>
+                            </div>
+                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
+                              <span className="text-xl">🔍</span>
+                              <span className="text-gray-800 font-medium">Diagnósticos</span>
+                            </div>
+                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
+                              <span className="text-xl">⚙️</span>
+                              <span className="text-gray-800 font-medium">Debug do Sistema</span>
+                            </div>
+                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
+                              <span className="text-xl">🚢</span>
+                              <span className="text-gray-800 font-medium">Manutenção de Eclusa</span>
+                            </div>
+                          </>
+                        )}
+                        
+                        {currentUser?.role?.name === 'operador' && (
+                          <>
+                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
+                              <span className="text-xl">🎮</span>
+                              <span className="text-gray-800 font-medium">Operação de Eclusa</span>
+                            </div>
+                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
+                              <span className="text-xl">📊</span>
+                              <span className="text-gray-800 font-medium">Relatórios Básicos</span>
+                            </div>
+                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
+                              <span className="text-xl">📡</span>
+                              <span className="text-gray-800 font-medium">Monitoramento</span>
+                            </div>
+                          </>
+                        )}
+
+                        {currentUser?.role?.name === 'visitante' && (
+                          <>
+                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
+                              <span className="text-xl">👁️</span>
+                              <span className="text-gray-800 font-medium">Visualização do Dashboard</span>
+                            </div>
+                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
+                              <span className="text-xl">📊</span>
+                              <span className="text-gray-800 font-medium">Relatórios Básicos</span>
+                            </div>
+                          </>
+                        )}
+
+                        {currentUser?.role?.name === 'supervisor' && (
+                          <>
+                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
+                              <span className="text-xl">👥</span>
+                              <span className="text-gray-800 font-medium">Visualizar Usuários</span>
+                            </div>
+                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
+                              <span className="text-xl">📊</span>
+                              <span className="text-gray-800 font-medium">Relatórios</span>
+                            </div>
+                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
+                              <span className="text-xl">🎮</span>
+                              <span className="text-gray-800 font-medium">Controle de Eclusa</span>
+                            </div>
+                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
+                              <span className="text-xl">📅</span>
+                              <span className="text-gray-800 font-medium">Agendamento</span>
+                            </div>
+                          </>
+                        )}
+
+                        {currentUser?.role?.name === 'gerente' && (
+                          <>
+                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
+                              <span className="text-xl">👥</span>
+                              <span className="text-gray-800 font-medium">Gerenciar Usuários</span>
+                            </div>
+                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
+                              <span className="text-xl">📊</span>
+                              <span className="text-gray-800 font-medium">Todos os Relatórios</span>
+                            </div>
+                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
+                              <span className="text-xl">📡</span>
+                              <span className="text-gray-800 font-medium">Monitoramento</span>
+                            </div>
+                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
+                              <span className="text-xl">🎮</span>
+                              <span className="text-gray-800 font-medium">Controle de Eclusa</span>
+                            </div>
+                          </>
+                        )}
+
+                        {currentUser?.role?.name === 'admin' && (
+                          <>
+                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
+                              <span className="text-xl">👑</span>
+                              <span className="text-gray-800 font-medium">Acesso Total</span>
+                            </div>
+                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
+                              <span className="text-xl">👥</span>
+                              <span className="text-gray-800 font-medium">Gerenciar Usuários</span>
+                            </div>
+                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
+                              <span className="text-xl">⚙️</span>
+                              <span className="text-gray-800 font-medium">Configurações</span>
+                            </div>
+                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
+                              <span className="text-xl">🔧</span>
+                              <span className="text-gray-800 font-medium">Todas as Funções</span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* INFORMAÇÕES ADICIONAIS */}
+                    <div className="mt-6 sm:mt-8 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                      <div className="text-center">
+                        <div className="w-8 h-8 bg-gray-400 rounded-lg flex items-center justify-center mx-auto mb-2">
+                          <span className="text-white font-bold text-sm">ℹ️</span>
+                        </div>
+                        <p className="text-sm text-gray-600 font-medium">
+                          Para alterações em seu perfil, entre em contato com o administrador do sistema.
+                        </p>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
-
-                {/* INFORMAÇÕES ADICIONAIS */}
-                <div className="mt-8 text-center">
-                  <p className="text-sm text-gray-500">
-                    Para alterações em seu perfil, entre em contato com o administrador do sistema.
-                  </p>
-                </div>
-
               </div>
             </div>
           </main>

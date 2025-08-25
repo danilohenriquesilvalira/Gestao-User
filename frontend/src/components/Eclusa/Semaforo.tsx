@@ -11,7 +11,7 @@ const Semaforo: React.FC<SemaforoProps> = ({
   editMode = false,
   componentId = "semaforo"
 }) => {
-  const { semaforos } = useWebSocket('ws://localhost:8080/ws');
+  const { semaforos } = useWebSocket('ws://localhost:1337/ws');
   
   // ✅ CORRIGIDO: Extrai o número correto do semáforo
   let semaforoNumber = '0'; // padrão

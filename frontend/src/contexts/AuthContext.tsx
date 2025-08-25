@@ -26,6 +26,8 @@ interface AuthContextType {
   logout: () => void;
   hasPermission: (permission: string) => boolean;
   isAdmin: () => boolean;
+  isGerente: () => boolean;
+  isSupervisor: () => boolean;
   canEditLayout: () => boolean; // Só admin pode ativar modo de edição
   getUserInfo: () => { name: string; role: string } | null;
 }

@@ -72,7 +72,7 @@ func GetWebSocketHub() *WebSocketHub {
 			register:          make(chan *WebSocketClient, 100),
 			unregister:        make(chan *WebSocketClient, 100),
 			broadcastInterval: 50 * time.Millisecond,  // 20 FPS otimizado
-			pingInterval:      30 * time.Second,
+			pingInterval:      120 * time.Second, // 2 minutos - menos agressivo
 			messageBuffer:     256,
 			maxClients:        100,
 		}
@@ -80,8 +80,7 @@ func GetWebSocketHub() *WebSocketHub {
 		// Iniciar hub em goroutine
 		go globalHub.run()
 		
-		// Iniciar broadcast automático
-		go globalHub.autoBroadcast()
+		// Nota: broadcast é feito pelo S7PLCConnector
 		
 		// Iniciar ping automático
 		go globalHub.autoPing()
@@ -132,19 +131,16 @@ func (h *WebSocketHub) run() {
 		case client := <-h.register:
 			h.mutex.Lock()
 			h.clients[client] = true
+			clientCount := len(h.clients)
 			h.mutex.Unlock()
 			
-			// Enviar dados atuais imediatamente
-			if h.lastMessage != nil {
-				select {
-				case client.send <- h.lastMessage:
-				default:
-					close(client.send)
-					delete(h.clients, client)
-				}
-			}
+			// Enviar dados atuais do S7 PLC para o novo cliente
+			go func() {
+				s7Connector := GetS7PLCConnector()
+				s7Connector.SendCurrentValues(client.send)
+			}()
 			
-			log.Printf("✅ Cliente registrado. Total: %d", len(h.clients))
+			log.Printf("✅ Cliente registrado. Total: %d", clientCount)
 			
 		case client := <-h.unregister:
 			h.mutex.Lock()
@@ -157,6 +153,7 @@ func (h *WebSocketHub) run() {
 			log.Printf("❌ Cliente desconectado. Total: %d", len(h.clients))
 			
 		case message := <-h.broadcast:
+			log.Printf("📨 HUB: Recebido broadcast com %d bytes", len(message))
 			h.broadcastMessage(message)
 		}
 	}
@@ -171,6 +168,8 @@ func (h *WebSocketHub) broadcastMessage(message []byte) {
 	}
 	h.mutex.RUnlock()
 	
+	log.Printf("📤 HUB: Enviando para %d clientes conectados", len(clients))
+	
 	// Broadcast paralelo para melhor performance
 	var wg sync.WaitGroup
 	for _, client := range clients {
@@ -180,9 +179,10 @@ func (h *WebSocketHub) broadcastMessage(message []byte) {
 			
 			select {
 			case c.send <- message:
-				// Sucesso
+				log.Printf("✅ HUB: Mensagem enviada para cliente %s", c.remoteAddr)
 			default:
 				// Canal cheio, remover cliente
+				log.Printf("❌ HUB: Canal cheio para cliente %s, removendo", c.remoteAddr)
 				h.mutex.Lock()
 				if _, ok := h.clients[c]; ok {
 					delete(h.clients, c)
@@ -194,68 +194,9 @@ func (h *WebSocketHub) broadcastMessage(message []byte) {
 	}
 	
 	wg.Wait()
+	log.Printf("📤 HUB: Broadcast concluído")
 }
 
-// autoBroadcast envia dados dos tags automaticamente
-func (h *WebSocketHub) autoBroadcast() {
-	ticker := time.NewTicker(h.broadcastInterval)
-	defer ticker.Stop()
-	
-	for range ticker.C {
-		if len(h.clients) == 0 {
-			continue // Sem clientes, não fazer broadcast
-		}
-		
-		// Obter dados atuais do cache
-		cache := GetTagCache()
-		tags := cache.GetAllTags()
-		
-		if len(tags) == 0 {
-			continue
-		}
-		
-		// Criar mensagem WebSocket
-		message := models.WebSocketMessage{
-			Type:      "tag_update",
-			Timestamp: time.Now(),
-			Data:      make(map[string]interface{}),
-		}
-		
-		// Converter tags para formato WebSocket
-		for name, tag := range tags {
-			if tag.IsActive {
-				message.Data[name] = map[string]interface{}{
-					"value":       tag.Value,
-					"type":        tag.Type,
-					"unit":        tag.Unit,
-					"description": tag.Description,
-					"updated_at":  tag.UpdatedAt,
-				}
-			}
-		}
-		
-		// Serializar mensagem
-		data, err := json.Marshal(message)
-		if err != nil {
-			log.Printf("❌ Erro ao serializar mensagem WebSocket: %v", err)
-			continue
-		}
-		
-		// Otimização: só fazer broadcast se dados mudaram
-		if string(data) != string(h.lastMessage) {
-			h.lastMessage = data
-			h.lastUpdate = time.Now()
-			
-			// Enviar para canal de broadcast
-			select {
-			case h.broadcast <- data:
-				// Sucesso
-			default:
-				log.Printf("⚠️ Canal de broadcast cheio, pulando mensagem")
-			}
-		}
-	}
-}
 
 // autoPing envia ping para manter conexões vivas
 func (h *WebSocketHub) autoPing() {
@@ -271,8 +212,8 @@ func (h *WebSocketHub) autoPing() {
 		h.mutex.RUnlock()
 		
 		for _, client := range clients {
-			// Verificar se cliente respondeu ao último ping
-			if time.Since(client.lastPong) > h.pingInterval*2 {
+			// Verificar se cliente respondeu ao último ping (timeout mais generoso)
+			if time.Since(client.lastPong) > h.pingInterval*3 { // 6 minutos de timeout
 				log.Printf("⚠️ Cliente sem resposta, removendo: %s", client.remoteAddr)
 				h.unregister <- client
 				continue
@@ -337,8 +278,8 @@ func (c *WebSocketClient) readPump() {
 		c.conn.Close()
 	}()
 	
-	// Configurações de timeout
-	c.conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+	// Configurações de timeout mais permissivas
+	c.conn.SetReadDeadline(time.Now().Add(300 * time.Second)) // 5 minutos
 	
 	for {
 		_, message, err := c.conn.ReadMessage()
@@ -353,7 +294,7 @@ func (c *WebSocketClient) readPump() {
 		log.Printf("📨 Mensagem recebida: %s", string(message))
 		
 		// Resetar timeout
-		c.conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+		c.conn.SetReadDeadline(time.Now().Add(300 * time.Second))
 	}
 }
 

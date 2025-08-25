@@ -26,7 +26,7 @@ export const AssistenteVirtual: React.FC = () => {
     semaforos,
     isConnected,
     error
-  } = useWebSocket('ws://localhost:8080/ws');
+  } = useWebSocket('ws://localhost:1337/ws');
 
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([

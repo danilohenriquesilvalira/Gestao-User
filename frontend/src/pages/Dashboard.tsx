@@ -19,7 +19,7 @@ export default function Dashboard() {
 }
 
 function DashboardContent() {
-  const { isConnected, error } = useWebSocket('ws://localhost:8080/ws');
+  const { isConnected, error } = useWebSocket('ws://localhost:1337/ws');
 
   const handleLogout = () => {
     window.location.replace('/');

@@ -67,7 +67,7 @@ function PortaJusanteContent() {
   const [editMode, setEditMode] = useState(false);
   const { canEditLayout } = useAuth();
   const { isAllLoaded } = useLayoutLoading();
-  const { nivelValue, motorValue, contrapesoDirectoValue, contrapesoEsquerdoValue, motorDireitoValue, motorEsquerdoValue, isConnected, error, lastMessage } = useWebSocket('ws://localhost:8080/ws');
+  const { nivelValue, motorValue, contrapesoDirectoValue, contrapesoEsquerdoValue, motorDireitoValue, motorEsquerdoValue, isConnected, error, lastMessage } = useWebSocket('ws://localhost:1337/ws');
 
   const handleLogout = () => {
     window.location.replace('/');
@@ -79,7 +79,7 @@ function PortaJusanteContent() {
         <EdpLoading
           title="Porta Jusante"
           subtitle="Sistema de Controle Industrial EDP"
-          status="Inicializando componentes da porta jusante..."
+          status="Carregando componentes..."
           size="lg"
         />
       )}

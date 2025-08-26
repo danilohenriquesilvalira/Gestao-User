@@ -47,11 +47,31 @@ interface PLCStatus {
   flooding: boolean;
 }
 
-export default function TagsMonitor() {
+interface TagsMonitorProps {
+  onFilterChange?: (category: string) => void;
+}
+
+export default function TagsMonitor({ onFilterChange }: TagsMonitorProps) {
   const webSocketData = useWebSocket('ws://localhost:1337/ws');
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [showOnlyActive, setShowOnlyActive] = useState(false);
+  
+  // PAGINAÇÃO DINÂMICA baseada na altura da tela
+  const [currentPage, setCurrentPage] = useState(1);
+  
+  // Calcular tags por página baseado no tamanho da tela
+  const getTagsPerPage = () => {
+    if (typeof window !== 'undefined') {
+      const height = window.innerHeight;
+      if (height >= 1080) return 20; // Telas grandes
+      if (height >= 800) return 15;  // Telas médias
+      return 10; // Telas pequenas
+    }
+    return 10;
+  };
+  
+  const [tagsPerPage] = useState(getTagsPerPage());
   
   // Estado dos dados das tags organizados
   const [tagsData, setTagsData] = useState<TagData[]>([]);
@@ -367,6 +387,11 @@ export default function TagsMonitor() {
 
   }, [webSocketData]);
 
+  // Notificar mudança de filtro inicial
+  React.useEffect(() => {
+    onFilterChange?.('all');
+  }, [onFilterChange]);
+
   // Filtrar tags
   const filteredTags = tagsData.filter(tag => {
     const matchesCategory = filterCategory === 'all' || tag.category === filterCategory;
@@ -376,6 +401,17 @@ export default function TagsMonitor() {
     
     return matchesCategory && matchesSearch && matchesActive;
   });
+  
+  // PAGINAÇÃO
+  const totalPages = Math.ceil(filteredTags.length / tagsPerPage);
+  const startIndex = (currentPage - 1) * tagsPerPage;
+  const endIndex = startIndex + tagsPerPage;
+  const paginatedTags = filteredTags.slice(startIndex, endIndex);
+  
+  // Reset page quando filtros mudam
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [filterCategory, searchTerm, showOnlyActive]);
 
   // Obter categorias únicas
   const categories = ['all', ...Array.from(new Set(tagsData.map(tag => tag.category)))];
@@ -417,224 +453,157 @@ export default function TagsMonitor() {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header com Status do PLC */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 mb-4">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-              <Database className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Monitor de Tags PLC</h1>
-              <p className="text-gray-600">Dados em tempo real via WebSocket</p>
-            </div>
-          </div>
+    <div className="w-full h-full flex flex-col overflow-hidden">
+      
+      {/* HEADER MINIMALISTA */}
+      <div className="flex-shrink-0 bg-white border-b border-gray-100" style={{ height: '60px' }}>
+        <div className="h-full px-4 py-2 flex items-center justify-between">
           
-          {/* Status Connection */}
-          <div className="flex items-center gap-2">
-            {plcStatus.connected ? (
-              <div className="flex items-center gap-2 bg-green-50 px-3 py-2 rounded-lg">
-                <Wifi className="w-5 h-5 text-green-500" />
-                <span className="text-green-700 font-medium">Conectado</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 bg-red-50 px-3 py-2 rounded-lg">
-                <WifiOff className="w-5 h-5 text-red-500" />
-                <span className="text-red-700 font-medium">Desconectado</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* ✅ MÉTRICAS PROFISSIONAIS DE DIAGNÓSTICO DO WEBSOCKET */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {/* Qualidade da Conexão */}
-          <div className={`p-4 rounded-xl border ${
-            webSocketDiagnostics.connectionQuality === 'good' ? 'bg-gradient-to-br from-green-50 to-green-100 border-green-200' :
-            webSocketDiagnostics.connectionQuality === 'fair' ? 'bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200' :
-            'bg-gradient-to-br from-red-50 to-red-100 border-red-200'
-          }`}>
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <Activity className={`w-5 h-5 ${
-                  webSocketDiagnostics.connectionQuality === 'good' ? 'text-green-600' :
-                  webSocketDiagnostics.connectionQuality === 'fair' ? 'text-yellow-600' : 'text-red-600'
-                }`} />
-                <span className={`font-semibold ${
-                  webSocketDiagnostics.connectionQuality === 'good' ? 'text-green-900' :
-                  webSocketDiagnostics.connectionQuality === 'fair' ? 'text-yellow-900' : 'text-red-900'
-                }`}>Qualidade</span>
-              </div>
-              <span className={`text-lg font-bold ${
-                webSocketDiagnostics.connectionQuality === 'good' ? 'text-green-600' :
-                webSocketDiagnostics.connectionQuality === 'fair' ? 'text-yellow-600' : 'text-red-600'
-              }`}>
-                {webSocketDiagnostics.connectionQuality === 'good' ? 'Ótima' :
-                 webSocketDiagnostics.connectionQuality === 'fair' ? 'Regular' : 'Ruim'}
-              </span>
+          {/* FILTROS COMPACTOS */}
+          <div className="flex items-center gap-3">
+            
+            {/* Campo de Busca */}
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar tags..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-40 pl-9 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:bg-white focus:border-blue-300 text-sm transition-colors"
+              />
             </div>
-            <div className={`text-sm ${
-              webSocketDiagnostics.connectionQuality === 'good' ? 'text-green-700' :
-              webSocketDiagnostics.connectionQuality === 'fair' ? 'text-yellow-700' : 'text-red-700'
-            }`}>
-              Conexão WebSocket
-            </div>
-          </div>
 
-          {/* Latência Real */}
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <Zap className="w-5 h-5 text-blue-600" />
-                <span className="font-semibold text-blue-900">Latência</span>
-              </div>
-              <span className="text-lg font-bold text-blue-600">
-                {webSocketDiagnostics.latency}ms
-              </span>
-            </div>
-            <div className="text-sm text-blue-700">Tempo de Resposta</div>
-          </div>
-
-          {/* Tags Ativas vs Total */}
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-purple-600" />
-                <span className="font-semibold text-purple-900">Tags</span>
-              </div>
-              <span className="text-lg font-bold text-purple-600">
-                {webSocketDiagnostics.activeTags}/{webSocketDiagnostics.totalTags}
-              </span>
-            </div>
-            <div className="text-sm text-purple-700">Ativas/Total</div>
-          </div>
-
-          {/* Frescor dos Dados */}
-          <div className={`p-4 rounded-xl border ${
-            webSocketDiagnostics.dataFreshness === 'real-time' ? 'bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200' :
-            webSocketDiagnostics.dataFreshness === 'delayed' ? 'bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200' :
-            'bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200'
-          }`}>
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <Clock className={`w-5 h-5 ${
-                  webSocketDiagnostics.dataFreshness === 'real-time' ? 'text-emerald-600' :
-                  webSocketDiagnostics.dataFreshness === 'delayed' ? 'text-orange-600' : 'text-gray-600'
-                }`} />
-                <span className={`font-semibold ${
-                  webSocketDiagnostics.dataFreshness === 'real-time' ? 'text-emerald-900' :
-                  webSocketDiagnostics.dataFreshness === 'delayed' ? 'text-orange-900' : 'text-gray-900'
-                }`}>Dados</span>
-              </div>
-              <span className={`text-sm font-bold ${
-                webSocketDiagnostics.dataFreshness === 'real-time' ? 'text-emerald-600' :
-                webSocketDiagnostics.dataFreshness === 'delayed' ? 'text-orange-600' : 'text-gray-600'
-              }`}>
-                {webSocketDiagnostics.dataFreshness === 'real-time' ? 'Tempo Real' :
-                 webSocketDiagnostics.dataFreshness === 'delayed' ? 'Atrasados' : 'Desatualizados'}
-              </span>
-            </div>
-            <div className={`text-sm ${
-              webSocketDiagnostics.dataFreshness === 'real-time' ? 'text-emerald-700' :
-              webSocketDiagnostics.dataFreshness === 'delayed' ? 'text-orange-700' : 'text-gray-700'
-            }`}>
-              Status dos Dados
-            </div>
-          </div>
-        </div>
-
-        {/* Filtros */}
-        <div className="flex flex-col lg:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Buscar por nome ou descrição..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          <div className="flex items-center gap-4">
+            {/* Select Categoria */}
             <select
               value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-              className="bg-white border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[150px]"
+              onChange={(e) => {
+                const newCategory = e.target.value;
+                setFilterCategory(newCategory);
+                onFilterChange?.(newCategory);
+              }}
+              className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:bg-white focus:border-blue-300 text-sm min-w-[90px]"
             >
               {categories.map(category => (
                 <option key={category} value={category}>
-                  {category === 'all' ? 'Todas as Categorias' : category}
+                  {category === 'all' ? 'Todas' : category}
                 </option>
               ))}
             </select>
 
+            {/* Botão Apenas Ativos */}
             <button
               onClick={() => setShowOnlyActive(!showOnlyActive)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
+              className={`px-2 py-1.5 rounded-lg text-sm transition-colors ${
                 showOnlyActive 
-                  ? 'bg-blue-50 border-blue-200 text-blue-700' 
-                  : 'bg-gray-50 border-gray-300 text-gray-700'
+                  ? 'bg-blue-100 text-blue-700' 
+                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
               }`}
+              title={showOnlyActive ? 'Mostrar todas' : 'Apenas ativas'}
             >
-              {showOnlyActive ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-              <span className="text-sm font-medium">Apenas Ativos</span>
+              <Eye className="w-4 h-4" />
             </button>
+          </div>
+          
+          {/* STATUS E MÉTRICAS NO FINAL */}
+          <div className="flex items-center gap-4 text-sm text-gray-500">
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${plcStatus.connected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+              <span>{plcStatus.connected ? 'Online' : 'Offline'}</span>
+            </div>
+            <span className="hidden sm:inline">{webSocketDiagnostics.activeTags}/{webSocketDiagnostics.totalTags}</span>
+            <span className="hidden sm:inline">{webSocketDiagnostics.latency}ms</span>
           </div>
         </div>
       </div>
 
-      {/* Lista de Tags */}
-      <div className="flex-1 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-        <div className="p-4 border-b border-gray-200 bg-gray-50">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <Activity className="w-5 h-5 text-blue-500" />
-              Tags em Tempo Real
-            </h2>
-            <div className="text-sm text-gray-500">
-              {filteredTags.length} de {tagsData.length} tags
-            </div>
+      {/* CONTEÚDO PRINCIPAL */}
+      <div className="flex-1 flex flex-col overflow-hidden" style={{ height: 'calc(100% - 60px)' }}>
+        {paginatedTags.length === 0 ? (
+          <div className="flex flex-col items-center justify-center flex-1 text-gray-400">
+            <Database className="w-12 h-12 text-gray-300 mb-3" />
+            <p className="text-sm text-gray-500">Nenhuma tag encontrada</p>
           </div>
-        </div>
-
-        <div className="overflow-auto h-full">
-          {filteredTags.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-              <Database className="w-16 h-16 text-gray-300 mb-4" />
-              <p className="text-lg font-medium">Nenhuma tag encontrada</p>
-              <p className="text-sm">Tente ajustar os filtros</p>
-            </div>
-          ) : (
-            <div className="p-4">
-              <div className="overflow-x-auto">
+        ) : (
+          <>
+            {/* LISTA RESPONSIVA */}
+            <div className="flex-1 overflow-auto" style={{ height: 'calc(100% - 40px)' }}>
+              
+              {/* MOBILE - Lista Limpa */}
+              <div className="block lg:hidden p-3 space-y-2">
+                {paginatedTags.map((tag, index) => (
+                  <div key={index} className="bg-white border border-gray-100 rounded-lg p-3 hover:border-gray-200 transition-colors">
+                    <div className="flex items-center justify-between">
+                      
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className={`w-2 h-2 rounded-full ${
+                          tag.status === 'active' ? 'bg-green-500' : 
+                          tag.status === 'error' ? 'bg-red-500' : 'bg-gray-300'
+                        }`}></div>
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="font-mono text-sm text-gray-900 truncate mb-1">
+                            {tag.name}
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-gray-500">
+                            {getCategoryIcon(tag.category)}
+                            <span>{tag.category}</span>
+                            <span className="bg-gray-100 px-1.5 py-0.5 rounded text-xs font-mono">
+                              {tag.type}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="text-right">
+                        <div className={`text-sm font-mono font-semibold ${
+                          tag.type === 'bool' ? 
+                            (tag.value ? 'text-green-600' : 'text-gray-500') : 
+                            'text-blue-600'
+                        }`}>
+                          {formatValue(tag.value, tag.type)}
+                        </div>
+                        <div className="text-xs text-gray-400 mt-1">
+                          {tag.lastUpdate.toLocaleTimeString()}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {/* DESKTOP - Tabela Profissional */}
+              <div className="hidden lg:block h-full">
                 <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">Status</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">Tag</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">Valor</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">Tipo</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">Categoria</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">Descrição</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">Atualizada</th>
+                  <thead>
+                    <tr className="border-b border-gray-100">
+                      <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                      <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                      <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                      <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
+                      <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Atualizado</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {filteredTags.map((tag, index) => (
-                      <tr key={index} className="hover:bg-gray-50 transition-colors">
+                  <tbody className="divide-y divide-gray-50">
+                    {paginatedTags.map((tag, index) => (
+                      <tr key={index} className="hover:bg-gray-50/50 transition-colors">
+                        
                         <td className="py-3 px-4">
-                          <div className={`w-3 h-3 rounded-full ${
+                          <div className={`w-2 h-2 rounded-full ${
                             tag.status === 'active' ? 'bg-green-500' : 
                             tag.status === 'error' ? 'bg-red-500' : 'bg-gray-300'
                           }`}></div>
                         </td>
+                        
                         <td className="py-3 px-4">
-                          <span className="font-mono text-sm text-gray-900">{tag.name}</span>
+                          <span className="font-mono text-sm text-gray-900">
+                            {tag.name}
+                          </span>
                         </td>
+                        
                         <td className="py-3 px-4">
-                          <span className={`font-mono text-sm font-bold ${
+                          <span className={`font-mono text-sm font-semibold ${
                             tag.type === 'bool' ? 
                               (tag.value ? 'text-green-600' : 'text-gray-500') : 
                               'text-blue-600'
@@ -642,25 +611,28 @@ export default function TagsMonitor() {
                             {formatValue(tag.value, tag.type)}
                           </span>
                         </td>
+                        
                         <td className="py-3 px-4">
-                          <span className="text-xs bg-gray-100 px-2 py-1 rounded font-mono">
-                            {tag.type.toUpperCase()}
+                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded font-mono">
+                            {tag.type}
                           </span>
                         </td>
+                        
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-2">
-                            {getCategoryIcon(tag.category)}
-                            <span className="text-sm text-gray-700">{tag.category}</span>
+                            <div className="w-4 h-4 text-gray-400">
+                              {getCategoryIcon(tag.category)}
+                            </div>
+                            <span className="text-sm text-gray-700">
+                              {tag.category}
+                            </span>
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-sm text-gray-600 max-w-xs">
-                          {tag.description}
-                        </td>
+                        
                         <td className="py-3 px-4">
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
-                            <Clock className="w-3 h-3" />
+                          <span className="text-xs text-gray-500 font-mono">
                             {tag.lastUpdate.toLocaleTimeString()}
-                          </div>
+                          </span>
                         </td>
                       </tr>
                     ))}
@@ -668,8 +640,70 @@ export default function TagsMonitor() {
                 </table>
               </div>
             </div>
-          )}
-        </div>
+            
+            {/* PAGINAÇÃO ULTRA MINIMALISTA */}
+            {totalPages > 1 && (
+              <div className="flex-shrink-0 border-t border-gray-100 bg-white px-4 py-2" style={{ height: '40px' }}>
+                <div className="flex items-center justify-between h-full">
+                  
+                  {/* Info Compacta */}
+                  <div className="text-xs text-gray-400">
+                    {startIndex + 1}-{Math.min(endIndex, filteredTags.length)} de {filteredTags.length}
+                  </div>
+                  
+                  {/* Controles Minimalistas */}
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setCurrentPage(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="w-6 h-6 text-gray-400 hover:text-blue-600 disabled:opacity-20 disabled:cursor-not-allowed transition-colors text-sm"
+                    >
+                      ←
+                    </button>
+                    
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: Math.min(totalPages, 3) }, (_, i) => {
+                        let page;
+                        if (totalPages <= 3) {
+                          page = i + 1;
+                        } else if (currentPage === 1) {
+                          page = i + 1;
+                        } else if (currentPage === totalPages) {
+                          page = totalPages - 2 + i;
+                        } else {
+                          page = currentPage - 1 + i;
+                        }
+                        return page;
+                      })
+                        .map((page) => (
+                          <button
+                            key={page}
+                            onClick={() => setCurrentPage(page)}
+                            className={`w-6 h-6 text-xs rounded transition-colors ${
+                              currentPage === page
+                                ? 'bg-blue-500 text-white'
+                                : 'text-gray-400 hover:text-blue-600 hover:bg-blue-50'
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        ))
+                      }
+                    </div>
+                    
+                    <button
+                      onClick={() => setCurrentPage(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="w-6 h-6 text-gray-400 hover:text-blue-600 disabled:opacity-20 disabled:cursor-not-allowed transition-colors text-sm"
+                    >
+                      →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

@@ -172,53 +172,50 @@ export default function DatabaseMonitor() {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 mb-4">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
-              <Database className="w-6 h-6 text-white" />
+    <div className="w-full h-full flex flex-col overflow-hidden">
+      
+      {/* HEADER ULTRA COMPACTO */}
+      <div className="flex-shrink-0 bg-white border-b border-gray-200 p-2">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <div className="w-8 h-8 bg-green-500 rounded flex items-center justify-center">
+              <Database className="w-4 h-4 text-white" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Monitor do Banco de Dados</h1>
-              <p className="text-gray-600">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-sm font-bold text-gray-900 truncate">Banco PostgreSQL</h1>
+              <p className="text-xs text-gray-600 truncate">
                 {databaseData.databaseStats.version}
-                {lastUpdate && ` • Atualizado às ${lastUpdate.toLocaleTimeString()}`}
+                {lastUpdate && ` • ${lastUpdate.toLocaleTimeString()}`}
               </p>
             </div>
           </div>
           
-          {/* Status Geral */}
-          <div className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${getStatusColor(databaseData.databaseStats.status)}`}>
-            <CheckCircle className="w-5 h-5" />
+          {/* Status Compacto */}
+          <div className={`flex items-center gap-1 px-2 py-1 rounded text-xs ${getStatusColor(databaseData.databaseStats.status)}`}>
+            <CheckCircle className="w-3 h-3" />
             <span className="font-medium">
-              {databaseData.databaseStats.status === 'healthy' ? 'Saudável' : 
+              {databaseData.databaseStats.status === 'healthy' ? 'OK' : 
                databaseData.databaseStats.status === 'warning' ? 'Atenção' : 'Erro'}
             </span>
           </div>
         </div>
 
-        {/* Métricas Principais do Banco */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Conexões Ativas */}
+        {/* MÉTRICAS ULTRA COMPACTAS */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1">
+          
+          {/* Conexões */}
           {(() => {
             const connectionStatus = getMetricStatus(databaseData.databaseStats.connections, 'connections');
             const colors = getMetricColor(connectionStatus);
             return (
-              <div className={`${colors.bg} p-4 rounded-xl border ${colors.border}`}>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Users className={`w-5 h-5 ${colors.text}`} />
-                    <span className={`font-semibold ${colors.textSecondary}`}>Conexões</span>
-                  </div>
-                  <span className={`text-2xl font-bold ${colors.text}`}>
+              <div className={`${colors.bg} p-2 rounded border ${colors.border}`}>
+                <div className="flex items-center justify-between">
+                  <Users className={`w-3 h-3 ${colors.text}`} />
+                  <span className={`text-sm font-bold ${colors.text}`}>
                     {databaseData.databaseStats.connections}
                   </span>
                 </div>
-                <div className={`text-sm ${colors.textSecondary}`}>
-                  Conexões Ativas {connectionStatus !== 'normal' && `(${connectionStatus.toUpperCase()})`}
-                </div>
+                <div className={`text-xs ${colors.textSecondary} truncate`}>Conexões</div>
               </div>
             );
           })()}
@@ -228,231 +225,100 @@ export default function DatabaseMonitor() {
             const tableStatus = getMetricStatus(databaseData.databaseStats.tablesCount, 'tables');
             const colors = getMetricColor(tableStatus);
             return (
-              <div className={`${colors.bg} p-4 rounded-xl border ${colors.border}`}>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Table className={`w-5 h-5 ${colors.text}`} />
-                    <span className={`font-semibold ${colors.textSecondary}`}>Tabelas</span>
-                  </div>
-                  <span className={`text-2xl font-bold ${colors.text}`}>
+              <div className={`${colors.bg} p-2 rounded border ${colors.border}`}>
+                <div className="flex items-center justify-between">
+                  <Table className={`w-3 h-3 ${colors.text}`} />
+                  <span className={`text-sm font-bold ${colors.text}`}>
                     {databaseData.databaseStats.tablesCount}
                   </span>
                 </div>
-                <div className={`text-sm ${colors.textSecondary}`}>
-                  Tabelas no Banco {tableStatus !== 'normal' && `(${tableStatus.toUpperCase()})`}
-                </div>
+                <div className={`text-xs ${colors.textSecondary} truncate`}>Tabelas</div>
               </div>
             );
           })()}
 
           {/* Tamanho */}
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <HardDrive className="w-5 h-5 text-purple-600" />
-                <span className="font-semibold text-purple-900">Tamanho</span>
-              </div>
-              <span className="text-lg font-bold text-purple-600">
+          <div className="bg-purple-50 p-2 rounded border border-purple-200">
+            <div className="flex items-center justify-between">
+              <HardDrive className="w-3 h-3 text-purple-600" />
+              <span className="text-sm font-bold text-purple-600">
                 {databaseData.databaseStats.size}
               </span>
             </div>
-            <div className="text-sm text-purple-700">Espaço Usado</div>
+            <div className="text-xs text-purple-700 truncate">Tamanho</div>
           </div>
 
-          {/* Tempo de Resposta */}
+          {/* Resposta */}
           {(() => {
             const responseStatus = getMetricStatus(databaseData.databaseStats.responseTime, 'responseTime');
             const colors = getMetricColor(responseStatus);
             return (
-              <div className={`${colors.bg} p-4 rounded-xl border ${colors.border}`}>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Zap className={`w-5 h-5 ${colors.text}`} />
-                    <span className={`font-semibold ${colors.textSecondary}`}>Resposta</span>
-                  </div>
-                  <span className={`text-lg font-bold ${colors.text}`}>
+              <div className={`${colors.bg} p-2 rounded border ${colors.border}`}>
+                <div className="flex items-center justify-between">
+                  <Zap className={`w-3 h-3 ${colors.text}`} />
+                  <span className={`text-sm font-bold ${colors.text}`}>
                     {databaseData.databaseStats.responseTime.toFixed(1)}ms
                   </span>
                 </div>
-                <div className={`text-sm ${colors.textSecondary}`}>
-                  Tempo de Query {responseStatus !== 'normal' && `(${responseStatus.toUpperCase()})`}
-                </div>
+                <div className={`text-xs ${colors.textSecondary} truncate`}>Resposta</div>
               </div>
             );
           })()}
         </div>
       </div>
 
-      {/* Seção de Detalhes */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        {/* Informações Detalhadas */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <Server className="w-6 h-6 text-blue-600" />
-            <h2 className="text-xl font-bold text-gray-900">Informações do Banco</h2>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-              <span className="font-medium text-gray-700">Versão:</span>
-              <span className="text-gray-900">{databaseData.databaseStats.version}</span>
-            </div>
-
-            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-              <span className="font-medium text-gray-700">Status:</span>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(databaseData.databaseStats.status)}`}>
-                {databaseData.databaseStats.status.toUpperCase()}
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-              <span className="font-medium text-gray-700">Uptime:</span>
-              <span className="text-gray-900">{databaseData.databaseStats.uptime}</span>
-            </div>
-
-            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-              <span className="font-medium text-gray-700">Último Backup:</span>
-              <span className="text-gray-900 font-mono text-sm">{databaseData.databaseStats.lastBackup}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Estatísticas */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <BarChart3 className="w-6 h-6 text-green-600" />
-            <h2 className="text-xl font-bold text-gray-900">Performance</h2>
-          </div>
-
-          <div className="space-y-4">
-            {/* Conexões */}
-            {(() => {
-              const connectionStatus = getMetricStatus(databaseData.databaseStats.connections, 'connections');
-              const colors = getMetricColor(connectionStatus);
-              const percentage = Math.min((databaseData.databaseStats.connections / 100) * 100, 100);
-              
-              return (
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-gray-700">
-                      Conexões Ativas 
-                      {connectionStatus !== 'normal' && (
-                        <span className={`ml-1 text-xs font-bold ${colors.text}`}>
-                          ({connectionStatus.toUpperCase()})
-                        </span>
-                      )}
-                    </span>
-                    <span className="text-sm text-gray-500">{databaseData.databaseStats.connections}/100</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`${colors.bar} h-2 rounded-full transition-all duration-500`} 
-                      style={{ width: `${percentage}%` }}
-                    ></div>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Tempo de Resposta */}
-            {(() => {
-              const responseStatus = getMetricStatus(databaseData.databaseStats.responseTime, 'responseTime');
-              const colors = getMetricColor(responseStatus);
-              const percentage = Math.min((databaseData.databaseStats.responseTime / 500) * 100, 100);
-              
-              return (
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-gray-700">
-                      Tempo de Resposta
-                      {responseStatus !== 'normal' && (
-                        <span className={`ml-1 text-xs font-bold ${colors.text}`}>
-                          ({responseStatus.toUpperCase()})
-                        </span>
-                      )}
-                    </span>
-                    <span className="text-sm text-gray-500">{databaseData.databaseStats.responseTime.toFixed(1)}ms</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`${colors.bar} h-2 rounded-full transition-all duration-500`} 
-                      style={{ width: `${percentage}%` }}
-                    ></div>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Tabelas */}
-            {(() => {
-              const tableStatus = getMetricStatus(databaseData.databaseStats.tablesCount, 'tables');
-              const colors = getMetricColor(tableStatus);
-              const percentage = Math.min((databaseData.databaseStats.tablesCount / 150) * 100, 100);
-              
-              return (
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-gray-700">
-                      Utilização de Tabelas
-                      {tableStatus !== 'normal' && (
-                        <span className={`ml-1 text-xs font-bold ${colors.text}`}>
-                          ({tableStatus.toUpperCase()})
-                        </span>
-                      )}
-                    </span>
-                    <span className="text-sm text-gray-500">{databaseData.databaseStats.tablesCount} tabelas</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`${colors.bar} h-2 rounded-full transition-all duration-500`} 
-                      style={{ width: `${percentage}%` }}
-                    ></div>
-                  </div>
-                </div>
-              );
-            })()}
-          </div>
-        </div>
-      </div>
-
-      {/* Logs do Banco */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 flex-1 min-h-0">
-        <div className="p-4 border-b border-gray-200 bg-gray-50">
-          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <Activity className="w-5 h-5 text-blue-500" />
-            Logs do Banco de Dados
+      {/* LOGS COM ALTURA CALCULADA PRECISA */}
+      <div className="flex-1 bg-white border-t border-gray-200 overflow-hidden" style={{ height: 'calc(100% - 140px)' }}>
+        <div className="flex-shrink-0 p-2 border-b border-gray-200 bg-gray-50">
+          <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+            <Activity className="w-4 h-4 text-green-500" />
+            Logs do Banco
           </h2>
         </div>
 
-        <div className="p-4 overflow-auto h-full">
-          <div className="space-y-3">
-            {databaseData.databaseLogs.map((log, index) => (
-              <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                <div className={`w-2 h-2 rounded-full mt-2 ${
-                  log.level === 'ERROR' ? 'bg-red-500' :
-                  log.level === 'WARNING' ? 'bg-yellow-500' :
-                  log.level === 'SUCCESS' ? 'bg-green-500' : 
-                  'bg-blue-500'
-                }`}></div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-xs font-semibold px-2 py-1 rounded ${
-                      log.level === 'ERROR' ? 'bg-red-100 text-red-700' :
-                      log.level === 'WARNING' ? 'bg-yellow-100 text-yellow-700' :
-                      log.level === 'SUCCESS' ? 'bg-green-100 text-green-700' : 
-                      'bg-blue-100 text-blue-700'
-                    }`}>
-                      {log.level}
-                    </span>
-                    <span className="text-xs text-gray-500">{log.source}</span>
-                    <span className="text-xs text-gray-400">
-                      {new Date(log.timestamp).toLocaleTimeString()}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-700">{log.message}</p>
-                </div>
+        <div className="flex-1 overflow-auto p-2" style={{ height: 'calc(100% - 40px)' }}>
+          <div className="space-y-2">
+            {databaseData.databaseLogs.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                <Activity className="w-12 h-12 text-gray-300 mb-2" />
+                <p className="text-sm">Nenhum log disponível</p>
               </div>
-            ))}
+            ) : (
+              databaseData.databaseLogs.map((log, index) => (
+                <div key={index} className="bg-gray-50 rounded p-2 hover:bg-gray-100 transition-colors">
+                  <div className="flex items-start gap-2">
+                    <div className={`w-2 h-2 rounded-full mt-1 flex-shrink-0 ${
+                      log.level === 'ERROR' ? 'bg-red-500' :
+                      log.level === 'WARNING' ? 'bg-yellow-500' :
+                      log.level === 'SUCCESS' ? 'bg-green-500' : 
+                      'bg-blue-500'
+                    }`}></div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col xs:flex-row xs:items-center xs:gap-2 mb-1">
+                        <span className={`text-xs font-semibold px-1 py-0.5 rounded ${
+                          log.level === 'ERROR' ? 'bg-red-100 text-red-700' :
+                          log.level === 'WARNING' ? 'bg-yellow-100 text-yellow-700' :
+                          log.level === 'SUCCESS' ? 'bg-green-100 text-green-700' : 
+                          'bg-blue-100 text-blue-700'
+                        }`}>
+                          {log.level}
+                        </span>
+                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                          <span className="truncate">{log.source}</span>
+                          <span>•</span>
+                          <span className="whitespace-nowrap">
+                            {new Date(log.timestamp).toLocaleTimeString()}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <p className="text-xs text-gray-700 break-words">{log.message}</p>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

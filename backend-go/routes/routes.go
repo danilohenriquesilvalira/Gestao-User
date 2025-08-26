@@ -117,5 +117,15 @@ func SetupRoutes() *gin.Engine {
 		c.JSON(200, status)
 	})
 
+	// ✅ DATABASE MONITOR ROUTES - FOCO APENAS NO BANCO DE DADOS
+	databaseMonitorController := &controllers.DatabaseMonitorController{}
+	databaseAPI := api.Group("/database")
+	{
+		databaseAPI.GET("/stats", databaseMonitorController.GetDatabaseStats)
+		databaseAPI.GET("/logs", databaseMonitorController.GetDatabaseLogs)
+		databaseAPI.GET("/all", databaseMonitorController.GetDatabaseData) // Todos os dados do BD
+		databaseAPI.GET("/tables", databaseMonitorController.GetAllTables) // Listar TODAS as tabelas
+	}
+
 	return r
 }

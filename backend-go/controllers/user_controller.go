@@ -44,36 +44,36 @@ func (ctrl *UserController) ListUsers(c *gin.Context) {
 		return
 	}
 
-	var query *gorm.DB = db.Preload("Role")
-
 	// Sistema hierárquico de permissões
 	switch currentUser.Role.Name {
 	case "admin":
 		// Admin vê todos os usuários
-		query = query.Find(&users)
-	case "gerente":
-		// Gerente NÃO vê admin
-		query = query.Joins("JOIN roles ON users.role_id = roles.id").
-			Where("roles.name != ?", "admin").Find(&users)
-	case "supervisor":
-		// Supervisor NÃO vê admin nem gerente
-		query = query.Joins("JOIN roles ON users.role_id = roles.id").
-			Where("roles.name NOT IN ?", []string{"admin", "gerente"}).Find(&users)
+		db.Preload("Role").Find(&users)
+	case "gerente", "supervisor":
+		// Gerente e Supervisor NÃO veem admin - buscar todos e filtrar depois
+		var allUsers []models.User
+		db.Preload("Role").Find(&allUsers)
+		
+		// Filtrar apenas usuários que não são admin
+		for _, user := range allUsers {
+			if user.Role.Name != "admin" {
+				users = append(users, user)
+			}
+		}
 	default:
 		// Técnico, Operador, Visitante só veem próprio perfil
-		query = query.Where("id = ?", currentUser.ID).Find(&users)
+		db.Preload("Role").Where("id = ?", currentUser.ID).Find(&users)
 	}
 
-	if query.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": map[string]interface{}{
-				"status":  500,
-				"name":    "InternalServerError", 
-				"message": "Erro ao buscar usuários: " + query.Error.Error(),
-				"details": map[string]interface{}{},
-			},
-		})
-		return
+	log.Printf("🔍 DEBUG - Usuário: %s, Role: %s, Level: %d", currentUser.Username, currentUser.Role.Name, currentUser.Role.Level)
+	log.Printf("📊 Query resultou em %d usuários para exibir", len(users))
+	
+	// Debug: listar todos os usuários que existem
+	var allUsers []models.User
+	db.Preload("Role").Find(&allUsers)
+	log.Printf("🔍 DEBUG - Total de usuários no banco: %d", len(allUsers))
+	for _, u := range allUsers {
+		log.Printf("   - User: %s, Role: %s, RoleID: %d", u.Username, u.Role.Name, u.RoleID)
 	}
 
 	c.JSON(http.StatusOK, gin.H{

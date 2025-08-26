@@ -8,7 +8,12 @@ import {
   UserX,
   Mail,
   Clock,
-  Settings
+  Settings,
+  Crown,
+  Users,
+  Eye,
+  Wrench,
+  Gamepad2
 } from 'lucide-react';
 import { type User } from '@/api/strapiUsers';
 
@@ -24,28 +29,36 @@ export default function UserCard({ user, onEdit, onDelete, canEdit }: UserCardPr
   const getRoleColor = (roleName: string) => {
     switch (roleName?.toLowerCase()) {
       case 'admin':
-      case 'superadmin':
-        return 'bg-red-100 text-red-700 border-red-200';
+        return 'bg-gradient-to-r from-red-50 to-pink-50 text-red-700 border border-red-200';
       case 'gerente':
-        return 'bg-purple-100 text-purple-700 border-purple-200';
+        return 'bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-700 border border-purple-200';
+      case 'supervisor':
+        return 'bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 border border-blue-200';
       case 'tecnico':
-        return 'bg-blue-100 text-blue-700 border-blue-200';
+        return 'bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border border-emerald-200';
       case 'operador':
-        return 'bg-green-100 text-green-700 border-green-200';
-      case 'terceirizado':
-        return 'bg-orange-100 text-orange-700 border-orange-200';
+        return 'bg-gradient-to-r from-orange-50 to-yellow-50 text-orange-700 border border-orange-200';
+      case 'visitante':
+        return 'bg-gradient-to-r from-gray-50 to-slate-50 text-gray-700 border border-gray-200';
       default:
-        return 'bg-gray-100 text-gray-700 border-gray-200';
+        return 'bg-gradient-to-r from-gray-50 to-slate-50 text-gray-700 border border-gray-200';
     }
   };
 
   const getRoleIcon = (roleName: string) => {
     switch (roleName?.toLowerCase()) {
       case 'admin':
-      case 'superadmin':
-        return <Shield className="w-3 h-3" />;
+        return <Crown className="w-3 h-3" />;
       case 'gerente':
-        return <Settings className="w-3 h-3" />;
+        return <Users className="w-3 h-3" />;
+      case 'supervisor':
+        return <Shield className="w-3 h-3" />;
+      case 'tecnico':
+        return <Wrench className="w-3 h-3" />;
+      case 'operador':
+        return <Gamepad2 className="w-3 h-3" />;
+      case 'visitante':
+        return <Eye className="w-3 h-3" />;
       default:
         return <UserCheck className="w-3 h-3" />;
     }
@@ -60,12 +73,12 @@ export default function UserCard({ user, onEdit, onDelete, canEdit }: UserCardPr
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-200">
+    <div className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg hover:border-gray-300 transition-all duration-300">
       {/* Avatar e Status */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-            <span className="text-white font-semibold text-sm">
+          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+            <span className="text-white font-bold text-lg">
               {user.username.charAt(0).toUpperCase()}
             </span>
           </div>
@@ -117,7 +130,7 @@ export default function UserCard({ user, onEdit, onDelete, canEdit }: UserCardPr
       {/* Role Badge */}
       {user.role && (
         <div className="mb-3">
-          <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium border ${getRoleColor(user.role.name)}`}>
+          <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold ${getRoleColor(user.role.name)} shadow-sm`}>
             {getRoleIcon(user.role.name)}
             <span>{user.role.displayName || user.role.name}</span>
           </div>

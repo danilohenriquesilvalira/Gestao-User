@@ -8,6 +8,24 @@ import AssistenteVirtual from '@/components/dashboard/AssistenteVirtual';
 import UserManagement from '@/components/usuarios/UserManagement';
 // import UserProfile from '@/components/usuarios/UserProfile'; // Temporariamente removido
 import { useAuth } from '@/contexts/AuthContext';
+import { 
+  User, 
+  Shield, 
+  Key, 
+  Info, 
+  Wrench, 
+  Search, 
+  Settings, 
+  Users, 
+  BarChart3, 
+  Radio, 
+  Calendar, 
+  Crown, 
+  Gamepad2, 
+  Eye, 
+  Activity,
+  CheckCircle2
+} from 'lucide-react';
 
 export default function UsuariosPage() {
   return (
@@ -97,7 +115,7 @@ function UsuariosContent() {
                       <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-200">
                         <div className="flex items-center gap-3 mb-4">
                           <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-                            <span className="text-white font-bold text-sm">👤</span>
+                            <User className="w-5 h-5 text-white" />
                           </div>
                           <h3 className="text-lg font-semibold text-gray-900">Informações Pessoais</h3>
                         </div>
@@ -117,7 +135,7 @@ function UsuariosContent() {
                       <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-200">
                         <div className="flex items-center gap-3 mb-4">
                           <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
-                            <span className="text-white font-bold text-sm">🛡️</span>
+                            <Shield className="w-5 h-5 text-white" />
                           </div>
                           <h3 className="text-lg font-semibold text-gray-900">Sistema</h3>
                         </div>
@@ -128,8 +146,8 @@ function UsuariosContent() {
                           </div>
                           <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                             <span className="font-medium text-gray-700 min-w-0 sm:min-w-[80px]">Status:</span>
-                            <span className="inline-flex items-center gap-1 text-green-600 font-medium">
-                              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                            <span className="inline-flex items-center gap-2 text-green-600 font-medium">
+                              <CheckCircle2 className="w-4 h-4" />
                               Ativo
                             </span>
                           </div>
@@ -141,7 +159,7 @@ function UsuariosContent() {
                     <div className="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-200">
                       <div className="flex items-center gap-3 mb-4">
                         <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
-                          <span className="text-white font-bold text-sm">🔑</span>
+                          <Key className="w-5 h-5 text-white" />
                         </div>
                         <h3 className="text-lg font-semibold text-gray-900">Suas Permissões</h3>
                       </div>
@@ -149,19 +167,27 @@ function UsuariosContent() {
                         {currentUser?.role?.name === 'tecnico' && (
                           <>
                             <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <span className="text-xl">🔧</span>
+                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <Wrench className="w-4 h-4 text-purple-600" />
+                              </div>
                               <span className="text-gray-800 font-medium">Manutenção Completa</span>
                             </div>
                             <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <span className="text-xl">🔍</span>
+                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <Search className="w-4 h-4 text-purple-600" />
+                              </div>
                               <span className="text-gray-800 font-medium">Diagnósticos</span>
                             </div>
                             <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <span className="text-xl">⚙️</span>
+                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <Settings className="w-4 h-4 text-purple-600" />
+                              </div>
                               <span className="text-gray-800 font-medium">Debug do Sistema</span>
                             </div>
                             <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <span className="text-xl">🚢</span>
+                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <Activity className="w-4 h-4 text-purple-600" />
+                              </div>
                               <span className="text-gray-800 font-medium">Manutenção de Eclusa</span>
                             </div>
                           </>
@@ -170,15 +196,21 @@ function UsuariosContent() {
                         {currentUser?.role?.name === 'operador' && (
                           <>
                             <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <span className="text-xl">🎮</span>
+                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <Gamepad2 className="w-4 h-4 text-purple-600" />
+                              </div>
                               <span className="text-gray-800 font-medium">Operação de Eclusa</span>
                             </div>
                             <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <span className="text-xl">📊</span>
+                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <BarChart3 className="w-4 h-4 text-purple-600" />
+                              </div>
                               <span className="text-gray-800 font-medium">Relatórios Básicos</span>
                             </div>
                             <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <span className="text-xl">📡</span>
+                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <Radio className="w-4 h-4 text-purple-600" />
+                              </div>
                               <span className="text-gray-800 font-medium">Monitoramento</span>
                             </div>
                           </>
@@ -187,11 +219,15 @@ function UsuariosContent() {
                         {currentUser?.role?.name === 'visitante' && (
                           <>
                             <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <span className="text-xl">👁️</span>
+                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <Eye className="w-4 h-4 text-purple-600" />
+                              </div>
                               <span className="text-gray-800 font-medium">Visualização do Dashboard</span>
                             </div>
                             <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <span className="text-xl">📊</span>
+                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <BarChart3 className="w-4 h-4 text-purple-600" />
+                              </div>
                               <span className="text-gray-800 font-medium">Relatórios Básicos</span>
                             </div>
                           </>
@@ -200,19 +236,27 @@ function UsuariosContent() {
                         {currentUser?.role?.name === 'supervisor' && (
                           <>
                             <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <span className="text-xl">👥</span>
+                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <Users className="w-4 h-4 text-purple-600" />
+                              </div>
                               <span className="text-gray-800 font-medium">Visualizar Usuários</span>
                             </div>
                             <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <span className="text-xl">📊</span>
+                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <BarChart3 className="w-4 h-4 text-purple-600" />
+                              </div>
                               <span className="text-gray-800 font-medium">Relatórios</span>
                             </div>
                             <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <span className="text-xl">🎮</span>
+                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <Gamepad2 className="w-4 h-4 text-purple-600" />
+                              </div>
                               <span className="text-gray-800 font-medium">Controle de Eclusa</span>
                             </div>
                             <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <span className="text-xl">📅</span>
+                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <Calendar className="w-4 h-4 text-purple-600" />
+                              </div>
                               <span className="text-gray-800 font-medium">Agendamento</span>
                             </div>
                           </>
@@ -221,19 +265,27 @@ function UsuariosContent() {
                         {currentUser?.role?.name === 'gerente' && (
                           <>
                             <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <span className="text-xl">👥</span>
+                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <Users className="w-4 h-4 text-purple-600" />
+                              </div>
                               <span className="text-gray-800 font-medium">Gerenciar Usuários</span>
                             </div>
                             <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <span className="text-xl">📊</span>
+                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <BarChart3 className="w-4 h-4 text-purple-600" />
+                              </div>
                               <span className="text-gray-800 font-medium">Todos os Relatórios</span>
                             </div>
                             <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <span className="text-xl">📡</span>
+                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <Radio className="w-4 h-4 text-purple-600" />
+                              </div>
                               <span className="text-gray-800 font-medium">Monitoramento</span>
                             </div>
                             <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <span className="text-xl">🎮</span>
+                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <Gamepad2 className="w-4 h-4 text-purple-600" />
+                              </div>
                               <span className="text-gray-800 font-medium">Controle de Eclusa</span>
                             </div>
                           </>
@@ -242,19 +294,27 @@ function UsuariosContent() {
                         {currentUser?.role?.name === 'admin' && (
                           <>
                             <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <span className="text-xl">👑</span>
+                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <Crown className="w-4 h-4 text-purple-600" />
+                              </div>
                               <span className="text-gray-800 font-medium">Acesso Total</span>
                             </div>
                             <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <span className="text-xl">👥</span>
+                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <Users className="w-4 h-4 text-purple-600" />
+                              </div>
                               <span className="text-gray-800 font-medium">Gerenciar Usuários</span>
                             </div>
                             <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <span className="text-xl">⚙️</span>
+                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <Settings className="w-4 h-4 text-purple-600" />
+                              </div>
                               <span className="text-gray-800 font-medium">Configurações</span>
                             </div>
                             <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <span className="text-xl">🔧</span>
+                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <Wrench className="w-4 h-4 text-purple-600" />
+                              </div>
                               <span className="text-gray-800 font-medium">Todas as Funções</span>
                             </div>
                           </>
@@ -266,7 +326,7 @@ function UsuariosContent() {
                     <div className="mt-6 sm:mt-8 p-4 bg-gray-50 rounded-xl border border-gray-200">
                       <div className="text-center">
                         <div className="w-8 h-8 bg-gray-400 rounded-lg flex items-center justify-center mx-auto mb-2">
-                          <span className="text-white font-bold text-sm">ℹ️</span>
+                          <Info className="w-4 h-4 text-white" />
                         </div>
                         <p className="text-sm text-gray-600 font-medium">
                           Para alterações em seu perfil, entre em contato com o administrador do sistema.

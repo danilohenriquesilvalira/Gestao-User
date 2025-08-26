@@ -19,7 +19,11 @@ import {
   Thermometer,
   Droplets,
   Eye,
-  EyeOff
+  EyeOff,
+  TrendingUp,
+  Users,
+  Server,
+  BarChart3
 } from 'lucide-react';
 import { useWebSocket } from '@/hooks/useWebSocket';
 
@@ -58,6 +62,15 @@ export default function TagsMonitor() {
     alarms: false,
     emergency: false,
     flooding: false
+  });
+  
+  // ✅ MÉTRICAS REAIS DE DIAGNÓSTICO DO WEBSOCKET
+  const [webSocketDiagnostics, setWebSocketDiagnostics] = useState({
+    connectionQuality: 'good' as 'good' | 'fair' | 'poor',
+    latency: 0,
+    totalTags: 0,
+    activeTags: 0,
+    dataFreshness: 'real-time' as 'real-time' | 'delayed' | 'stale'
   });
 
   // Processar dados do WebSocket e organizar em tags
@@ -303,6 +316,45 @@ export default function TagsMonitor() {
 
     setTagsData(newTags);
 
+    // ✅ CALCULAR MÉTRICAS REAIS DE DIAGNÓSTICO
+    const activeTags = newTags.filter(tag => tag.status === 'active').length;
+    const totalTags = newTags.length;
+    
+    // ✅ Qualidade da conexão baseada em dados reais
+    let connectionQuality: 'good' | 'fair' | 'poor' = 'good';
+    if (!webSocketData.isConnected) {
+      connectionQuality = 'poor';
+    } else if (activeTags / totalTags < 0.7) {
+      connectionQuality = 'fair';
+    }
+    
+    // ✅ Frescor dos dados baseado no isDataReady
+    let dataFreshness: 'real-time' | 'delayed' | 'stale' = 'real-time';
+    if (!webSocketData.isDataReady) {
+      dataFreshness = 'delayed';
+    } else if (webSocketData.error) {
+      dataFreshness = 'stale';
+    }
+    
+    // ✅ Latência REAL baseada no tempo de resposta (timestamp)
+    let latency = 0;
+    if (webSocketData.isConnected && webSocketData.lastMessage) {
+      // Calcular latência real baseada no tempo de processamento
+      const now = Date.now();
+      const messageTime = new Date(webSocketData.lastMessage).getTime();
+      if (!isNaN(messageTime)) {
+        latency = Math.abs(now - messageTime);
+      }
+    }
+
+    setWebSocketDiagnostics({
+      connectionQuality,
+      latency,
+      totalTags,
+      activeTags,
+      dataFreshness
+    });
+
     // Atualizar status do PLC
     setPLCStatus({
       connected: webSocketData.isConnected,
@@ -395,60 +447,99 @@ export default function TagsMonitor() {
           </div>
         </div>
 
-        {/* Status Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-          <div className={`p-3 rounded-lg border ${plcStatus.communication ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-            <div className="flex items-center gap-2">
-              {plcStatus.communication ? (
-                <CheckCircle className="w-4 h-4 text-green-500" />
-              ) : (
-                <XCircle className="w-4 h-4 text-red-500" />
-              )}
-              <span className="text-sm font-medium text-gray-700">Comunicação</span>
+        {/* ✅ MÉTRICAS PROFISSIONAIS DE DIAGNÓSTICO DO WEBSOCKET */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {/* Qualidade da Conexão */}
+          <div className={`p-4 rounded-xl border ${
+            webSocketDiagnostics.connectionQuality === 'good' ? 'bg-gradient-to-br from-green-50 to-green-100 border-green-200' :
+            webSocketDiagnostics.connectionQuality === 'fair' ? 'bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200' :
+            'bg-gradient-to-br from-red-50 to-red-100 border-red-200'
+          }`}>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Activity className={`w-5 h-5 ${
+                  webSocketDiagnostics.connectionQuality === 'good' ? 'text-green-600' :
+                  webSocketDiagnostics.connectionQuality === 'fair' ? 'text-yellow-600' : 'text-red-600'
+                }`} />
+                <span className={`font-semibold ${
+                  webSocketDiagnostics.connectionQuality === 'good' ? 'text-green-900' :
+                  webSocketDiagnostics.connectionQuality === 'fair' ? 'text-yellow-900' : 'text-red-900'
+                }`}>Qualidade</span>
+              </div>
+              <span className={`text-lg font-bold ${
+                webSocketDiagnostics.connectionQuality === 'good' ? 'text-green-600' :
+                webSocketDiagnostics.connectionQuality === 'fair' ? 'text-yellow-600' : 'text-red-600'
+              }`}>
+                {webSocketDiagnostics.connectionQuality === 'good' ? 'Ótima' :
+                 webSocketDiagnostics.connectionQuality === 'fair' ? 'Regular' : 'Ruim'}
+              </span>
+            </div>
+            <div className={`text-sm ${
+              webSocketDiagnostics.connectionQuality === 'good' ? 'text-green-700' :
+              webSocketDiagnostics.connectionQuality === 'fair' ? 'text-yellow-700' : 'text-red-700'
+            }`}>
+              Conexão WebSocket
             </div>
           </div>
 
-          <div className={`p-3 rounded-lg border ${plcStatus.operation ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
-            <div className="flex items-center gap-2">
-              {plcStatus.operation ? (
-                <CheckCircle className="w-4 h-4 text-green-500" />
-              ) : (
-                <XCircle className="w-4 h-4 text-gray-500" />
-              )}
-              <span className="text-sm font-medium text-gray-700">Operação</span>
+          {/* Latência Real */}
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Zap className="w-5 h-5 text-blue-600" />
+                <span className="font-semibold text-blue-900">Latência</span>
+              </div>
+              <span className="text-lg font-bold text-blue-600">
+                {webSocketDiagnostics.latency}ms
+              </span>
             </div>
+            <div className="text-sm text-blue-700">Tempo de Resposta</div>
           </div>
 
-          <div className={`p-3 rounded-lg border ${plcStatus.alarms ? 'bg-yellow-50 border-yellow-200' : 'bg-green-50 border-green-200'}`}>
-            <div className="flex items-center gap-2">
-              {plcStatus.alarms ? (
-                <AlertCircle className="w-4 h-4 text-yellow-500" />
-              ) : (
-                <CheckCircle className="w-4 h-4 text-green-500" />
-              )}
-              <span className="text-sm font-medium text-gray-700">Alarmes</span>
+          {/* Tags Ativas vs Total */}
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-purple-600" />
+                <span className="font-semibold text-purple-900">Tags</span>
+              </div>
+              <span className="text-lg font-bold text-purple-600">
+                {webSocketDiagnostics.activeTags}/{webSocketDiagnostics.totalTags}
+              </span>
             </div>
+            <div className="text-sm text-purple-700">Ativas/Total</div>
           </div>
 
-          <div className={`p-3 rounded-lg border ${plcStatus.emergency ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
-            <div className="flex items-center gap-2">
-              {plcStatus.emergency ? (
-                <AlertCircle className="w-4 h-4 text-red-500" />
-              ) : (
-                <CheckCircle className="w-4 h-4 text-green-500" />
-              )}
-              <span className="text-sm font-medium text-gray-700">Emergência</span>
+          {/* Frescor dos Dados */}
+          <div className={`p-4 rounded-xl border ${
+            webSocketDiagnostics.dataFreshness === 'real-time' ? 'bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200' :
+            webSocketDiagnostics.dataFreshness === 'delayed' ? 'bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200' :
+            'bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200'
+          }`}>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Clock className={`w-5 h-5 ${
+                  webSocketDiagnostics.dataFreshness === 'real-time' ? 'text-emerald-600' :
+                  webSocketDiagnostics.dataFreshness === 'delayed' ? 'text-orange-600' : 'text-gray-600'
+                }`} />
+                <span className={`font-semibold ${
+                  webSocketDiagnostics.dataFreshness === 'real-time' ? 'text-emerald-900' :
+                  webSocketDiagnostics.dataFreshness === 'delayed' ? 'text-orange-900' : 'text-gray-900'
+                }`}>Dados</span>
+              </div>
+              <span className={`text-sm font-bold ${
+                webSocketDiagnostics.dataFreshness === 'real-time' ? 'text-emerald-600' :
+                webSocketDiagnostics.dataFreshness === 'delayed' ? 'text-orange-600' : 'text-gray-600'
+              }`}>
+                {webSocketDiagnostics.dataFreshness === 'real-time' ? 'Tempo Real' :
+                 webSocketDiagnostics.dataFreshness === 'delayed' ? 'Atrasados' : 'Desatualizados'}
+              </span>
             </div>
-          </div>
-
-          <div className={`p-3 rounded-lg border ${plcStatus.flooding ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
-            <div className="flex items-center gap-2">
-              {plcStatus.flooding ? (
-                <AlertCircle className="w-4 h-4 text-red-500" />
-              ) : (
-                <CheckCircle className="w-4 h-4 text-green-500" />
-              )}
-              <span className="text-sm font-medium text-gray-700">Inundação</span>
+            <div className={`text-sm ${
+              webSocketDiagnostics.dataFreshness === 'real-time' ? 'text-emerald-700' :
+              webSocketDiagnostics.dataFreshness === 'delayed' ? 'text-orange-700' : 'text-gray-700'
+            }`}>
+              Status dos Dados
             </div>
           </div>
         </div>

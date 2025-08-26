@@ -21,7 +21,7 @@ import { strapiUsersApi, type User, type UserRole } from '@/api/strapiUsers';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function UserManagement() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, isGerente, isSupervisor } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<UserRole[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,8 +52,9 @@ export default function UserManagement() {
   };
 
   const handleCreateUser = () => {
-    if (!isAdmin) {
-      alert('Apenas administradores podem criar usuários');
+    const canManage = isAdmin() || isGerente() || isSupervisor();
+    if (!canManage) {
+      alert('Apenas administradores, gerentes e supervisores podem criar usuários');
       return;
     }
     setEditingUser(null);
@@ -61,8 +62,9 @@ export default function UserManagement() {
   };
 
   const handleEditUser = (user: User) => {
-    if (!isAdmin) {
-      alert('Apenas administradores podem editar usuários');
+    const canManage = isAdmin() || isGerente() || isSupervisor();
+    if (!canManage) {
+      alert('Apenas administradores, gerentes e supervisores podem editar usuários');
       return;
     }
     setEditingUser(user);
@@ -70,8 +72,9 @@ export default function UserManagement() {
   };
 
   const handleDeleteUser = async (userId: number) => {
-    if (!isAdmin) {
-      alert('Apenas administradores podem excluir usuários');
+    const canManage = isAdmin() || isGerente() || isSupervisor();
+    if (!canManage) {
+      alert('Apenas administradores, gerentes e supervisores podem excluir usuários');
       return;
     }
 
@@ -147,7 +150,7 @@ export default function UserManagement() {
             </div>
           </div>
 
-          {isAdmin && (
+          {(isAdmin() || isGerente() || isSupervisor()) && (
             <button
               onClick={handleCreateUser}
               className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
@@ -213,7 +216,7 @@ export default function UserManagement() {
                   user={user}
                   onEdit={handleEditUser}
                   onDelete={handleDeleteUser}
-                  canEdit={isAdmin}
+                  canEdit={isAdmin() || isGerente() || isSupervisor()}
                 />
               ))}
             </div>

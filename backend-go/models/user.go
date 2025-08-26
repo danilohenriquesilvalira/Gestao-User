@@ -91,11 +91,11 @@ func SeedRoles(db *gorm.DB) error {
 		},
 		{
 			Name: "gerente", DisplayName: "Gerente", Description: "Gerenciamento operacional e supervisão",
-			Type: "gerente", Level: 80, Permissions: []string{"users.manage", "reports.view", "system.monitor", "eclusa.control"},
+			Type: "gerente", Level: 80, Permissions: []string{"users.view", "users.manage", "reports.view", "system.monitor", "eclusa.control"},
 		},
 		{
 			Name: "supervisor", DisplayName: "Supervisor", Description: "Supervisão de operações e equipe",
-			Type: "supervisor", Level: 70, Permissions: []string{"users.view", "reports.view", "eclusa.control", "maintenance.schedule"},
+			Type: "supervisor", Level: 70, Permissions: []string{"users.view", "users.manage", "reports.view", "eclusa.control", "maintenance.schedule"},
 		},
 		{
 			Name: "tecnico", DisplayName: "Técnico", Description: "Suporte técnico e manutenção especializada",

@@ -98,49 +98,47 @@ function TagsAdminContent() {
               {/* CARD PRINCIPAL COM ALTURA CALCULADA */}
               <div className="w-full h-full bg-white rounded-lg sm:rounded-xl shadow-lg border border-gray-200 overflow-hidden flex flex-col">
                 
-                {/* BARRA COLORIDA - MAIS FINA EM MOBILE */}
-                <div className={`h-2 sm:h-4 rounded-t-lg sm:rounded-t-xl ${
+                {/* BARRA ELEGANTE */}
+                <div className={`h-2 sm:h-3 rounded-t-lg sm:rounded-t-xl transition-colors duration-200 ${
                   activeTab === 'tags' ? 'bg-blue-500' :
                   activeTab === 'database' ? 'bg-green-500' : 'bg-purple-500'
-                }`} 
-                style={{
-                  backgroundColor: activeTab === 'tags' && tagsFilterCategory === 'all' ? '#3b82f6' : 
-                                  activeTab === 'tags' && tagsFilterCategory === 'Níveis' ? '#06b6d4' :
-                                  activeTab === 'tags' && tagsFilterCategory === 'Radares' ? '#a855f7' :
-                                  activeTab === 'tags' && tagsFilterCategory === 'Portas' ? '#f97316' :
-                                  activeTab === 'tags' && tagsFilterCategory === 'Lasers' ? '#eab308' :
-                                  activeTab === 'tags' && tagsFilterCategory === 'Semáforos' ? '#22c55e' :
-                                  activeTab === 'tags' && tagsFilterCategory === 'PipeSystem' ? '#6366f1' :
-                                  activeTab === 'tags' && tagsFilterCategory === 'Válvulas' ? '#ef4444' :
-                                  activeTab === 'tags' && tagsFilterCategory === 'Cotas' ? '#ec4899' : undefined
-                }}></div>
+                }`}></div>
                 
-                {/* HEADER MINIMALISTA */}
-                <div className="flex-shrink-0 p-3 border-b border-gray-100">
+                {/* HEADER COM TABS E STATUS */}
+                <div className="flex-shrink-0 p-4 border-b border-gray-100">
                   <div className="flex items-center justify-between">
                     
-                    {/* TABS SIMPLES */}
-                    <div className="flex gap-1">
+                    {/* TABS MODERNOS */}
+                    <div className="flex gap-2">
                       {tabs.map((tab) => (
                         <button
                           key={tab.id}
                           onClick={() => setActiveTab(tab.id)}
-                          className={`px-3 py-2 text-sm rounded-lg transition-colors flex items-center gap-2 ${
+                          className={`px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-2 ${
                             activeTab === tab.id
-                              ? 'bg-blue-500 text-white' 
+                              ? 'bg-blue-500 text-white shadow-sm' 
                               : 'text-gray-600 hover:bg-gray-100'
                           }`}
+                          style={{ fontFamily: '"Inter", sans-serif' }}
                         >
                           <span className="w-4 h-4">{tab.icon}</span>
                           <span>{tab.label}</span>
                         </button>
                       ))}
                     </div>
+
+                    {/* STATUS ONLINE */}
+                    <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
+                      <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                      <span className="text-sm font-medium text-gray-700" style={{ fontFamily: '"Inter", sans-serif' }}>
+                        Sistema Online
+                      </span>
+                    </div>
                   </div>
                 </div>
 
                 {/* CONTEÚDO COM ALTURA CALCULADA PRECISA */}
-                <div className="flex-1 min-h-0 overflow-hidden" style={{ height: 'calc(100% - 80px)' }}>
+                <div className="flex-1 min-h-0 overflow-hidden" style={{ height: 'calc(100% - 88px)' }}>
                   {activeTab === 'tags' && <TagsMonitor onFilterChange={setTagsFilterCategory} />}
                   {activeTab === 'database' && <DatabaseMonitor />}
                   {activeTab === 'server' && <ServerMonitor />}

@@ -54,8 +54,8 @@ interface TagsMonitorProps {
 export default function TagsMonitor({ onFilterChange }: TagsMonitorProps) {
   const webSocketData = useWebSocket('ws://localhost:1337/ws');
   const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [filterType, setFilterType] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [showOnlyActive, setShowOnlyActive] = useState(false);
   
   // PAGINAÇÃO DINÂMICA baseada na altura da tela
   const [currentPage, setCurrentPage] = useState(1);
@@ -395,11 +395,12 @@ export default function TagsMonitor({ onFilterChange }: TagsMonitorProps) {
   // Filtrar tags
   const filteredTags = tagsData.filter(tag => {
     const matchesCategory = filterCategory === 'all' || tag.category === filterCategory;
+    const matchesType = filterType === 'all' || tag.type === filterType;
     const matchesSearch = tag.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         tag.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesActive = !showOnlyActive || tag.status === 'active';
+                         tag.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         tag.category.toLowerCase().includes(searchTerm.toLowerCase());
     
-    return matchesCategory && matchesSearch && matchesActive;
+    return matchesCategory && matchesType && matchesSearch;
   });
   
   // PAGINAÇÃO
@@ -411,10 +412,11 @@ export default function TagsMonitor({ onFilterChange }: TagsMonitorProps) {
   // Reset page quando filtros mudam
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [filterCategory, searchTerm, showOnlyActive]);
+  }, [filterCategory, filterType, searchTerm]);
 
-  // Obter categorias únicas
+  // Obter categorias e tipos únicos
   const categories = ['all', ...Array.from(new Set(tagsData.map(tag => tag.category)))];
+  const dataTypes = ['all', ...Array.from(new Set(tagsData.map(tag => tag.type)))];
 
   // Função para obter ícone por categoria
   const getCategoryIcon = (category: string) => {
@@ -455,64 +457,102 @@ export default function TagsMonitor({ onFilterChange }: TagsMonitorProps) {
   return (
     <div className="w-full h-full flex flex-col overflow-hidden">
       
-      {/* HEADER MINIMALISTA */}
+      {/* HEADER LIMPO */}
       <div className="flex-shrink-0 bg-white border-b border-gray-100" style={{ height: '60px' }}>
-        <div className="h-full px-4 py-2 flex items-center justify-between">
+        <div className="h-full px-6 flex items-center justify-between gap-6">
           
-          {/* FILTROS COMPACTOS */}
-          <div className="flex items-center gap-3">
+          {/* CONTROLES MODERNOS */}
+          <div className="flex items-center gap-4">
             
             {/* Campo de Busca */}
             <div className="relative">
               <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                placeholder="Buscar tags..."
+                placeholder="Buscar por nome, categoria..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-40 pl-9 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:bg-white focus:border-blue-300 text-sm transition-colors"
+                className="w-64 pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl 
+                         focus:outline-none focus:bg-white focus:border-gray-300 focus:ring-1 focus:ring-gray-200
+                         text-sm transition-all duration-200 placeholder:text-gray-400"
+                style={{ fontFamily: '"Inter", sans-serif' }}
               />
             </div>
 
-            {/* Select Categoria */}
-            <select
-              value={filterCategory}
-              onChange={(e) => {
-                const newCategory = e.target.value;
-                setFilterCategory(newCategory);
-                onFilterChange?.(newCategory);
-              }}
-              className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:bg-white focus:border-blue-300 text-sm min-w-[90px]"
-            >
-              {categories.map(category => (
-                <option key={category} value={category}>
-                  {category === 'all' ? 'Todas' : category}
-                </option>
-              ))}
-            </select>
+            {/* Filtro por Categoria */}
+            <div className="relative">
+              <select
+                value={filterCategory}
+                onChange={(e) => {
+                  const newCategory = e.target.value;
+                  setFilterCategory(newCategory);
+                  onFilterChange?.(newCategory);
+                }}
+                className="appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 pr-10
+                         focus:outline-none focus:bg-white focus:border-gray-300 focus:ring-1 focus:ring-gray-200
+                         text-sm cursor-pointer transition-all duration-200 min-w-[140px]"
+                style={{ fontFamily: '"Inter", sans-serif' }}
+              >
+                <option value="all">Todas as categorias</option>
+                {categories.filter(cat => cat !== 'all').map(category => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
 
-            {/* Botão Apenas Ativos */}
-            <button
-              onClick={() => setShowOnlyActive(!showOnlyActive)}
-              className={`px-2 py-1.5 rounded-lg text-sm transition-colors ${
-                showOnlyActive 
-                  ? 'bg-blue-100 text-blue-700' 
-                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-              }`}
-              title={showOnlyActive ? 'Mostrar todas' : 'Apenas ativas'}
-            >
-              <Eye className="w-4 h-4" />
-            </button>
+            {/* Filtro por Tipo de Dados */}
+            <div className="relative">
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 pr-10
+                         focus:outline-none focus:bg-white focus:border-gray-300 focus:ring-1 focus:ring-gray-200
+                         text-sm cursor-pointer transition-all duration-200 min-w-[120px]"
+                style={{ fontFamily: '"Inter", sans-serif' }}
+              >
+                <option value="all">Todos os tipos</option>
+                {dataTypes.filter(type => type !== 'all').map(dataType => (
+                  <option key={dataType} value={dataType}>
+                    {dataType.toUpperCase()}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
           
-          {/* STATUS E MÉTRICAS NO FINAL */}
-          <div className="flex items-center gap-4 text-sm text-gray-500">
+          {/* MÉTRICAS SIMPLES */}
+          <div className="flex items-center gap-6 text-sm text-gray-600">
+            
+            {/* Contador de Tags */}
             <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${plcStatus.connected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-              <span>{plcStatus.connected ? 'Online' : 'Offline'}</span>
+              <Database className="w-4 h-4" />
+              <span className="font-mono font-semibold text-gray-900">
+                {webSocketDiagnostics.activeTags}/{webSocketDiagnostics.totalTags}
+              </span>
             </div>
-            <span className="hidden sm:inline">{webSocketDiagnostics.activeTags}/{webSocketDiagnostics.totalTags}</span>
-            <span className="hidden sm:inline">{webSocketDiagnostics.latency}ms</span>
+
+            {/* Latência */}
+            <div className="flex items-center gap-2">
+              <div className={`w-1.5 h-1.5 rounded-full ${
+                webSocketDiagnostics.latency < 100 ? 'bg-green-500' :
+                webSocketDiagnostics.latency < 300 ? 'bg-yellow-500' : 'bg-red-500'
+              }`}></div>
+              <span className="font-mono font-semibold text-gray-900">
+                {webSocketDiagnostics.latency}ms
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -527,43 +567,62 @@ export default function TagsMonitor({ onFilterChange }: TagsMonitorProps) {
         ) : (
           <>
             {/* LISTA RESPONSIVA */}
-            <div className="flex-1 overflow-auto" style={{ height: 'calc(100% - 40px)' }}>
+            <div className="flex-1 overflow-auto" style={{ height: 'calc(100% - 44px)' }}>
               
-              {/* MOBILE - Lista Limpa */}
-              <div className="block lg:hidden p-3 space-y-2">
+              {/* MOBILE - Cards Premium */}
+              <div className="block lg:hidden p-4 space-y-3" style={{ fontFamily: '"Inter", sans-serif' }}>
                 {paginatedTags.map((tag, index) => (
-                  <div key={index} className="bg-white border border-gray-100 rounded-lg p-3 hover:border-gray-200 transition-colors">
+                  <div key={index} 
+                       className="bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-xl p-4 
+                                shadow-sm hover:shadow-md hover:border-gray-300/50 
+                                transition-all duration-200 group">
                     <div className="flex items-center justify-between">
                       
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className={`w-2 h-2 rounded-full ${
-                          tag.status === 'active' ? 'bg-green-500' : 
-                          tag.status === 'error' ? 'bg-red-500' : 'bg-gray-300'
-                        }`}></div>
+                        <div className="relative">
+                          <div className={`w-2.5 h-2.5 rounded-full transition-all duration-200 ${
+                            tag.status === 'active' ? 'bg-green-500 shadow-green-500/30 shadow-lg' : 
+                            tag.status === 'error' ? 'bg-red-500 shadow-red-500/30 shadow-lg' : 'bg-gray-300'
+                          }`}>
+                            {tag.status === 'active' && (
+                              <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-20"></div>
+                            )}
+                          </div>
+                        </div>
                         
                         <div className="flex-1 min-w-0">
-                          <div className="font-mono text-sm text-gray-900 truncate mb-1">
+                          <div className="text-sm text-gray-900 truncate mb-2 group-hover:text-gray-800 transition-colors" 
+                               style={{ fontFamily: '"JetBrains Mono", monospace' }}>
                             {tag.name}
                           </div>
-                          <div className="flex items-center gap-2 text-xs text-gray-500">
-                            {getCategoryIcon(tag.category)}
-                            <span>{tag.category}</span>
-                            <span className="bg-gray-100 px-1.5 py-0.5 rounded text-xs font-mono">
-                              {tag.type}
+                          <div className="flex items-center gap-2.5 text-xs">
+                            <div className="flex items-center gap-1.5 text-gray-500">
+                              <div className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-500 transition-colors">
+                                {getCategoryIcon(tag.category)}
+                              </div>
+                              <span className="text-gray-600" style={{ fontFamily: '"Inter", sans-serif' }}>
+                                {tag.category}
+                              </span>
+                            </div>
+                            <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium 
+                                           bg-gray-100/80 text-gray-600 border border-gray-200/50"
+                                  style={{ fontFamily: '"Inter", sans-serif' }}>
+                              {tag.type.toUpperCase()}
                             </span>
                           </div>
                         </div>
                       </div>
                       
-                      <div className="text-right">
-                        <div className={`text-sm font-mono font-semibold ${
+                      <div className="text-right ml-3">
+                        <div className={`text-sm font-medium px-2 py-1 rounded-lg transition-all duration-200 ${
                           tag.type === 'bool' ? 
-                            (tag.value ? 'text-green-600' : 'text-gray-500') : 
-                            'text-blue-600'
-                        }`}>
+                            (tag.value ? 'text-green-700 bg-green-50 border border-green-200/50' : 'text-gray-500 bg-gray-50 border border-gray-200/50') : 
+                            'text-blue-700 bg-blue-50 border border-blue-200/50'
+                        }`} style={{ fontFamily: '"JetBrains Mono", monospace' }}>
                           {formatValue(tag.value, tag.type)}
                         </div>
-                        <div className="text-xs text-gray-400 mt-1">
+                        <div className="text-xs text-gray-400 mt-2 text-center" 
+                             style={{ fontFamily: '"JetBrains Mono", monospace' }}>
                           {tag.lastUpdate.toLocaleTimeString()}
                         </div>
                       </div>
@@ -572,67 +631,97 @@ export default function TagsMonitor({ onFilterChange }: TagsMonitorProps) {
                 ))}
               </div>
               
-              {/* DESKTOP - Tabela Profissional */}
-              <div className="hidden lg:block h-full">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-100">
-                      <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
-                      <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
-                      <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
-                      <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
-                      <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Atualizado</th>
+              {/* DESKTOP - Tabela Premium */}
+              <div className="hidden lg:block h-full bg-white">
+                <table className="w-full" style={{ fontFamily: '"Inter", sans-serif' }}>
+                  <thead className="bg-gradient-to-r from-gray-50/50 to-gray-50/30">
+                    <tr className="border-b border-gray-200/60">
+                      <th className="text-center py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider" 
+                          style={{ fontFamily: '"Inter", sans-serif' }}>Status</th>
+                      <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                          style={{ fontFamily: '"Inter", sans-serif' }}>Nome da Tag</th>
+                      <th className="text-center py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                          style={{ fontFamily: '"Inter", sans-serif' }}>Valor Atual</th>
+                      <th className="text-center py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                          style={{ fontFamily: '"Inter", sans-serif' }}>Tipo</th>
+                      <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                          style={{ fontFamily: '"Inter", sans-serif' }}>Categoria</th>
+                      <th className="text-center py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                          style={{ fontFamily: '"Inter", sans-serif' }}>Última Atualização</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-50">
+                  <tbody className="divide-y divide-gray-100/50">
                     {paginatedTags.map((tag, index) => (
-                      <tr key={index} className="hover:bg-gray-50/50 transition-colors">
+                      <tr key={index} 
+                          className="hover:bg-gradient-to-r hover:from-gray-50/30 hover:to-transparent 
+                                   transition-all duration-200 group border-l-2 border-transparent 
+                                   hover:border-l-blue-400/20 hover:shadow-sm">
                         
-                        <td className="py-3 px-4">
-                          <div className={`w-2 h-2 rounded-full ${
-                            tag.status === 'active' ? 'bg-green-500' : 
-                            tag.status === 'error' ? 'bg-red-500' : 'bg-gray-300'
-                          }`}></div>
+                        <td className="py-4 px-6 text-center">
+                          <div className="flex justify-center">
+                            <div className="relative">
+                              <div className={`w-2.5 h-2.5 rounded-full transition-all duration-200 ${
+                                tag.status === 'active' ? 'bg-green-500 shadow-green-500/30 shadow-md' : 
+                                tag.status === 'error' ? 'bg-red-500 shadow-red-500/30 shadow-md' : 'bg-gray-300'
+                              }`}>
+                                {tag.status === 'active' && (
+                                  <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-20"></div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
                         </td>
                         
-                        <td className="py-3 px-4">
-                          <span className="font-mono text-sm text-gray-900">
-                            {tag.name}
+                        <td className="py-4 px-6">
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm text-gray-900 group-hover:text-gray-800 transition-colors" 
+                                  style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                              {tag.name}
+                            </span>
+                          </div>
+                        </td>
+                        
+                        <td className="py-4 px-6 text-center">
+                          <div className="flex justify-center">
+                            <span className={`text-sm font-medium px-2 py-1 rounded-md transition-all duration-200 ${
+                              tag.type === 'bool' ? 
+                                (tag.value ? 'text-green-700 bg-green-50 border border-green-200/50' : 'text-gray-500 bg-gray-50 border border-gray-200/50') : 
+                                'text-blue-700 bg-blue-50 border border-blue-200/50'
+                            }`} style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                              {formatValue(tag.value, tag.type)}
+                            </span>
+                          </div>
+                        </td>
+                        
+                        <td className="py-4 px-6 text-center">
+                          <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium 
+                                         bg-gray-100/80 text-gray-700 border border-gray-200/50 
+                                         group-hover:bg-gray-200/60 transition-colors"
+                                style={{ fontFamily: '"Inter", sans-serif' }}>
+                            {tag.type.toUpperCase()}
                           </span>
                         </td>
                         
-                        <td className="py-3 px-4">
-                          <span className={`font-mono text-sm font-semibold ${
-                            tag.type === 'bool' ? 
-                              (tag.value ? 'text-green-600' : 'text-gray-500') : 
-                              'text-blue-600'
-                          }`}>
-                            {formatValue(tag.value, tag.type)}
-                          </span>
-                        </td>
-                        
-                        <td className="py-3 px-4">
-                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded font-mono">
-                            {tag.type}
-                          </span>
-                        </td>
-                        
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 text-gray-400">
+                        <td className="py-4 px-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-4 h-4 text-gray-400 group-hover:text-gray-500 transition-colors">
                               {getCategoryIcon(tag.category)}
                             </div>
-                            <span className="text-sm text-gray-700">
+                            <span className="text-sm text-gray-700 group-hover:text-gray-800 transition-colors"
+                                  style={{ fontFamily: '"Inter", sans-serif' }}>
                               {tag.category}
                             </span>
                           </div>
                         </td>
                         
-                        <td className="py-3 px-4">
-                          <span className="text-xs text-gray-500 font-mono">
-                            {tag.lastUpdate.toLocaleTimeString()}
-                          </span>
+                        <td className="py-4 px-6 text-center">
+                          <div className="flex flex-col items-center gap-0.5">
+                            <span className="text-xs text-gray-500 font-medium"
+                                  style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                              {tag.lastUpdate.toLocaleTimeString()}
+                            </span>
+                            <div className="w-1 h-1 bg-gray-300 rounded-full opacity-60"></div>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -641,27 +730,40 @@ export default function TagsMonitor({ onFilterChange }: TagsMonitorProps) {
               </div>
             </div>
             
-            {/* PAGINAÇÃO ULTRA MINIMALISTA */}
+            {/* PAGINAÇÃO ELEGANTE */}
             {totalPages > 1 && (
-              <div className="flex-shrink-0 border-t border-gray-100 bg-white px-4 py-2" style={{ height: '40px' }}>
+              <div className="flex-shrink-0 border-t border-gray-100/50 bg-white/95 backdrop-blur-sm px-6 py-3" 
+                   style={{ height: '44px', fontFamily: '"Inter", sans-serif' }}>
                 <div className="flex items-center justify-between h-full">
                   
-                  {/* Info Compacta */}
-                  <div className="text-xs text-gray-400">
-                    {startIndex + 1}-{Math.min(endIndex, filteredTags.length)} de {filteredTags.length}
+                  {/* Info da Paginação */}
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <div className="flex items-center gap-1">
+                      <span>Exibindo</span>
+                      <span className="font-semibold text-gray-700 px-1.5 py-0.5 bg-gray-100 rounded font-mono">
+                        {startIndex + 1}-{Math.min(endIndex, filteredTags.length)}
+                      </span>
+                      <span>de</span>
+                      <span className="font-semibold text-gray-700 px-1.5 py-0.5 bg-gray-100 rounded font-mono">
+                        {filteredTags.length}
+                      </span>
+                      <span>tags</span>
+                    </div>
                   </div>
                   
-                  {/* Controles Minimalistas */}
+                  {/* Controles de Navegação */}
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => setCurrentPage(currentPage - 1)}
                       disabled={currentPage === 1}
-                      className="w-6 h-6 text-gray-400 hover:text-blue-600 disabled:opacity-20 disabled:cursor-not-allowed transition-colors text-sm"
+                      className="w-8 h-8 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100/80 
+                               disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-150
+                               flex items-center justify-center text-sm font-medium border border-transparent hover:border-gray-200/50"
                     >
                       ←
                     </button>
                     
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-0.5 mx-2">
                       {Array.from({ length: Math.min(totalPages, 3) }, (_, i) => {
                         let page;
                         if (totalPages <= 3) {
@@ -679,10 +781,10 @@ export default function TagsMonitor({ onFilterChange }: TagsMonitorProps) {
                           <button
                             key={page}
                             onClick={() => setCurrentPage(page)}
-                            className={`w-6 h-6 text-xs rounded transition-colors ${
+                            className={`w-8 h-8 text-xs font-medium rounded-lg transition-all duration-150 ${
                               currentPage === page
-                                ? 'bg-blue-500 text-white'
-                                : 'text-gray-400 hover:text-blue-600 hover:bg-blue-50'
+                                ? 'bg-blue-500 text-white shadow-sm border border-blue-600/20'
+                                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100/80 border border-transparent hover:border-gray-200/50'
                             }`}
                           >
                             {page}
@@ -694,7 +796,9 @@ export default function TagsMonitor({ onFilterChange }: TagsMonitorProps) {
                     <button
                       onClick={() => setCurrentPage(currentPage + 1)}
                       disabled={currentPage === totalPages}
-                      className="w-6 h-6 text-gray-400 hover:text-blue-600 disabled:opacity-20 disabled:cursor-not-allowed transition-colors text-sm"
+                      className="w-8 h-8 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100/80 
+                               disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-150
+                               flex items-center justify-center text-sm font-medium border border-transparent hover:border-gray-200/50"
                     >
                       →
                     </button>

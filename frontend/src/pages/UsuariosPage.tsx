@@ -163,159 +163,159 @@ function UsuariosContent() {
                         </div>
                         <h3 className="text-lg font-semibold text-gray-900">Suas Permissões</h3>
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {currentUser?.role?.name === 'tecnico' && (
                           <>
-                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <Wrench className="w-4 h-4 text-purple-600" />
+                            <div className="flex items-center gap-3 p-4 bg-purple-50/60 rounded-xl border border-purple-200/50 hover:bg-purple-50 transition-colors">
+                              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <Wrench className="w-5 h-5 text-purple-600" />
                               </div>
-                              <span className="text-gray-800 font-medium">Manutenção Completa</span>
+                              <span className="text-gray-800 font-semibold" style={{ fontFamily: '"Inter", sans-serif' }}>Manutenção Completa</span>
                             </div>
-                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <Search className="w-4 h-4 text-purple-600" />
+                            <div className="flex items-center gap-3 p-4 bg-purple-50/60 rounded-xl border border-purple-200/50 hover:bg-purple-50 transition-colors">
+                              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <Search className="w-5 h-5 text-purple-600" />
                               </div>
-                              <span className="text-gray-800 font-medium">Diagnósticos</span>
+                              <span className="text-gray-800 font-semibold" style={{ fontFamily: '"Inter", sans-serif' }}>Diagnósticos</span>
                             </div>
-                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <Settings className="w-4 h-4 text-purple-600" />
+                            <div className="flex items-center gap-3 p-4 bg-purple-50/60 rounded-xl border border-purple-200/50 hover:bg-purple-50 transition-colors">
+                              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <Settings className="w-5 h-5 text-purple-600" />
                               </div>
-                              <span className="text-gray-800 font-medium">Debug do Sistema</span>
+                              <span className="text-gray-800 font-semibold" style={{ fontFamily: '"Inter", sans-serif' }}>Debug do Sistema</span>
                             </div>
-                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <Activity className="w-4 h-4 text-purple-600" />
+                            <div className="flex items-center gap-3 p-4 bg-purple-50/60 rounded-xl border border-purple-200/50 hover:bg-purple-50 transition-colors">
+                              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <Activity className="w-5 h-5 text-purple-600" />
                               </div>
-                              <span className="text-gray-800 font-medium">Manutenção de Eclusa</span>
+                              <span className="text-gray-800 font-semibold" style={{ fontFamily: '"Inter", sans-serif' }}>Manutenção de Eclusa</span>
                             </div>
                           </>
                         )}
                         
                         {currentUser?.role?.name === 'operador' && (
                           <>
-                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <Gamepad2 className="w-4 h-4 text-purple-600" />
+                            <div className="flex items-center gap-3 p-4 bg-purple-50/60 rounded-xl border border-purple-200/50 hover:bg-purple-50 transition-colors">
+                              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <Gamepad2 className="w-5 h-5 text-purple-600" />
                               </div>
-                              <span className="text-gray-800 font-medium">Operação de Eclusa</span>
+                              <span className="text-gray-800 font-semibold" style={{ fontFamily: '"Inter", sans-serif' }}>Operação de Eclusa</span>
                             </div>
-                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <BarChart3 className="w-4 h-4 text-purple-600" />
+                            <div className="flex items-center gap-3 p-4 bg-purple-50/60 rounded-xl border border-purple-200/50 hover:bg-purple-50 transition-colors">
+                              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <BarChart3 className="w-5 h-5 text-purple-600" />
                               </div>
-                              <span className="text-gray-800 font-medium">Relatórios Básicos</span>
+                              <span className="text-gray-800 font-semibold" style={{ fontFamily: '"Inter", sans-serif' }}>Relatórios Básicos</span>
                             </div>
-                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <Radio className="w-4 h-4 text-purple-600" />
+                            <div className="flex items-center gap-3 p-4 bg-purple-50/60 rounded-xl border border-purple-200/50 hover:bg-purple-50 transition-colors">
+                              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <Radio className="w-5 h-5 text-purple-600" />
                               </div>
-                              <span className="text-gray-800 font-medium">Monitoramento</span>
+                              <span className="text-gray-800 font-semibold" style={{ fontFamily: '"Inter", sans-serif' }}>Monitoramento</span>
                             </div>
                           </>
                         )}
 
                         {currentUser?.role?.name === 'visitante' && (
                           <>
-                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <Eye className="w-4 h-4 text-purple-600" />
+                            <div className="flex items-center gap-3 p-4 bg-purple-50/60 rounded-xl border border-purple-200/50 hover:bg-purple-50 transition-colors">
+                              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <Eye className="w-5 h-5 text-purple-600" />
                               </div>
-                              <span className="text-gray-800 font-medium">Visualização do Dashboard</span>
+                              <span className="text-gray-800 font-semibold" style={{ fontFamily: '"Inter", sans-serif' }}>Visualização do Dashboard</span>
                             </div>
-                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <BarChart3 className="w-4 h-4 text-purple-600" />
+                            <div className="flex items-center gap-3 p-4 bg-purple-50/60 rounded-xl border border-purple-200/50 hover:bg-purple-50 transition-colors">
+                              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <BarChart3 className="w-5 h-5 text-purple-600" />
                               </div>
-                              <span className="text-gray-800 font-medium">Relatórios Básicos</span>
+                              <span className="text-gray-800 font-semibold" style={{ fontFamily: '"Inter", sans-serif' }}>Relatórios Básicos</span>
                             </div>
                           </>
                         )}
 
                         {currentUser?.role?.name === 'supervisor' && (
                           <>
-                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <Users className="w-4 h-4 text-purple-600" />
+                            <div className="flex items-center gap-3 p-4 bg-purple-50/60 rounded-xl border border-purple-200/50 hover:bg-purple-50 transition-colors">
+                              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <Users className="w-5 h-5 text-purple-600" />
                               </div>
-                              <span className="text-gray-800 font-medium">Visualizar Usuários</span>
+                              <span className="text-gray-800 font-semibold" style={{ fontFamily: '"Inter", sans-serif' }}>Visualizar Usuários</span>
                             </div>
-                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <BarChart3 className="w-4 h-4 text-purple-600" />
+                            <div className="flex items-center gap-3 p-4 bg-purple-50/60 rounded-xl border border-purple-200/50 hover:bg-purple-50 transition-colors">
+                              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <BarChart3 className="w-5 h-5 text-purple-600" />
                               </div>
-                              <span className="text-gray-800 font-medium">Relatórios</span>
+                              <span className="text-gray-800 font-semibold" style={{ fontFamily: '"Inter", sans-serif' }}>Relatórios</span>
                             </div>
-                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <Gamepad2 className="w-4 h-4 text-purple-600" />
+                            <div className="flex items-center gap-3 p-4 bg-purple-50/60 rounded-xl border border-purple-200/50 hover:bg-purple-50 transition-colors">
+                              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <Gamepad2 className="w-5 h-5 text-purple-600" />
                               </div>
-                              <span className="text-gray-800 font-medium">Controle de Eclusa</span>
+                              <span className="text-gray-800 font-semibold" style={{ fontFamily: '"Inter", sans-serif' }}>Controle de Eclusa</span>
                             </div>
-                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <Calendar className="w-4 h-4 text-purple-600" />
+                            <div className="flex items-center gap-3 p-4 bg-purple-50/60 rounded-xl border border-purple-200/50 hover:bg-purple-50 transition-colors">
+                              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <Calendar className="w-5 h-5 text-purple-600" />
                               </div>
-                              <span className="text-gray-800 font-medium">Agendamento</span>
+                              <span className="text-gray-800 font-semibold" style={{ fontFamily: '"Inter", sans-serif' }}>Agendamento</span>
                             </div>
                           </>
                         )}
 
                         {currentUser?.role?.name === 'gerente' && (
                           <>
-                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <Users className="w-4 h-4 text-purple-600" />
+                            <div className="flex items-center gap-3 p-4 bg-purple-50/60 rounded-xl border border-purple-200/50 hover:bg-purple-50 transition-colors">
+                              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <Users className="w-5 h-5 text-purple-600" />
                               </div>
-                              <span className="text-gray-800 font-medium">Gerenciar Usuários</span>
+                              <span className="text-gray-800 font-semibold" style={{ fontFamily: '"Inter", sans-serif' }}>Gerenciar Usuários</span>
                             </div>
-                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <BarChart3 className="w-4 h-4 text-purple-600" />
+                            <div className="flex items-center gap-3 p-4 bg-purple-50/60 rounded-xl border border-purple-200/50 hover:bg-purple-50 transition-colors">
+                              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <BarChart3 className="w-5 h-5 text-purple-600" />
                               </div>
-                              <span className="text-gray-800 font-medium">Todos os Relatórios</span>
+                              <span className="text-gray-800 font-semibold" style={{ fontFamily: '"Inter", sans-serif' }}>Todos os Relatórios</span>
                             </div>
-                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <Radio className="w-4 h-4 text-purple-600" />
+                            <div className="flex items-center gap-3 p-4 bg-purple-50/60 rounded-xl border border-purple-200/50 hover:bg-purple-50 transition-colors">
+                              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <Radio className="w-5 h-5 text-purple-600" />
                               </div>
-                              <span className="text-gray-800 font-medium">Monitoramento</span>
+                              <span className="text-gray-800 font-semibold" style={{ fontFamily: '"Inter", sans-serif' }}>Monitoramento</span>
                             </div>
-                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <Gamepad2 className="w-4 h-4 text-purple-600" />
+                            <div className="flex items-center gap-3 p-4 bg-purple-50/60 rounded-xl border border-purple-200/50 hover:bg-purple-50 transition-colors">
+                              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <Gamepad2 className="w-5 h-5 text-purple-600" />
                               </div>
-                              <span className="text-gray-800 font-medium">Controle de Eclusa</span>
+                              <span className="text-gray-800 font-semibold" style={{ fontFamily: '"Inter", sans-serif' }}>Controle de Eclusa</span>
                             </div>
                           </>
                         )}
 
                         {currentUser?.role?.name === 'admin' && (
                           <>
-                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <Crown className="w-4 h-4 text-purple-600" />
+                            <div className="flex items-center gap-3 p-4 bg-purple-50/60 rounded-xl border border-purple-200/50 hover:bg-purple-50 transition-colors">
+                              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <Crown className="w-5 h-5 text-purple-600" />
                               </div>
-                              <span className="text-gray-800 font-medium">Acesso Total</span>
+                              <span className="text-gray-800 font-semibold" style={{ fontFamily: '"Inter", sans-serif' }}>Acesso Total</span>
                             </div>
-                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <Users className="w-4 h-4 text-purple-600" />
+                            <div className="flex items-center gap-3 p-4 bg-purple-50/60 rounded-xl border border-purple-200/50 hover:bg-purple-50 transition-colors">
+                              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <Users className="w-5 h-5 text-purple-600" />
                               </div>
-                              <span className="text-gray-800 font-medium">Gerenciar Usuários</span>
+                              <span className="text-gray-800 font-semibold" style={{ fontFamily: '"Inter", sans-serif' }}>Gerenciar Usuários</span>
                             </div>
-                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <Settings className="w-4 h-4 text-purple-600" />
+                            <div className="flex items-center gap-3 p-4 bg-purple-50/60 rounded-xl border border-purple-200/50 hover:bg-purple-50 transition-colors">
+                              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <Settings className="w-5 h-5 text-purple-600" />
                               </div>
-                              <span className="text-gray-800 font-medium">Configurações</span>
+                              <span className="text-gray-800 font-semibold" style={{ fontFamily: '"Inter", sans-serif' }}>Configurações</span>
                             </div>
-                            <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
-                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <Wrench className="w-4 h-4 text-purple-600" />
+                            <div className="flex items-center gap-3 p-4 bg-purple-50/60 rounded-xl border border-purple-200/50 hover:bg-purple-50 transition-colors">
+                              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <Wrench className="w-5 h-5 text-purple-600" />
                               </div>
-                              <span className="text-gray-800 font-medium">Todas as Funções</span>
+                              <span className="text-gray-800 font-semibold" style={{ fontFamily: '"Inter", sans-serif' }}>Todas as Funções</span>
                             </div>
                           </>
                         )}
@@ -323,12 +323,13 @@ function UsuariosContent() {
                     </div>
 
                     {/* INFORMAÇÕES ADICIONAIS */}
-                    <div className="mt-6 sm:mt-8 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                    <div className="mt-8 p-6 bg-gradient-to-r from-gray-50 to-gray-100/50 rounded-xl border border-gray-200/50 
+                               shadow-sm hover:shadow-md transition-all duration-200">
                       <div className="text-center">
-                        <div className="w-8 h-8 bg-gray-400 rounded-lg flex items-center justify-center mx-auto mb-2">
-                          <Info className="w-4 h-4 text-white" />
+                        <div className="w-12 h-12 bg-gradient-to-br from-gray-500 to-gray-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                          <Info className="w-6 h-6 text-white" />
                         </div>
-                        <p className="text-sm text-gray-600 font-medium">
+                        <p className="text-sm text-gray-700 font-semibold" style={{ fontFamily: '"Inter", sans-serif' }}>
                           Para alterações em seu perfil, entre em contato com o administrador do sistema.
                         </p>
                       </div>

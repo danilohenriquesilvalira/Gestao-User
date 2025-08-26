@@ -136,89 +136,109 @@ export default function UserManagement() {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 mb-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-              <Users className="w-5 h-5 text-white" />
+    <div className="w-full h-full flex flex-col overflow-hidden">
+      
+      {/* CARD PRINCIPAL COM BARRA VERDE */}
+      <div className="flex-1 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden flex flex-col">
+        
+        {/* BARRA VERDE ELEGANTE */}
+        <div className="h-3 bg-green-500 rounded-t-xl"></div>
+        
+        {/* HEADER MODERNO */}
+        <div className="flex-shrink-0 bg-white border-b border-gray-100" style={{ height: '140px' }}>
+          <div className="h-full p-6 flex flex-col justify-between">
+            
+            {/* Título e Ações */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900" style={{ fontFamily: '"Inter", sans-serif' }}>Gerenciamento de Usuários</h1>
+                  <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: '"Inter", sans-serif' }}>
+                    <span className="font-mono font-semibold text-gray-700">{filteredUsers.length}</span> usuários encontrados
+                  </p>
+                </div>
+              </div>
+
+              {(isAdmin() || isGerente() || isSupervisor()) && (
+                <button
+                  onClick={handleCreateUser}
+                  className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl font-medium"
+                  style={{ fontFamily: '"Inter", sans-serif' }}
+                >
+                  <Plus className="w-5 h-5" />
+                  Novo Usuário
+                </button>
+              )}
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">Gerenciamento de Usuários</h1>
-              <p className="text-sm text-gray-500">{filteredUsers.length} usuários encontrados</p>
+
+            {/* Filtros Modernos */}
+            <div className="flex flex-col sm:flex-row gap-4 mt-4">
+              <div className="flex-1 relative">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Buscar por nome ou email..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl 
+                           focus:outline-none focus:bg-white focus:border-gray-300 focus:ring-1 focus:ring-gray-200
+                           text-sm transition-all duration-200 placeholder:text-gray-400"
+                  style={{ fontFamily: '"Inter", sans-serif' }}
+                />
+              </div>
+
+              <div className="relative">
+                <select
+                  value={selectedRole}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                  className="appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 pr-10
+                           focus:outline-none focus:bg-white focus:border-gray-300 focus:ring-1 focus:ring-gray-200
+                           text-sm cursor-pointer transition-all duration-200 min-w-[160px]"
+                  style={{ fontFamily: '"Inter", sans-serif' }}
+                >
+                  <option value="all">Todos os Perfis</option>
+                  {roles.map(role => (
+                    <option key={role.id} value={role.name}>
+                      {role.displayName || role.name}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
             </div>
           </div>
-
-          {(isAdmin() || isGerente() || isSupervisor()) && (
-            <button
-              onClick={handleCreateUser}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Novo Usuário
-            </button>
-          )}
         </div>
 
-        {/* Filtros */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Buscar por nome ou email..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          <div className="relative">
-            <select
-              value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value)}
-              className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">Todos os Perfis</option>
-              {roles.map(role => (
-                <option key={role.id} value={role.name}>
-                  {role.displayName || role.name}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="w-4 h-4 absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
-          </div>
-        </div>
-      </div>
-
-      {/* Lista de usuários */}
-      <div className="flex-1 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-        <div className="p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <Shield className="w-5 h-5 text-blue-500" />
-            Lista de Usuários
-          </h2>
-        </div>
-
-        <div className="overflow-auto h-full">
+        {/* CONTEÚDO PRINCIPAL */}
+        <div className="flex-1 overflow-hidden" style={{ height: 'calc(100% - 143px)' }}>
           {filteredUsers.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-              <Users className="w-16 h-16 text-gray-300 mb-4" />
-              <p className="text-lg font-medium">Nenhum usuário encontrado</p>
-              <p className="text-sm">Tente ajustar os filtros de busca</p>
+            <div className="flex flex-col items-center justify-center h-full text-gray-400">
+              <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-4">
+                <Users className="w-8 h-8 text-gray-300" />
+              </div>
+              <p className="text-lg font-medium text-gray-500" style={{ fontFamily: '"Inter", sans-serif' }}>Nenhum usuário encontrado</p>
+              <p className="text-sm text-gray-400 mt-1" style={{ fontFamily: '"Inter", sans-serif' }}>Tente ajustar os filtros de busca</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 p-4">
-              {filteredUsers.map(user => (
-                <UserCard
-                  key={user.id}
-                  user={user}
-                  onEdit={handleEditUser}
-                  onDelete={handleDeleteUser}
-                  canEdit={isAdmin() || isGerente() || isSupervisor()}
-                />
-              ))}
+            <div className="h-full overflow-auto bg-gray-50/50">
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 p-6">
+                {filteredUsers.map(user => (
+                  <UserCard
+                    key={user.id}
+                    user={user}
+                    onEdit={handleEditUser}
+                    onDelete={handleDeleteUser}
+                    canEdit={isAdmin() || isGerente() || isSupervisor()}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </div>

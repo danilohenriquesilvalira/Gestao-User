@@ -19,7 +19,7 @@ export default function NivelJusante({
   componentWidth,
   componentHeight
 }: NivelJusanteProps) {
-  const [nivelAtual, setNivelAtual] = useState(nivel);
+  const [nivelAtual, setNivelAtual] = useState<number | null>(null);
   const [isManualControl] = useState(false);
 
   useEffect(() => {
@@ -27,6 +27,14 @@ export default function NivelJusante({
       setNivelAtual(websocketValue);
     }
   }, [websocketValue, isManualControl]);
+
+  // ✅ NÃO RENDERIZA ATÉ TER DADOS REAIS (a menos que esteja em edit mode)
+  if (nivelAtual === null && !editMode) {
+    return null;
+  }
+
+  // Usa valor real ou fallback para edit mode
+  const displayNivel = nivelAtual ?? nivel;
 
   return (
     <ResponsiveWrapper 
@@ -58,7 +66,7 @@ export default function NivelJusante({
         >
           <defs>
             <clipPath id="nivelJusanteClip">
-              <rect x="0" y={73 - (nivelAtual / 100) * 73} width="185" height={(nivelAtual / 100) * 73} />
+              <rect x="0" y={73 - (displayNivel / 100) * 73} width="185" height={(displayNivel / 100) * 73} />
             </clipPath>
           </defs>
           <path

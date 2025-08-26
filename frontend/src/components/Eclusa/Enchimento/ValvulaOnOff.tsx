@@ -108,12 +108,12 @@ const ValvulaOnOff: React.FC<ValvulaOnOffProps> = ({
         
         .valvula-onoff-wrapper[data-state="1"] .valvula-svg {
           opacity: 1;
-          filter: drop-shadow(0 0 4px #00FF09);
+          /* Removido efeito de brilho verde - apenas cor sólida */
         }
         
         .valvula-onoff-wrapper[data-state="2"] .valvula-svg {
           opacity: 1;
-          filter: drop-shadow(0 0 4px #FF0000);
+          /* Removido efeito de brilho vermelho - apenas cor sólida */
           animation: valve-error 1s ease-in-out infinite alternate;
         }
         

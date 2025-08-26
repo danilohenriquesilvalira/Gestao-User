@@ -19,7 +19,7 @@ export default function NivelMontante({
   componentWidth,
   componentHeight
 }: NivelMontanteProps) {
-  const [nivelAtual, setNivelAtual] = useState(nivel);
+  const [nivelAtual, setNivelAtual] = useState<number | null>(null);
   const [isManualControl] = useState(false);
 
   useEffect(() => {
@@ -27,6 +27,14 @@ export default function NivelMontante({
       setNivelAtual(websocketValue);
     }
   }, [websocketValue, isManualControl]);
+
+  // ✅ NÃO RENDERIZA ATÉ TER DADOS REAIS (a menos que esteja em edit mode)
+  if (nivelAtual === null && !editMode) {
+    return null;
+  }
+
+  // Usa valor real ou fallback para edit mode
+  const displayNivel = nivelAtual ?? nivel;
 
   return (
     <ResponsiveWrapper 
@@ -58,7 +66,7 @@ export default function NivelMontante({
         >
           <defs>
             <clipPath id="nivelMontanteClip">
-              <rect x="0" y={137 - (nivelAtual / 100) * 137} width="296" height={(nivelAtual / 100) * 137} />
+              <rect x="0" y={137 - (displayNivel / 100) * 137} width="296" height={(displayNivel / 100) * 137} />
             </clipPath>
           </defs>
           <path

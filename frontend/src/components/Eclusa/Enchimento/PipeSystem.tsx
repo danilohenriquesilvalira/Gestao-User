@@ -285,7 +285,7 @@ const PipeSystem: React.FC<PipeSystemProps> = ({
         }
         
         .pipe-active {
-          filter: drop-shadow(0 0 6px #FC6500);
+          /* Removido efeito de brilho - apenas cor sólida */
         }
         
         .pipe-inactive {

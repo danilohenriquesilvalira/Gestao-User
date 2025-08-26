@@ -67,7 +67,10 @@ function PortaJusanteContent() {
   const [editMode, setEditMode] = useState(false);
   const { canEditLayout } = useAuth();
   const { isAllLoaded } = useLayoutLoading();
-  const { nivelValue, motorValue, contrapesoDirectoValue, contrapesoEsquerdoValue, motorDireitoValue, motorEsquerdoValue, isConnected, error, lastMessage } = useWebSocket('ws://localhost:1337/ws');
+  const { nivelValue, motorValue, contrapesoDirectoValue, contrapesoEsquerdoValue, motorDireitoValue, motorEsquerdoValue, isConnected, isDataReady, error, lastMessage } = useWebSocket('ws://localhost:1337/ws');
+
+  // ✅ CONDIÇÃO OTIMIZADA: Só aguarda componentes carregarem, não dados do WebSocket
+  const isFullyReady = isAllLoaded;
 
   const handleLogout = () => {
     window.location.replace('/');
@@ -75,16 +78,20 @@ function PortaJusanteContent() {
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-gray-100">
-      {!isAllLoaded && (
+      {!isFullyReady && (
         <EdpLoading
           title="Porta Jusante"
           subtitle="Sistema de Controle Industrial EDP"
-          status="Carregando componentes..."
+          status={
+            !isAllLoaded ? 'Carregando componentes...' : 
+            false ? 'Aguardando dados do PLC...' :
+            'Sistema pronto'
+          }
           size="lg"
         />
       )}
 
-      {isAllLoaded && (
+      {isFullyReady && (
         <>
           <ModernHeader
             title="Porta Jusante - Sistema de Controle"

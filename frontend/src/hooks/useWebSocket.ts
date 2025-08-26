@@ -60,6 +60,9 @@ interface UseWebSocketReturn {
   // ✅ Array ValvulasOnOFF [0..5]
   valvulasOnOff: number[];
   
+  // ✅ NOVO: Estado indicando se dados iniciais estão prontos
+  isDataReady: boolean;
+  
   isConnected: boolean;
   error: string | null;
   lastMessage: string | null;
@@ -74,6 +77,10 @@ let reconnectAttempts = 0;
 
 // ✅ CACHE GLOBAL DOS ÚLTIMOS DADOS RECEBIDOS
 let lastReceivedData: any = null;
+
+// ✅ ESTADO GLOBAL PARA INDICAR SE DADOS INICIAIS ESTÃO PRONTOS
+let isInitialDataReceived = false;
+let connectionTimeout: NodeJS.Timeout | null = null;
 
 function connectGlobalWebSocket(url: string) {
   if (globalWebSocket?.readyState === WebSocket.OPEN || isConnecting) {
@@ -98,15 +105,19 @@ function connectGlobalWebSocket(url: string) {
       reconnectAttempts = 0;
       notifyGlobalListeners({ type: 'connected', connected: true });
       
+      // ✅ TIMEOUT DE 2 SEGUNDOS PARA MARCAR COMO PRONTO MESMO SEM DADOS
+      connectionTimeout = setTimeout(() => {
+        if (!isInitialDataReceived) {
+          console.log('⚡ Timeout: marcando dados como prontos após 2s de conexão');
+          isInitialDataReceived = true;
+          notifyGlobalListeners({ type: 'data_ready', ready: true });
+        }
+      }, 2000);
+      
       // ✅ ENVIA DADOS EM CACHE PARA NOVOS LISTENERS (se existirem)
       if (lastReceivedData) {
         console.log('📤 Enviando dados em cache para novos listeners');
         notifyGlobalListeners({ type: 'data', ...lastReceivedData });
-      } else {
-        // ✅ ENVIA DADOS PADRÃO PARA GARANTIR QUE A INTERFACE CARREGUE
-        console.log('📤 Enviando dados padrão iniciais');
-        // ✅ SEM DADOS PADRÃO - AGUARDA PLC
-        console.log('📡 Aguardando dados do PLC...');
       }
     };
 
@@ -114,10 +125,18 @@ function connectGlobalWebSocket(url: string) {
       try {
         const data = JSON.parse(event.data);
         
-        // ✅ SALVA DADOS NO CACHE GLOBAL
-        if (!data.ping && data.semaforos) {
+        // ✅ SALVA DADOS NO CACHE GLOBAL E MARCA COMO PRONTO
+        if (!data.ping) {
           lastReceivedData = data;
-          console.log('💾 Dados salvos no cache:', data);
+          if (!isInitialDataReceived) {
+            isInitialDataReceived = true;
+            console.log('💾 Dados salvos no cache e marcados como prontos:', data);
+            if (connectionTimeout) {
+              clearTimeout(connectionTimeout);
+              connectionTimeout = null;
+            }
+            notifyGlobalListeners({ type: 'data_ready', ready: true });
+          }
         }
         
         notifyGlobalListeners({ type: 'data', ...data });
@@ -170,18 +189,17 @@ function addGlobalListener(callback: (data: any) => void) {
   globalListeners.add(callback);
   console.log(`👂 Listener adicionado. Total: ${globalListeners.size}`);
   
-  // ✅ ENVIA DADOS EM CACHE IMEDIATAMENTE PARA NOVOS LISTENERS
-  if (lastReceivedData) {
+  // ✅ ENVIA DADOS EM CACHE IMEDIATAMENTE PARA NOVOS LISTENERS (SE DISPONÍVEL)
+  if (lastReceivedData && isInitialDataReceived) {
     console.log('📤 Enviando dados em cache para novo listener');
     setTimeout(() => {
       callback({ type: 'data', ...lastReceivedData });
+      callback({ type: 'data_ready', ready: true });
     }, 100); // Pequeno delay para garantir que o component está montado
   } else {
-    // ✅ ENVIA DADOS PADRÃO PARA GARANTIR QUE COMPONENTE FUNCIONE
-    console.log('📤 Enviando dados padrão para novo listener');
+    console.log('📡 Novo listener aguardando dados iniciais do PLC...');
     setTimeout(() => {
-      // ✅ SEM DADOS PADRÃO - AGUARDA PLC
-      console.log('📡 Novo listener aguardando dados do PLC...');
+      callback({ type: 'data_ready', ready: false });
     }, 100);
   }
 }
@@ -211,52 +229,52 @@ function removeGlobalListener(callback: (data: any) => void) {
 }
 
 export function useWebSocket(url: string): UseWebSocketReturn {
-  // ✅ ESTADOS INICIALIZADOS COM VALORES PADRÃO PARA EVITAR LOADING INFINITO
-  const [nivelCaldeiraValue, setNivelCaldeiraValue] = useState<number | null>(75);
-  const [nivelMontanteValue, setNivelMontanteValue] = useState<number | null>(68);
-  const [nivelJusanteValue, setNivelJusanteValue] = useState<number | null>(82);
+  // ✅ ESTADOS INICIALIZADOS COM NULL - SÓ RENDERIZAM APÓS DADOS REAIS
+  const [nivelCaldeiraValue, setNivelCaldeiraValue] = useState<number | null>(null);
+  const [nivelMontanteValue, setNivelMontanteValue] = useState<number | null>(null);
+  const [nivelJusanteValue, setNivelJusanteValue] = useState<number | null>(null);
   
-  // ✅ ESTADOS COM VALORES PADRÃO PARA EVITAR LOADING INFINITO
-  const [radarCaldeiraDistanciaValue, setRadarCaldeiraDistanciaValue] = useState<number | null>(12.5);
-  const [radarCaldeiraVelocidadeValue, setRadarCaldeiraVelocidadeValue] = useState<number | null>(0);
-  const [radarMontanteDistanciaValue, setRadarMontanteDistanciaValue] = useState<number | null>(15.0);
-  const [radarMontanteVelocidadeValue, setRadarMontanteVelocidadeValue] = useState<number | null>(0);
-  const [radarJusanteDistanciaValue, setRadarJusanteDistanciaValue] = useState<number | null>(18.0);
-  const [radarJusanteVelocidadeValue, setRadarJusanteVelocidadeValue] = useState<number | null>(0);
+  // ✅ RADARES INICIALIZADOS COM NULL
+  const [radarCaldeiraDistanciaValue, setRadarCaldeiraDistanciaValue] = useState<number | null>(null);
+  const [radarCaldeiraVelocidadeValue, setRadarCaldeiraVelocidadeValue] = useState<number | null>(null);
+  const [radarMontanteDistanciaValue, setRadarMontanteDistanciaValue] = useState<number | null>(null);
+  const [radarMontanteVelocidadeValue, setRadarMontanteVelocidadeValue] = useState<number | null>(null);
+  const [radarJusanteDistanciaValue, setRadarJusanteDistanciaValue] = useState<number | null>(null);
+  const [radarJusanteVelocidadeValue, setRadarJusanteVelocidadeValue] = useState<number | null>(null);
   
-  // ✅ ESTADOS DAS PORTAS COM VALORES PADRÃO
-  const [eclusaPortaJusanteValue, setEclusaPortaJusanteValue] = useState<number | null>(0);
-  const [eclusaPortaMontanteValue, setEclusaPortaMontanteValue] = useState<number | null>(0);
+  // ✅ PORTAS INICIALIZADAS COM NULL
+  const [eclusaPortaJusanteValue, setEclusaPortaJusanteValue] = useState<number | null>(null);
+  const [eclusaPortaMontanteValue, setEclusaPortaMontanteValue] = useState<number | null>(null);
   
-  // ✅ ESTADOS DOS LASERS COM VALORES PADRÃO
-  const [laserMontanteValue, setLaserMontanteValue] = useState<number | null>(0);
-  const [laserJusanteValue, setLaserJusanteValue] = useState<number | null>(0);
+  // ✅ LASERS INICIALIZADOS COM NULL
+  const [laserMontanteValue, setLaserMontanteValue] = useState<number | null>(null);
+  const [laserJusanteValue, setLaserJusanteValue] = useState<number | null>(null);
   
-  // ✅ STATUS DA ECLUSA COM VALORES PADRÃO
-  const [comunicacaoPLCValue, setComunicacaoPLCValue] = useState<boolean | null>(true);
-  const [operacaoValue, setOperacaoValue] = useState<boolean | null>(true);
-  const [alarmesAtivoValue, setAlarmesAtivoValue] = useState<boolean | null>(false);
-  const [emergenciaAtivaValue, setEmergenciaAtivaValue] = useState<boolean | null>(false);
-  const [inundacaoValue, setInundacaoValue] = useState<boolean | null>(false);
+  // ✅ STATUS DA ECLUSA INICIALIZADOS COM NULL
+  const [comunicacaoPLCValue, setComunicacaoPLCValue] = useState<boolean | null>(null);
+  const [operacaoValue, setOperacaoValue] = useState<boolean | null>(null);
+  const [alarmesAtivoValue, setAlarmesAtivoValue] = useState<boolean | null>(null);
+  const [emergenciaAtivaValue, setEmergenciaAtivaValue] = useState<boolean | null>(null);
+  const [inundacaoValue, setInundacaoValue] = useState<boolean | null>(null);
   
-  // Estados legados com valores padrão
-  const [nivelValue, setNivelValue] = useState<number | null>(75);
-  const [motorValue, setMotorValue] = useState<number | null>(0);
-  const [contrapesoDirectoValue, setContrapesoDirectoValue] = useState<number | null>(0);
-  const [contrapesoEsquerdoValue, setContrapesoEsquerdoValue] = useState<number | null>(0);
-  const [motorDireitoValue, setMotorDireitoValue] = useState<number | null>(0);
-  const [motorEsquerdoValue, setMotorEsquerdoValue] = useState<number | null>(0);
+  // ✅ Estados legados inicializados com NULL
+  const [nivelValue, setNivelValue] = useState<number | null>(null);
+  const [motorValue, setMotorValue] = useState<number | null>(null);
+  const [contrapesoDirectoValue, setContrapesoDirectoValue] = useState<number | null>(null);
+  const [contrapesoEsquerdoValue, setContrapesoEsquerdoValue] = useState<number | null>(null);
+  const [motorDireitoValue, setMotorDireitoValue] = useState<number | null>(null);
+  const [motorEsquerdoValue, setMotorEsquerdoValue] = useState<number | null>(null);
   
-  // Estados para Porta Montante com valores padrão
-  const [portaMontanteValue, setPortaMontanteValue] = useState<number | null>(0);
-  const [portaMontanteContrapesoDirectoValue, setPortaMontanteContrapesoDirectoValue] = useState<number | null>(0);
-  const [portaMontanteContrapesoEsquerdoValue, setPortaMontanteContrapesoEsquerdoValue] = useState<number | null>(0);
-  const [portaMontanteMotorDireitoValue, setPortaMontanteMotorDireitoValue] = useState<number | null>(0);
-  const [portaMontanteMotorEsquerdoValue, setPortaMontanteMotorEsquerdoValue] = useState<number | null>(0);
-  const [radarDistanciaValue, setRadarDistanciaValue] = useState<number | null>(12.5);
-  const [cotaMontanteValue, setCotaMontanteValue] = useState<number | null>(15);
-  const [cotaCaldeiraValue, setCotaCaldeiraValue] = useState<number | null>(12);
-  const [cotaJusanteValue, setCotaJusanteValue] = useState<number | null>(8);
+  // ✅ Estados para Porta Montante inicializados com NULL
+  const [portaMontanteValue, setPortaMontanteValue] = useState<number | null>(null);
+  const [portaMontanteContrapesoDirectoValue, setPortaMontanteContrapesoDirectoValue] = useState<number | null>(null);
+  const [portaMontanteContrapesoEsquerdoValue, setPortaMontanteContrapesoEsquerdoValue] = useState<number | null>(null);
+  const [portaMontanteMotorDireitoValue, setPortaMontanteMotorDireitoValue] = useState<number | null>(null);
+  const [portaMontanteMotorEsquerdoValue, setPortaMontanteMotorEsquerdoValue] = useState<number | null>(null);
+  const [radarDistanciaValue, setRadarDistanciaValue] = useState<number | null>(null);
+  const [cotaMontanteValue, setCotaMontanteValue] = useState<number | null>(null);
+  const [cotaCaldeiraValue, setCotaCaldeiraValue] = useState<number | null>(null);
+  const [cotaJusanteValue, setCotaJusanteValue] = useState<number | null>(null);
   
   const [semaforos, setSemaforos] = useState<Record<string, boolean>>({});
   
@@ -266,7 +284,10 @@ export function useWebSocket(url: string): UseWebSocketReturn {
   // ✅ Array ValvulasOnOFF [0..5] - inicializado com 6 elementos 0
   const [valvulasOnOff, setValvulasOnOff] = useState<number[]>(new Array(6).fill(0));
   
-  const [isConnected, setIsConnected] = useState(true); // Inicia como conectado para evitar loading
+  // ✅ NOVO: Estado indicando se dados iniciais estão prontos
+  const [isDataReady, setIsDataReady] = useState(false);
+  
+  const [isConnected, setIsConnected] = useState(true); // Inicia como conectado
   const [error, setError] = useState<string | null>(null);
   const [lastMessage, setLastMessage] = useState<string | null>(null);
   
@@ -286,11 +307,20 @@ export function useWebSocket(url: string): UseWebSocketReturn {
       setError(data.error);
       setIsConnected(false);
       console.log('❌ Hook: Erro WebSocket');
+    } else if (data.type === 'data_ready') {
+      setIsDataReady(data.ready);
+      console.log(`📊 Hook: Dados ${data.ready ? 'prontos' : 'não prontos'}`);
     } else if (data.type === 'data') {
       // Filtra ping messages
       if (data.ping) return;
       
       console.log('📊 Processando dados do PLC no hook:', data);
+      
+      // ✅ MARCA DADOS COMO PRONTOS NA PRIMEIRA RECEPÇÃO VÁLIDA
+      if (!isDataReady) {
+        setIsDataReady(true);
+        console.log('✅ Primeira recepção de dados - marcando como prontos');
+      }
       
       // ✅ PROCESSA NOVOS NÍVEIS DA ECLUSA
       if (data.nivelCaldeiraValue !== undefined) {
@@ -621,6 +651,9 @@ export function useWebSocket(url: string): UseWebSocketReturn {
     // ✅ Arrays de dados
     pipeSystem,
     valvulasOnOff,
+    
+    // ✅ Estado de dados prontos
+    isDataReady,
     
     isConnected,
     error,

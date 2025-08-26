@@ -19,7 +19,7 @@ export default function NivelCaldeira({
   componentWidth,
   componentHeight
 }: NivelCaldeiraProps) {
-  const [nivelAtual, setNivelAtual] = useState(nivel);
+  const [nivelAtual, setNivelAtual] = useState<number | null>(null);
   const [isManualControl] = useState(false);
 
   useEffect(() => {
@@ -27,6 +27,14 @@ export default function NivelCaldeira({
       setNivelAtual(websocketValue);
     }
   }, [websocketValue, isManualControl]);
+
+  // ✅ NÃO RENDERIZA ATÉ TER DADOS REAIS (a menos que esteja em edit mode)
+  if (nivelAtual === null && !editMode) {
+    return null;
+  }
+
+  // Usa valor real ou fallback para edit mode
+  const displayNivel = nivelAtual ?? nivel;
 
   return (
     <ResponsiveWrapper 
@@ -58,7 +66,7 @@ export default function NivelCaldeira({
         >
           <defs>
             <clipPath id="nivelCaldeiraClip">
-              <rect x="0" y={158 - (nivelAtual / 100) * 158} width="687" height={(nivelAtual / 100) * 158} />
+              <rect x="0" y={158 - (displayNivel / 100) * 158} width="687" height={(displayNivel / 100) * 158} />
             </clipPath>
           </defs>
           <path

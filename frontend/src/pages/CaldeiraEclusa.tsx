@@ -84,12 +84,13 @@ function DashboardContent() {
     nivelMontanteValue, 
     nivelJusanteValue,
     motorValue, 
-    isConnected, 
+    isConnected,
+    isDataReady,
     error, 
     lastMessage 
   } = useWebSocket('ws://localhost:1337/ws');
 
-  // ✅ CONDIÇÃO CORRIGIDA: Layout carregado (WebSocket é iniciado como conectado)
+  // ✅ CONDIÇÃO OTIMIZADA: Só aguarda componentes carregarem, não dados do WebSocket
   const isFullyReady = isAllLoaded;
 
   const handleLogout = () => {
@@ -105,6 +106,7 @@ function DashboardContent() {
           subtitle="Sistema de Gestão Industrial EDP"
           status={
             !isAllLoaded ? 'Carregando componentes...' : 
+            false ? 'Aguardando dados do PLC...' :
             'Sistema pronto'
           }
           size="lg"

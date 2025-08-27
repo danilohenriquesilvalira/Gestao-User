@@ -124,19 +124,19 @@ const DashboardRegua: React.FC = () => {
     switch (tipo) {
       case 'Crítico':
         return (
-          <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3 h-3 sm:w-4 sm:h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2L1 21h22L12 2zm0 3.5L19.5 19h-15L12 5.5zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/>
           </svg>
         );
       case 'Aviso':
         return (
-          <svg className="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
           </svg>
         );
       default:
         return (
-          <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
           </svg>
         );
@@ -231,10 +231,10 @@ const DashboardRegua: React.FC = () => {
           </div>
 
           {/* Informações principais em grid limpo - Mobile First */}
-          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
+          <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1.5 xs:gap-2 sm:gap-3">
             
             {/* Operador */}
-            <div className="col-span-1 xs:col-span-2 sm:col-span-1 md:col-span-1 lg:col-span-1 bg-gray-50 rounded-lg p-2 sm:p-3">
+            <div className="col-span-2 xs:col-span-2 sm:col-span-1 md:col-span-1 lg:col-span-1 bg-gray-50 rounded-lg p-1.5 xs:p-2 sm:p-3">
               <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
                 <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
@@ -249,46 +249,46 @@ const DashboardRegua: React.FC = () => {
               </div>
             </div>
 
-            {/* Níveis de Água - 3 colunas */}
-            <div className="bg-blue-50 rounded-lg p-2 sm:p-3">
-              <div className="text-xs text-blue-600 uppercase tracking-wide mb-1">Montante</div>
+            {/* Níveis de Água - 3 colunas Mobile First */}
+            <div className="bg-blue-50 rounded-lg p-1.5 xs:p-2 sm:p-3">
+              <div className="text-xs text-blue-600 uppercase tracking-wide mb-1">Mont.</div>
               <div className="text-xs sm:text-sm font-bold text-blue-800">{reguaData.cotaMontante}</div>
             </div>
 
-            <div className="bg-blue-50 rounded-lg p-2 sm:p-3">
-              <div className="text-xs text-blue-600 uppercase tracking-wide mb-1">Caldeira</div>
+            <div className="bg-blue-50 rounded-lg p-1.5 xs:p-2 sm:p-3">
+              <div className="text-xs text-blue-600 uppercase tracking-wide mb-1">Cald.</div>
               <div className="text-xs sm:text-sm font-bold text-blue-800">{reguaData.cotaCaldeira}</div>
             </div>
 
-            <div className="bg-blue-50 rounded-lg p-2 sm:p-3">
-              <div className="text-xs text-blue-600 uppercase tracking-wide mb-1">Jusante</div>
+            <div className="bg-blue-50 rounded-lg p-1.5 xs:p-2 sm:p-3">
+              <div className="text-xs text-blue-600 uppercase tracking-wide mb-1">Just.</div>
               <div className="text-xs sm:text-sm font-bold text-blue-800">{reguaData.cotaJusante}</div>
             </div>
 
             {/* Status Geral */}
-            <div className="col-span-1 xs:col-span-2 sm:col-span-1 md:col-span-1 lg:col-span-1 bg-gray-50 rounded-lg p-2 sm:p-3">
+            <div className="col-span-2 xs:col-span-2 sm:col-span-1 md:col-span-1 lg:col-span-1 bg-gray-50 rounded-lg p-1.5 xs:p-2 sm:p-3">
               <div className="text-xs text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Status Sistemas</div>
               <div className="flex justify-between items-center">
                 <div className="flex flex-col items-center gap-1">
                   <svg className={`w-3 h-3 sm:w-4 sm:h-4 ${reguaData.comunicacao === 'Online' ? 'text-green-500' : 'text-red-500'}`} fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
                   </svg>
-                  <span className="text-xs text-gray-600 hidden sm:block">COM</span>
-                  <span className="text-xs text-gray-600 sm:hidden">C</span>
+                  <span className="text-xs text-gray-600 hidden xs:block">COM</span>
+                  <span className="text-xs text-gray-600 xs:hidden">C</span>
                 </div>
                 <div className="flex flex-col items-center gap-1">
                   <svg className={`w-3 h-3 sm:w-4 sm:h-4 ${reguaData.inundacao === 'Normal' ? 'text-green-500' : 'text-red-500'}`} fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 3.77L11.25 4.61C11.25 4.61 6 10.26 6 14c0 3.31 2.69 6 6 6s6-2.69 6-6c0-3.74-5.25-9.39-5.25-9.39L12 3.77zM12 18.5c-2.49 0-4.5-2.01-4.5-4.5 0-1.77 2.79-5.75 4.5-7.72 1.71 1.97 4.5 5.95 4.5 7.72 0 2.49-2.01 4.5-4.5 4.5z"/>
                   </svg>
-                  <span className="text-xs text-gray-600 hidden sm:block">NIV</span>
-                  <span className="text-xs text-gray-600 sm:hidden">N</span>
+                  <span className="text-xs text-gray-600 hidden xs:block">NIV</span>
+                  <span className="text-xs text-gray-600 xs:hidden">N</span>
                 </div>
                 <div className="flex flex-col items-center gap-1">
                   <svg className={`w-3 h-3 sm:w-4 sm:h-4 ${!reguaData.emergencia ? 'text-green-500' : 'text-red-500'}`} fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 5.99L19.53 19H4.47L12 5.99M12 2L1 21h22L12 2zm1 14h-2v2h2v-2zm0-6h-2v4h2v-4z"/>
                   </svg>
-                  <span className="text-xs text-gray-600 hidden sm:block">EMG</span>
-                  <span className="text-xs text-gray-600 sm:hidden">E</span>
+                  <span className="text-xs text-gray-600 hidden xs:block">EMG</span>
+                  <span className="text-xs text-gray-600 xs:hidden">E</span>
                 </div>
               </div>
             </div>
@@ -297,12 +297,12 @@ const DashboardRegua: React.FC = () => {
       </div>
 
       {/* CONTENT AREA - ALARMES E FALHAS - Mobile First */}
-      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-5 gap-2 sm:gap-3 lg:gap-4 overflow-hidden">
+      <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 xl:grid-cols-5 gap-2 xs:gap-3 sm:gap-4 lg:gap-4 overflow-hidden">
         
         {/* ALARMES - Mobile First */}
-        <div className="lg:col-span-1 xl:col-span-2 bg-white rounded-lg sm:rounded-xl shadow-lg border border-gray-200 overflow-hidden flex flex-col max-h-full">
-          <div className="h-3 bg-orange-500 rounded-t-xl"></div>
-          <div className="p-2 sm:p-3 lg:p-4 flex-1 flex flex-col min-h-0">
+        <div className="lg:col-span-1 xl:col-span-2 bg-white rounded-lg xs:rounded-xl shadow-lg border border-gray-200 overflow-hidden flex flex-col max-h-full">
+          <div className="h-2 xs:h-3 bg-orange-500 rounded-t-xl"></div>
+          <div className="p-2 xs:p-3 sm:p-4 lg:p-4 flex-1 flex flex-col min-h-0">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-2 sm:mb-3 flex-shrink-0">
               <div className="flex items-center gap-1 sm:gap-2">
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" fill="currentColor" viewBox="0 0 24 24">
@@ -418,9 +418,9 @@ const DashboardRegua: React.FC = () => {
         </div>
 
         {/* ANÁLISE DE FALHAS - Mobile First */}
-        <div className="lg:col-span-2 xl:col-span-3 bg-white rounded-lg sm:rounded-xl shadow-lg border border-gray-200 overflow-hidden flex flex-col">
-          <div className="h-3 bg-red-500 rounded-t-xl"></div>
-          <div className="p-2 sm:p-3 lg:p-4 flex-1 flex flex-col">
+        <div className="lg:col-span-2 xl:col-span-3 bg-white rounded-lg xs:rounded-xl shadow-lg border border-gray-200 overflow-hidden flex flex-col">
+          <div className="h-2 xs:h-3 bg-red-500 rounded-t-xl"></div>
+          <div className="p-2 xs:p-3 sm:p-4 lg:p-4 flex-1 flex flex-col">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-2 sm:mb-3">
               <div className="flex items-center gap-1 sm:gap-2">
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
@@ -430,12 +430,12 @@ const DashboardRegua: React.FC = () => {
               </div>
               
               {/* Filtros compactos - Mobile Optimized */}
-              <div className="flex gap-1 flex-wrap overflow-x-auto">
+              <div className="flex gap-1 xs:gap-1.5 flex-wrap overflow-x-auto">
                 {chartOptions.map((option) => (
                   <button
                     key={option.id}
                     onClick={() => setSelectedChart(option.id)}
-                    className={`px-2 sm:px-3 py-1.5 sm:py-2 text-xs rounded-lg transition-all flex items-center gap-1 sm:gap-2 ${
+                    className={`px-1.5 xs:px-2 sm:px-3 py-1 xs:py-1.5 sm:py-2 text-xs rounded-lg transition-all flex items-center gap-1 sm:gap-2 ${
                       selectedChart === option.id
                         ? 'bg-red-500 text-white shadow-md'
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -443,7 +443,7 @@ const DashboardRegua: React.FC = () => {
                     title={option.label}
                   >
                     <span className="flex-shrink-0">{option.icon}</span>
-                    <span className="hidden md:inline lg:hidden xl:inline text-xs">{option.label}</span>
+                    <span className="hidden sm:inline md:hidden lg:inline text-xs">{option.label}</span>
                   </button>
                 ))}
               </div>
@@ -477,14 +477,14 @@ const DashboardRegua: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Legenda moderna */}
-                  <div className="flex-shrink-0 mt-4">
-                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                  {/* Legenda moderna - Mobile First */}
+                  <div className="flex-shrink-0 mt-2 xs:mt-3 sm:mt-4">
+                    <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-1.5 xs:gap-2 sm:gap-3">
                       {equipamentosEclusa.map((item, index) => (
-                        <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                          <div className="w-4 h-4 rounded-full flex-shrink-0" style={{ backgroundColor: item.cor }}></div>
+                        <div key={index} className="flex items-center gap-1.5 xs:gap-2 sm:gap-3 p-1.5 xs:p-2 sm:p-3 bg-gray-50 rounded-lg xs:rounded-lg sm:rounded-xl border border-gray-100">
+                          <div className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 rounded-full flex-shrink-0" style={{ backgroundColor: item.cor }}></div>
                           <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium text-gray-800 truncate">{item.equipamento}</div>
+                            <div className="text-xs xs:text-xs sm:text-sm font-medium text-gray-800 truncate">{item.equipamento}</div>
                             <div className="text-xs text-gray-500">{item.falhas} falha{item.falhas !== 1 ? 's' : ''}</div>
                           </div>
                         </div>
@@ -526,57 +526,57 @@ const DashboardRegua: React.FC = () => {
               )}
 
               {selectedChart === 'equipment' && (
-                <div className="h-full flex flex-col gap-3 overflow-y-auto">
+                <div className="h-full flex flex-col gap-2 sm:gap-3 overflow-y-auto">
                   {equipamentosEclusa.map((item, index) => (
-                    <div key={index} className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-200">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: `${item.cor}20`, border: `2px solid ${item.cor}` }}>
+                    <div key={index} className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-gray-200 hover:shadow-md transition-all duration-200">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+                        <div className="flex items-center gap-3 sm:gap-4">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: `${item.cor}20`, border: `2px solid ${item.cor}` }}>
                             {/* Ícones específicos por equipamento */}
                             {item.equipamento === 'Enchimento' && (
-                              <svg className="w-6 h-6" style={{ color: item.cor }} fill="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: item.cor }} fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M12 3.77L11.25 4.61C11.25 4.61 6 10.26 6 14c0 3.31 2.69 6 6 6s6-2.69 6-6c0-3.74-5.25-9.39-5.25-9.39L12 3.77z"/>
                               </svg>
                             )}
                             {item.equipamento === 'Esvaziamento' && (
-                              <svg className="w-6 h-6" style={{ color: item.cor }} fill="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: item.cor }} fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
                               </svg>
                             )}
                             {item.equipamento === 'Porta Jusante' && (
-                              <svg className="w-6 h-6" style={{ color: item.cor }} fill="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: item.cor }} fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M19 19V5c0-1.1-.9-2-2-2H7c-1.1 0-2 .9-2 2v14H3v2h18v-2h-2zM8 19V7h8v12H8z"/>
                               </svg>
                             )}
                             {item.equipamento === 'Porta Montante' && (
-                              <svg className="w-6 h-6" style={{ color: item.cor }} fill="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: item.cor }} fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M19 19V5c0-1.1-.9-2-2-2H7c-1.1 0-2 .9-2 2v14H3v2h18v-2h-2zM8 19V7h8v12H8z"/>
                               </svg>
                             )}
                             {item.equipamento === 'Sala Comando' && (
-                              <svg className="w-6 h-6" style={{ color: item.cor }} fill="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: item.cor }} fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M21 2H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h7l-2 3v1h8v-1l-2-3h7c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 12H3V4h18v10z"/>
                               </svg>
                             )}
                             {item.equipamento === 'Esgoto e Drenagem' && (
-                              <svg className="w-6 h-6" style={{ color: item.cor }} fill="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: item.cor }} fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
                               </svg>
                             )}
                           </div>
                           <div>
-                            <div className="text-lg font-semibold text-gray-800">{item.equipamento}</div>
-                            <div className="text-sm text-gray-500">{item.descricao}</div>
+                            <div className="text-base sm:text-lg font-semibold text-gray-800">{item.equipamento}</div>
+                            <div className="text-xs sm:text-sm text-gray-500">{item.descricao}</div>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-2xl font-bold" style={{ color: item.cor }}>{item.falhas}</div>
+                          <div className="text-xl sm:text-2xl font-bold" style={{ color: item.cor }}>{item.falhas}</div>
                           <div className="text-xs text-gray-500 font-medium">falha{item.falhas !== 1 ? 's' : ''} ativa{item.falhas !== 1 ? 's' : ''}</div>
                         </div>
                       </div>
                       
                       {/* Barra de progresso visual */}
-                      <div className="mt-3 w-full bg-gray-200 rounded-full h-2">
+                      <div className="mt-2 sm:mt-3 w-full bg-gray-200 rounded-full h-2">
                         <div 
                           className="h-2 rounded-full transition-all duration-300" 
                           style={{ 
@@ -593,27 +593,27 @@ const DashboardRegua: React.FC = () => {
               {selectedChart === 'failures' && (
                 <div className="h-full flex flex-col">
                   {/* Gráfico de barras personalizado */}
-                  <div className="flex-1 space-y-3 overflow-y-auto">
+                  <div className="flex-1 space-y-2 sm:space-y-3 overflow-y-auto">
                     {falhasPorTipo.map((sistema, index) => {
                       const maxQuantidade = Math.max(...falhasPorTipo.map(f => f.quantidade));
                       const porcentagem = maxQuantidade > 0 ? (sistema.quantidade / maxQuantidade) * 100 : 0;
                       
                       return (
-                        <div key={index} className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-200">
+                        <div key={index} className="bg-gradient-to-r from-gray-50 to-white rounded-lg sm:rounded-xl p-3 sm:p-4 border border-gray-200 hover:shadow-md transition-all duration-200">
                           {/* Header do sistema */}
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-3">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-2 sm:mb-3">
+                            <div className="flex items-center gap-2 sm:gap-3">
                               <div 
                                 className="w-4 h-4 rounded-full"
                                 style={{ backgroundColor: sistema.cor }}
                               ></div>
                               <div>
-                                <h4 className="font-semibold text-gray-800 text-sm">{sistema.tipo}</h4>
+                                <h4 className="font-semibold text-gray-800 text-xs sm:text-sm">{sistema.tipo}</h4>
                                 <p className="text-xs text-gray-500">Sistema de falhas</p>
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className="text-xl font-bold" style={{ color: sistema.cor }}>
+                              <div className="text-lg sm:text-xl font-bold" style={{ color: sistema.cor }}>
                                 {sistema.quantidade}
                               </div>
                               <div className="text-xs text-gray-500">ativas</div>
@@ -641,7 +641,7 @@ const DashboardRegua: React.FC = () => {
                           </div>
 
                           {/* Indicadores de status */}
-                          <div className="flex gap-4 mt-3">
+                          <div className="flex flex-wrap gap-2 sm:gap-4 mt-2 sm:mt-3">
                             <div className="flex items-center gap-2">
                               <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                               <span className="text-xs text-gray-600">
@@ -667,14 +667,14 @@ const DashboardRegua: React.FC = () => {
                   </div>
 
                   {/* Resumo */}
-                  <div className="flex-shrink-0 mt-4 bg-red-50 rounded-xl p-4 border border-red-200">
-                    <div className="flex items-center justify-between">
+                  <div className="flex-shrink-0 mt-3 sm:mt-4 bg-red-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-red-200">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
                       <div>
-                        <h4 className="font-semibold text-red-800 text-sm">Resumo Geral</h4>
+                        <h4 className="font-semibold text-red-800 text-xs sm:text-sm">Resumo Geral</h4>
                         <p className="text-xs text-red-600">Total de falhas por sistema</p>
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-red-700">
+                        <div className="text-xl sm:text-2xl font-bold text-red-700">
                           {falhasPorTipo.reduce((acc, f) => acc + f.quantidade, 0)}
                         </div>
                         <div className="text-xs text-red-600">falhas ativas</div>

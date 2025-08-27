@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
 // 1. Definir os tipos de item de navegação
@@ -7,8 +7,23 @@ type NavItem = 'dashboard' | 'eclusa' | 'enchimento' | 'porta_jusante' | 'porta_
 export default function ModernSidebar() {
   const { isAdmin } = useAuth();
   const [isHovered, setIsHovered] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   // 2. Usar o tipo 'NavItem' para o estado 'activeItem'
   const [activeItem, setActiveItem] = useState<NavItem>('dashboard');
+
+  // Detectar se é mobile
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const checkIsMobile = () => {
+        setIsMobile(window.innerWidth < 768);
+      };
+      
+      checkIsMobile();
+      window.addEventListener('resize', checkIsMobile);
+      
+      return () => window.removeEventListener('resize', checkIsMobile);
+    }
+  }, []);
 
   // Detectar a página atual automaticamente
   useEffect(() => {
@@ -83,18 +98,21 @@ export default function ModernSidebar() {
   };
 
   return (
-    <div
-      className="fixed left-0 top-1/2 transform -translate-y-1/2 z-50 hidden md:block"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Container principal */}
-      <div className={`relative transition-all duration-300 ease-out ${
-        isHovered ? 'translate-x-0' : '-translate-x-[52px]'
-      }`}>
+    <>
+      {/* Desktop Sidebar - Lateral esquerda - APENAS DESKTOP */}
+      {!isMobile && (
+        <div
+          className="fixed left-0 top-1/2 transform -translate-y-1/2 z-50"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+        {/* Container principal */}
+        <div className={`relative transition-all duration-300 ease-out ${
+          isHovered ? 'translate-x-0' : '-translate-x-[52px]'
+        }`}>
         
-        {/* 3 Traços quando recuado */}
-        <div className={`absolute left-[36px] top-1/2 transform -translate-y-1/2 flex flex-col space-y-2 transition-opacity duration-300 ${
+        {/* 3 Traços quando recuado - APENAS DESKTOP */}
+        <div className={`absolute left-[36px] top-1/2 transform -translate-y-1/2 flex flex-col space-y-2 transition-opacity duration-300 hidden md:block ${
           isHovered ? 'opacity-0' : 'opacity-100'
         }`}>
           <div className="w-7 h-1 bg-green-400 rounded-full shadow-md"></div>
@@ -102,8 +120,8 @@ export default function ModernSidebar() {
           <div className="w-7 h-1 bg-purple-400 rounded-full shadow-md"></div>
         </div>
 
-        {/* SVG Container */}
-        <div className={`transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'} drop-shadow-lg`}>
+        {/* SVG Container - APENAS DESKTOP */}
+        <div className={`transition-opacity duration-300 hidden md:block ${isHovered ? 'opacity-100' : 'opacity-0'} drop-shadow-lg`}>
           <svg width="88" height="620" viewBox="0 0 88 620" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M43.175 52C15.543 44 2.878 14 0 0V310H88V94C88 67 70.867 59.6 43.175 52Z" fill="#131827"/>
             <path d="M43.175 568C15.543 576 2.878 606 0 620V310H88V526C88 553 70.867 560.4 43.175 568Z" fill="#131827"/>
@@ -172,21 +190,14 @@ export default function ModernSidebar() {
               onClick={() => handleItemClick('porta_montante')}
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Contorno principal */}
                 <rect x="2" y="2" width="20" height="20" fill={getIconColor('porta_montante')} stroke={getIconColor('porta_montante')} strokeWidth="1"/>
-                
-                {/* Barra superior */}
                 <rect x="2" y="2" width="20" height="3" fill="#4D4D4D"/>
-                
-                {/* Grid 3x3 de painéis */}
                 <rect x="3" y="6" width="5" height="4" fill="#4D4D4D" stroke="white" strokeWidth="0.5"/>
                 <rect x="9.5" y="6" width="5" height="4" fill="#4D4D4D" stroke="white" strokeWidth="0.5"/>
                 <rect x="16" y="6" width="5" height="4" fill="#4D4D4D" stroke="white" strokeWidth="0.5"/>
-                
                 <rect x="3" y="11" width="5" height="4" fill="#4D4D4D" stroke="white" strokeWidth="0.5"/>
                 <rect x="9.5" y="11" width="5" height="4" fill="#4D4D4D" stroke="white" strokeWidth="0.5"/>
                 <rect x="16" y="11" width="5" height="4" fill="#4D4D4D" stroke="white" strokeWidth="0.5"/>
-                
                 <rect x="3" y="16" width="5" height="4" fill="#4D4D4D" stroke="white" strokeWidth="0.5"/>
                 <rect x="9.5" y="16" width="5" height="4" fill="#4D4D4D" stroke="white" strokeWidth="0.5"/>
                 <rect x="16" y="16" width="5" height="4" fill="#4D4D4D" stroke="white" strokeWidth="0.5"/>
@@ -226,10 +237,122 @@ export default function ModernSidebar() {
                 </button>
               </div>
             )}
-
           </div>
         </div>
-      </div>
-    </div>
+        </div>
+        </div>
+      )}
+
+      {/* Mobile Bottom Navigation - APENAS MOBILE */}
+      {isMobile && (
+        <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-[#131827] border-t border-slate-700 h-16 w-full">
+        <div className="grid grid-cols-5 gap-0 h-full">
+          
+          {/* Dashboard */}
+          <button 
+            className={`flex flex-col items-center justify-center py-1 px-1 transition-all h-full ${
+              activeItem === 'dashboard' 
+                ? 'bg-slate-700/80 border-t-2 border-green-400' 
+                : 'hover:bg-slate-700/50 active:bg-slate-700/50'
+            }`}
+            onClick={() => handleItemClick('dashboard')}
+          >
+            <svg className={`w-5 h-5 mb-1 ${activeItem === 'dashboard' ? 'text-green-400' : 'text-slate-400'}`} fill="currentColor" viewBox="0 0 24 24">
+              <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
+            </svg>
+            <span className={`text-xs font-medium ${activeItem === 'dashboard' ? 'text-green-400' : 'text-slate-400'} text-center`}>
+              Dashboard
+            </span>
+          </button>
+
+          {/* Eclusa */}
+          <button 
+            className={`flex flex-col items-center justify-center py-1 px-1 transition-all h-full ${
+              activeItem === 'eclusa' 
+                ? 'bg-slate-700/80 border-t-2 border-green-400' 
+                : 'hover:bg-slate-700/50 active:bg-slate-700/50'
+            }`}
+            onClick={() => handleItemClick('eclusa')}
+          >
+            <svg className={`w-5 h-5 mb-1 ${activeItem === 'eclusa' ? 'text-green-400' : 'text-slate-400'}`} fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 3.77L11.25 4.61C11.25 4.61 6 10.26 6 14c0 3.31 2.69 6 6 6s6-2.69 6-6c0-3.74-5.25-9.39-5.25-9.39L12 3.77z"/>
+            </svg>
+            <span className={`text-xs font-medium ${activeItem === 'eclusa' ? 'text-green-400' : 'text-slate-400'} text-center`}>
+              Eclusa
+            </span>
+          </button>
+
+          {/* Enchimento */}
+          <button 
+            className={`flex flex-col items-center justify-center py-1 px-1 transition-all h-full ${
+              activeItem === 'enchimento' 
+                ? 'bg-slate-700/80 border-t-2 border-green-400' 
+                : 'hover:bg-slate-700/50 active:bg-slate-700/50'
+            }`}
+            onClick={() => handleItemClick('enchimento')}
+          >
+            <svg className={`w-5 h-5 mb-1 ${activeItem === 'enchimento' ? 'text-green-400' : 'text-slate-400'}`} fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2l-2 4h-8v2h8l2-4 2 4h8v-2h-8l-2-4zm0 6l-2 4h-8v2h8l2-4 2 4h8v-2h-8l-2-4z"/>
+            </svg>
+            <span className={`text-xs font-medium ${activeItem === 'enchimento' ? 'text-green-400' : 'text-slate-400'} text-center`}>
+              Enchimento
+            </span>
+          </button>
+
+          {/* Porta Jusante */}
+          <button 
+            className={`flex flex-col items-center justify-center py-1 px-1 transition-all h-full ${
+              activeItem === 'porta_jusante' 
+                ? 'bg-slate-700/80 border-t-2 border-green-400' 
+                : 'hover:bg-slate-700/50 active:bg-slate-700/50'
+            }`}
+            onClick={() => handleItemClick('porta_jusante')}
+          >
+            <svg className={`w-5 h-5 mb-1 ${activeItem === 'porta_jusante' ? 'text-green-400' : 'text-slate-400'}`} fill="currentColor" viewBox="0 0 24 24">
+              <rect x="6" y="2" width="12" height="20" rx="2" />
+              <circle cx="10" cy="7" r="1" fill={activeItem === 'porta_jusante' ? '#374151' : '#64748b'} />
+              <circle cx="14" cy="7" r="1" fill={activeItem === 'porta_jusante' ? '#374151' : '#64748b'} />
+              <circle cx="10" cy="12" r="1" fill={activeItem === 'porta_jusante' ? '#374151' : '#64748b'} />
+              <circle cx="14" cy="12" r="1" fill={activeItem === 'porta_jusante' ? '#374151' : '#64748b'} />
+              <circle cx="10" cy="17" r="1" fill={activeItem === 'porta_jusante' ? '#374151' : '#64748b'} />
+              <circle cx="14" cy="17" r="1" fill={activeItem === 'porta_jusante' ? '#374151' : '#64748b'} />
+            </svg>
+            <span className={`text-xs font-medium ${activeItem === 'porta_jusante' ? 'text-green-400' : 'text-slate-400'} text-center`}>
+              P.Jusante
+            </span>
+          </button>
+
+          {/* Porta Montante */}
+          <button 
+            className={`flex flex-col items-center justify-center py-1 px-1 transition-all h-full ${
+              activeItem === 'porta_montante' 
+                ? 'bg-slate-700/80 border-t-2 border-green-400' 
+                : 'hover:bg-slate-700/50 active:bg-slate-700/50'
+            }`}
+            onClick={() => handleItemClick('porta_montante')}
+          >
+            <svg className={`w-4 h-4 mb-1 ${activeItem === 'porta_montante' ? 'text-green-400' : 'text-slate-400'}`} fill="currentColor" viewBox="0 0 24 24">
+              <rect x="2" y="2" width="20" height="20" rx="1" />
+              <rect x="2" y="2" width="20" height="3" fill={activeItem === 'porta_montante' ? '#10b981' : '#64748b'} />
+              <rect x="4" y="7" width="4" height="3" fill={activeItem === 'porta_montante' ? '#10b981' : '#64748b'} />
+              <rect x="10" y="7" width="4" height="3" fill={activeItem === 'porta_montante' ? '#10b981' : '#64748b'} />
+              <rect x="16" y="7" width="4" height="3" fill={activeItem === 'porta_montante' ? '#10b981' : '#64748b'} />
+              <rect x="4" y="12" width="4" height="3" fill={activeItem === 'porta_montante' ? '#10b981' : '#64748b'} />
+              <rect x="10" y="12" width="4" height="3" fill={activeItem === 'porta_montante' ? '#10b981' : '#64748b'} />
+              <rect x="16" y="12" width="4" height="3" fill={activeItem === 'porta_montante' ? '#10b981' : '#64748b'} />
+              <rect x="4" y="17" width="4" height="3" fill={activeItem === 'porta_montante' ? '#10b981' : '#64748b'} />
+              <rect x="10" y="17" width="4" height="3" fill={activeItem === 'porta_montante' ? '#10b981' : '#64748b'} />
+              <rect x="16" y="17" width="4" height="3" fill={activeItem === 'porta_montante' ? '#10b981' : '#64748b'} />
+            </svg>
+            <span className={`text-xs font-medium ${activeItem === 'porta_montante' ? 'text-green-400' : 'text-slate-400'} text-center`}>
+              P.Montante
+            </span>
+          </button>
+
+
+        </div>
+        </div>
+      )}
+    </>
   );
 }

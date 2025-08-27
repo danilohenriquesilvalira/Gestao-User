@@ -8,8 +8,12 @@ export default defineConfig({
   
   // Server configuration
   server: {
-    port: 3000,
-    host: true,
+    port: 3001,
+    host: '0.0.0.0',
+    allowedHosts: ['localhost', '.ngrok.io', '.ngrok-free.app', '.ngrok.app'],
+    hmr: {
+      clientPort: 443
+    },
     cors: {
       origin: '*',
       credentials: true
@@ -18,8 +22,9 @@ export default defineConfig({
 
   // Preview configuration (for production build testing)
   preview: {
-    port: 3000,
-    host: true,
+    port: 3001,
+    host: '0.0.0.0',
+    allowedHosts: ['localhost', '.ngrok.io', '.ngrok-free.app', '.ngrok.app'],
     cors: {
       origin: '*',
       credentials: true

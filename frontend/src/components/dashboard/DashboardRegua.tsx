@@ -201,22 +201,22 @@ const DashboardRegua: React.FC = () => {
   ];
 
   return (
-    <div className="w-full h-full flex flex-col gap-3 lg:gap-4 overflow-hidden">
+    <div className="w-full h-full flex flex-col gap-2 sm:gap-3 md:gap-4 lg:gap-4 xl:gap-5 overflow-hidden">
       
-      {/* CARD DA RÉGUA */}
-      <div className="w-full bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden flex-shrink-0">
+      {/* CARD DA RÉGUA - Mobile First */}
+      <div className="w-full bg-white rounded-lg sm:rounded-xl shadow-lg border border-gray-200 overflow-hidden flex-shrink-0">
         <div className="h-3 bg-green-500 rounded-t-xl"></div>
-        <div className="p-4">
-          {/* Header limpo - Nome e Status */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+        <div className="p-3 sm:p-4 md:p-5 lg:p-4 xl:p-5">
+          {/* Header limpo - Nome e Status - Mobile First */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M3 21h18v-2H3v2zm0-4h18v-6H3v6zm0-10v2h18V7H3z"/>
                 </svg>
               </div>
               <div>
-                <h2 className="text-lg font-bold text-gray-900">Eclusa {reguaData.name}</h2>
+                <h2 className="text-base sm:text-lg font-bold text-gray-900">Eclusa {reguaData.name}</h2>
                 <div className="flex items-center gap-2">
                   <div className={`w-2 h-2 rounded-full ${reguaData.status === 'Operacional' ? 'bg-green-500' : 'bg-red-500'}`}></div>
                   <span className={`text-sm font-medium ${getStatusColor(reguaData.status)}`}>{reguaData.status}</span>
@@ -225,23 +225,24 @@ const DashboardRegua: React.FC = () => {
             </div>
             
             <div className="text-right">
-              <div className="text-2xl font-bold text-green-600">{reguaData.eficiencia}%</div>
+              <div className="text-xl sm:text-2xl font-bold text-green-600">{reguaData.eficiencia}%</div>
               <div className="text-xs text-gray-500 uppercase tracking-wide">Eficiência</div>
             </div>
           </div>
 
-          {/* Informações principais em grid limpo */}
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+          {/* Informações principais em grid limpo - Mobile First */}
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
             
             {/* Operador */}
-            <div className="lg:col-span-1 bg-gray-50 rounded-lg p-3">
-              <div className="flex items-center gap-2 mb-2">
-                <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+            <div className="col-span-1 xs:col-span-2 sm:col-span-1 md:col-span-1 lg:col-span-1 bg-gray-50 rounded-lg p-2 sm:p-3">
+              <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
+                <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                 </svg>
-                <div className="text-xs text-gray-500 uppercase tracking-wide">Operador</div>
+                <div className="text-xs text-gray-500 uppercase tracking-wide hidden sm:block">Operador</div>
+                <div className="text-xs text-gray-500 uppercase tracking-wide sm:hidden">OP</div>
               </div>
-              <div className="text-sm font-semibold text-gray-900">{reguaData.userLogado}</div>
+              <div className="text-xs sm:text-sm font-semibold text-gray-900">{reguaData.userLogado}</div>
               <div className="flex items-center gap-1 mt-1">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 <div className="text-xs text-green-600 font-medium">Online</div>
@@ -249,42 +250,45 @@ const DashboardRegua: React.FC = () => {
             </div>
 
             {/* Níveis de Água - 3 colunas */}
-            <div className="bg-blue-50 rounded-lg p-3">
+            <div className="bg-blue-50 rounded-lg p-2 sm:p-3">
               <div className="text-xs text-blue-600 uppercase tracking-wide mb-1">Montante</div>
-              <div className="text-sm font-bold text-blue-800">{reguaData.cotaMontante}</div>
+              <div className="text-xs sm:text-sm font-bold text-blue-800">{reguaData.cotaMontante}</div>
             </div>
 
-            <div className="bg-blue-50 rounded-lg p-3">
+            <div className="bg-blue-50 rounded-lg p-2 sm:p-3">
               <div className="text-xs text-blue-600 uppercase tracking-wide mb-1">Caldeira</div>
-              <div className="text-sm font-bold text-blue-800">{reguaData.cotaCaldeira}</div>
+              <div className="text-xs sm:text-sm font-bold text-blue-800">{reguaData.cotaCaldeira}</div>
             </div>
 
-            <div className="bg-blue-50 rounded-lg p-3">
+            <div className="bg-blue-50 rounded-lg p-2 sm:p-3">
               <div className="text-xs text-blue-600 uppercase tracking-wide mb-1">Jusante</div>
-              <div className="text-sm font-bold text-blue-800">{reguaData.cotaJusante}</div>
+              <div className="text-xs sm:text-sm font-bold text-blue-800">{reguaData.cotaJusante}</div>
             </div>
 
             {/* Status Geral */}
-            <div className="bg-gray-50 rounded-lg p-3">
-              <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">Status Sistemas</div>
+            <div className="col-span-1 xs:col-span-2 sm:col-span-1 md:col-span-1 lg:col-span-1 bg-gray-50 rounded-lg p-2 sm:p-3">
+              <div className="text-xs text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Status Sistemas</div>
               <div className="flex justify-between items-center">
                 <div className="flex flex-col items-center gap-1">
-                  <svg className={`w-4 h-4 ${reguaData.comunicacao === 'Online' ? 'text-green-500' : 'text-red-500'}`} fill="currentColor" viewBox="0 0 24 24">
+                  <svg className={`w-3 h-3 sm:w-4 sm:h-4 ${reguaData.comunicacao === 'Online' ? 'text-green-500' : 'text-red-500'}`} fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
                   </svg>
-                  <span className="text-xs text-gray-600">COM</span>
+                  <span className="text-xs text-gray-600 hidden sm:block">COM</span>
+                  <span className="text-xs text-gray-600 sm:hidden">C</span>
                 </div>
                 <div className="flex flex-col items-center gap-1">
-                  <svg className={`w-4 h-4 ${reguaData.inundacao === 'Normal' ? 'text-green-500' : 'text-red-500'}`} fill="currentColor" viewBox="0 0 24 24">
+                  <svg className={`w-3 h-3 sm:w-4 sm:h-4 ${reguaData.inundacao === 'Normal' ? 'text-green-500' : 'text-red-500'}`} fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 3.77L11.25 4.61C11.25 4.61 6 10.26 6 14c0 3.31 2.69 6 6 6s6-2.69 6-6c0-3.74-5.25-9.39-5.25-9.39L12 3.77zM12 18.5c-2.49 0-4.5-2.01-4.5-4.5 0-1.77 2.79-5.75 4.5-7.72 1.71 1.97 4.5 5.95 4.5 7.72 0 2.49-2.01 4.5-4.5 4.5z"/>
                   </svg>
-                  <span className="text-xs text-gray-600">NIV</span>
+                  <span className="text-xs text-gray-600 hidden sm:block">NIV</span>
+                  <span className="text-xs text-gray-600 sm:hidden">N</span>
                 </div>
                 <div className="flex flex-col items-center gap-1">
-                  <svg className={`w-4 h-4 ${!reguaData.emergencia ? 'text-green-500' : 'text-red-500'}`} fill="currentColor" viewBox="0 0 24 24">
+                  <svg className={`w-3 h-3 sm:w-4 sm:h-4 ${!reguaData.emergencia ? 'text-green-500' : 'text-red-500'}`} fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 5.99L19.53 19H4.47L12 5.99M12 2L1 21h22L12 2zm1 14h-2v2h2v-2zm0-6h-2v4h2v-4z"/>
                   </svg>
-                  <span className="text-xs text-gray-600">EMG</span>
+                  <span className="text-xs text-gray-600 hidden sm:block">EMG</span>
+                  <span className="text-xs text-gray-600 sm:hidden">E</span>
                 </div>
               </div>
             </div>
@@ -292,24 +296,24 @@ const DashboardRegua: React.FC = () => {
         </div>
       </div>
 
-      {/* CONTENT AREA - ALARMES E FALHAS */}
-      <div className="flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-5 gap-3 xl:gap-4 overflow-hidden">
+      {/* CONTENT AREA - ALARMES E FALHAS - Mobile First */}
+      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-5 gap-2 sm:gap-3 lg:gap-4 overflow-hidden">
         
-        {/* ALARMES */}
-        <div className="xl:col-span-2 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden flex flex-col max-h-full">
+        {/* ALARMES - Mobile First */}
+        <div className="lg:col-span-1 xl:col-span-2 bg-white rounded-lg sm:rounded-xl shadow-lg border border-gray-200 overflow-hidden flex flex-col max-h-full">
           <div className="h-3 bg-orange-500 rounded-t-xl"></div>
-          <div className="p-3 lg:p-4 flex-1 flex flex-col min-h-0">
-            <div className="flex items-center justify-between mb-3 flex-shrink-0">
-              <div className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-orange-500" fill="currentColor" viewBox="0 0 24 24">
+          <div className="p-2 sm:p-3 lg:p-4 flex-1 flex flex-col min-h-0">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-2 sm:mb-3 flex-shrink-0">
+              <div className="flex items-center gap-1 sm:gap-2">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                 </svg>
-                <h3 className="text-gray-800 font-semibold text-sm">Alarmes e Avisos</h3>
+                <h3 className="text-gray-800 font-semibold text-xs sm:text-sm">Alarmes e Avisos</h3>
               </div>
               
-              <div className="flex items-center gap-2">
-                {/* Filtros dos alarmes */}
-                <div className="flex gap-1">
+              <div className="flex items-center gap-1 sm:gap-2">
+                {/* Filtros dos alarmes - Mobile Optimized */}
+                <div className="flex gap-1 flex-wrap">
                   {[
                     { 
                       id: 'todos', 
@@ -343,7 +347,7 @@ const DashboardRegua: React.FC = () => {
                     <button
                       key={filter.id}
                       onClick={() => setAlarmFilter(filter.id)}
-                      className={`p-1.5 rounded-lg transition-all ${
+                      className={`p-1 sm:p-1.5 rounded-lg transition-all ${
                         alarmFilter === filter.id
                           ? 'bg-orange-500 text-white shadow-md'
                           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -355,49 +359,49 @@ const DashboardRegua: React.FC = () => {
                   ))}
                 </div>
                 
-                <div className="flex items-center gap-1 ml-2">
+                <div className="flex items-center gap-1 ml-1 sm:ml-2">
                   <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
                   <span className="text-xs text-gray-500">{alarmesDataCompletos.filter(a => a.status === 'ativo').length}</span>
                 </div>
               </div>
             </div>
 
-            <div className="flex-1 min-h-0 overflow-auto space-y-2 pr-1"
+            <div className="flex-1 min-h-0 overflow-auto space-y-1 sm:space-y-2 pr-1"
                  style={{
                    scrollbarWidth: 'thin',
                    scrollbarColor: '#fb923c #fed7aa',
                    maxHeight: 'calc(100% - 4rem)'
                  }}>
               {alarmesData.map((alarme) => (
-                <div key={alarme.id} className={`p-3 rounded-xl border-l-4 shadow-sm hover:shadow-md transition-all duration-200 ${
+                <div key={alarme.id} className={`p-2 sm:p-3 rounded-lg sm:rounded-xl border-l-3 sm:border-l-4 shadow-sm hover:shadow-md transition-all duration-200 ${
                   alarme.tipo === 'Crítico' ? 'bg-red-50 border-red-500 hover:bg-red-100' :
                   alarme.tipo === 'Aviso' ? 'bg-yellow-50 border-yellow-500 hover:bg-yellow-100' : 
                   'bg-blue-50 border-blue-500 hover:bg-blue-100'
                 }`}>
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-2 sm:gap-3">
                     <div className="flex-shrink-0 mt-0.5">
                       {getAlarmIcon(alarme.tipo)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2 mb-2">
-                        <span className="text-sm font-semibold text-gray-800 truncate">{alarme.equipamento}</span>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <span className="text-xs text-gray-500 bg-white/60 px-2 py-1 rounded-full">{alarme.timestamp}</span>
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-2 mb-1 sm:mb-2">
+                        <span className="text-xs sm:text-sm font-semibold text-gray-800 truncate">{alarme.equipamento}</span>
+                        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                          <span className="text-xs text-gray-500 bg-white/60 px-1 sm:px-2 py-0.5 sm:py-1 rounded-full">{alarme.timestamp}</span>
                           {alarme.status === 'ativo' && (
                             <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
                           )}
                         </div>
                       </div>
-                      <p className="text-xs text-gray-700 leading-relaxed">{alarme.mensagem}</p>
-                      <div className="mt-2 flex items-center gap-2">
-                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                      <p className="text-xs text-gray-700 leading-relaxed mb-1 sm:mb-2">{alarme.mensagem}</p>
+                      <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                        <span className={`text-xs px-1 sm:px-2 py-0.5 sm:py-1 rounded-full font-medium ${
                           alarme.status === 'ativo' 
                             ? 'bg-red-100 text-red-700' 
                             : 'bg-green-100 text-green-700'
                         }`}>
-                          {alarme.status === 'ativo' ? 'Ativo' : 'Resolvido'}
+                          {alarme.status === 'ativo' ? 'Ativo' : 'OK'}
                         </span>
-                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                        <span className={`text-xs px-1 sm:px-2 py-0.5 sm:py-1 rounded-full font-medium ${
                           alarme.tipo === 'Crítico' ? 'bg-red-200 text-red-800' :
                           alarme.tipo === 'Aviso' ? 'bg-yellow-200 text-yellow-800' :
                           'bg-blue-200 text-blue-800'
@@ -413,25 +417,25 @@ const DashboardRegua: React.FC = () => {
           </div>
         </div>
 
-        {/* ANÁLISE DE FALHAS */}
-        <div className="xl:col-span-3 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden flex flex-col">
+        {/* ANÁLISE DE FALHAS - Mobile First */}
+        <div className="lg:col-span-2 xl:col-span-3 bg-white rounded-lg sm:rounded-xl shadow-lg border border-gray-200 overflow-hidden flex flex-col">
           <div className="h-3 bg-red-500 rounded-t-xl"></div>
-          <div className="p-3 lg:p-4 flex-1 flex flex-col">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+          <div className="p-2 sm:p-3 lg:p-4 flex-1 flex flex-col">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-2 sm:mb-3">
+              <div className="flex items-center gap-1 sm:gap-2">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                 </svg>
-                <h3 className="text-gray-800 font-semibold text-sm">Análise de Falhas</h3>
+                <h3 className="text-gray-800 font-semibold text-xs sm:text-sm">Análise de Falhas</h3>
               </div>
               
-              {/* Filtros compactos */}
-              <div className="flex gap-1">
+              {/* Filtros compactos - Mobile Optimized */}
+              <div className="flex gap-1 flex-wrap overflow-x-auto">
                 {chartOptions.map((option) => (
                   <button
                     key={option.id}
                     onClick={() => setSelectedChart(option.id)}
-                    className={`px-3 py-2 text-xs rounded-lg transition-all flex items-center gap-2 ${
+                    className={`px-2 sm:px-3 py-1.5 sm:py-2 text-xs rounded-lg transition-all flex items-center gap-1 sm:gap-2 ${
                       selectedChart === option.id
                         ? 'bg-red-500 text-white shadow-md'
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -439,7 +443,7 @@ const DashboardRegua: React.FC = () => {
                     title={option.label}
                   >
                     <span className="flex-shrink-0">{option.icon}</span>
-                    <span className="hidden sm:inline text-xs">{option.label}</span>
+                    <span className="hidden md:inline lg:hidden xl:inline text-xs">{option.label}</span>
                   </button>
                 ))}
               </div>

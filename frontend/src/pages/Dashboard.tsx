@@ -26,16 +26,16 @@ function DashboardContent() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex flex-col lg:flex-row h-screen bg-gray-50">
       <ModernSidebar />
       
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-h-0">
         <ModernHeader onLogout={handleLogout} />
         
-        <main className="flex-1 overflow-hidden">
-          {/* Dashboard Unificado da Régua */}
-          <div className="w-full h-full pl-4 pr-4 py-4 md:pl-24">
-            <div className="w-full h-full border-2 border-dashed border-gray-300 rounded-2xl bg-gray-50/50 p-3 lg:p-4">
+        <main className="flex-1 overflow-hidden min-h-0">
+          {/* Dashboard Unificado da Régua - Mobile First */}
+          <div className="w-full h-full p-2 sm:p-3 md:p-4 lg:pl-6 lg:pr-4 lg:py-4 xl:pl-8 xl:pr-6">
+            <div className="w-full h-full border-2 border-dashed border-gray-300 rounded-xl sm:rounded-2xl bg-gray-50/50 p-2 sm:p-3 md:p-4 lg:p-4 xl:p-5">
               <DashboardRegua />
             </div>
           </div>

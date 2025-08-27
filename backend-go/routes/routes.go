@@ -7,7 +7,6 @@ import (
 	"backend-go/middleware"
 	"backend-go/services"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -27,14 +26,8 @@ func SetupRoutes() *gin.Engine {
 	r.Use(gin.Recovery())
 
 	// Configure CORS
-	corsOrigins := os.Getenv("CORS_ORIGINS")
-	if corsOrigins == "" {
-		corsOrigins = "http://localhost:5173,http://localhost:3000"
-	}
-	
-	origins := strings.Split(corsOrigins, ",")
 	config := cors.Config{
-		AllowOrigins:     origins,
+		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization", "Accept", "X-Requested-With"},
 		ExposeHeaders:    []string{"Content-Length", "Authorization"},

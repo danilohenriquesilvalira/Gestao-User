@@ -1,11 +1,11 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"backend-go/database"
 	"backend-go/models"
 )

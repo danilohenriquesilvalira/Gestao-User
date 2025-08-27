@@ -1,7 +1,9 @@
 // API service for Strapi users management
 const STRAPI_BASE_URL = window.location.origin.includes('localhost') 
   ? 'http://localhost:1337' 
-  : import.meta.env.VITE_STRAPI_URL || 'http://localhost:1337';
+  : window.location.origin.includes('ngrok') 
+    ? 'https://c009668a8a39.ngrok-free.app'  // Backend ngrok
+    : import.meta.env.VITE_STRAPI_URL || 'http://localhost:1337';
 
 export interface UserRole {
   id: number;

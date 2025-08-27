@@ -148,9 +148,11 @@ export default {
         }
       },
       fontFamily: {
-        'tech': ['Inter', 'system-ui', 'sans-serif'],
+        'sans': ['Inter', 'Helvetica Neue', 'Arial', 'system-ui', 'sans-serif'],
+        'tech': ['Inter', 'Helvetica Neue', 'system-ui', 'sans-serif'],
         'mono-tech': ['JetBrains Mono', 'Consolas', 'monospace'],
-        'display': ['Inter', 'system-ui', 'sans-serif'],
+        'display': ['Inter', 'Helvetica Neue', 'system-ui', 'sans-serif'],
+        'corporate': ['Inter', 'Helvetica Neue', 'Arial', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         'tech-xs': ['0.75rem', { lineHeight: '1.5', letterSpacing: '0.05em' }],

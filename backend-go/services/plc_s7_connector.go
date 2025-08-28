@@ -98,7 +98,7 @@ func (s7 *S7PLCConnector) loadConfig(filename string) error {
 func (s7 *S7PLCConnector) setupDefaultConfig() {
 	s7.config = PLCConfigFile{
 		PLCConfig: PLCConfig{
-			IP:       "192.168.0.33",
+			IP:       "192.168.1.33",
 			Rack:     0,
 			Slot:     1,
 			DBNumber: 19,

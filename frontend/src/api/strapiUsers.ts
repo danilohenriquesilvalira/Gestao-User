@@ -321,4 +321,3 @@ export const strapiUsersApi = {
   }
 };
 
-export type { User, UserRole };

@@ -121,7 +121,7 @@ export default function LoginPage() {
           <img 
             src="/Login/EDP_Logo.svg" 
             alt="EDP Logo" 
-            className="h-24 w-auto xs:h-32 sm:h-40 md:h-48 lg:h-64 xl:h-72 2xl:h-[40rem] 3xl:h-[36rem] 4xl:h-[60rem] 5xl:h-[120rem] opacity-40 object-contain transform -translate-x-4 -translate-y-4 xs:-translate-x-6 xs:-translate-y-6 sm:-translate-x-8 sm:-translate-y-8 3xl:-translate-x-16 3xl:-translate-y-12 4xl:-translate-x-32 4xl:-translate-y-24 5xl:-translate-x-40 5xl:-translate-y-32"
+            className="h-24 w-auto xs:h-32 sm:h-40 md:h-48 lg:h-64 xl:h-72 2xl:h-[40rem] 3xl:h-[36rem] 4xl:h-[60rem] 5xl:h-[120rem] opacity-100 object-contain transform -translate-x-4 -translate-y-4 xs:-translate-x-6 xs:-translate-y-6 sm:-translate-x-8 sm:-translate-y-8 3xl:-translate-x-16 3xl:-translate-y-12 4xl:-translate-x-32 4xl:-translate-y-24 5xl:-translate-x-40 5xl:-translate-y-32"
           />
         </div>
 
@@ -130,7 +130,7 @@ export default function LoginPage() {
           <img 
             src="/Login/Seta_Login.svg" 
             alt="Seta Login" 
-            className="h-16 w-auto xs:h-20 sm:h-24 md:h-32 lg:h-40 xl:h-44 2xl:h-[24rem] 3xl:h-[20rem] 4xl:h-[40rem] 5xl:h-[60rem] opacity-15 object-contain transform translate-x-2 translate-y-2 xs:translate-x-3 xs:translate-y-3 sm:translate-x-4 sm:translate-y-4 3xl:translate-x-8 3xl:translate-y-6 4xl:translate-x-16 4xl:translate-y-12 5xl:translate-x-20 5xl:translate-y-16"
+            className="h-16 w-auto xs:h-20 sm:h-24 md:h-32 lg:h-40 xl:h-44 2xl:h-[24rem] 3xl:h-[20rem] 4xl:h-[40rem] 5xl:h-[60rem] opacity-100 object-contain transform translate-x-2 translate-y-2 xs:translate-x-3 xs:translate-y-3 sm:translate-x-4 sm:translate-y-4 3xl:translate-x-8 3xl:translate-y-6 4xl:translate-x-16 4xl:translate-y-12 5xl:translate-x-20 5xl:translate-y-16"
           />
         </div>
         
